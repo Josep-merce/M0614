@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA1·A1 — Servidor web a Linux (localhost) · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea1.html"><span class="arrow">←</span> Tornar a l'AEA1</a>
+
+  <header>
+    <span class="badge">AEA1 · A1</span>
+    <span class="eyebrow">M0614 · RA1 · Linux</span>
+    <h1>Servidor web a Linux <span class="code">(localhost)</span></h1>
+    <p class="lede">Instal·larem un servidor web (Apache) directament sobre Linux i el veurem funcionar per primera vegada al nostre propi navegador.</p>
+    <div class="meta">
+      <span class="pill">Branca <strong>aea1</strong></span>
+      <span class="pill">RA <strong>RA1</strong></span>
+      <span class="pill">CA <strong>1.1 · 1.2 · 1.3 · 1.7 · 1.8</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En aquesta activitat aprendràs a:</p>
+    <ul>
+      <li>Explicar amb les teves paraules què és un <strong>servidor web</strong> i què és un <strong>client</strong>.</li>
+      <li>Instal·lar el servidor web <strong>Apache</strong> en una màquina Linux.</li>
+      <li>Comprovar que el servei està <strong>actiu</strong> i arrencat.</li>
+      <li>Publicar una pàgina pròpia (<code>index.html</code>) i veure-la des del navegador.</li>
+    </ul>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Haver completat l'AEA0 (entorn, Git/GitHub i Docker ja preparats).</li>
+      <li>Tenir accés a una màquina Linux amb Debian amb permisos d'administrador (<code>sudo</code>).</li>
+    </ul>
+
+    <h3>Branca de treball</h3>
+    <p>Tota la feina d'aquesta AEA es fa a la branca <code>aea1</code>. Si és el primer cop que hi treballes, crea-la a partir de <code>main</code>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git switch -c aea1</code></pre>
+    </div>
+    <p>➜ Crea la branca <code>aea1</code> i hi entra alhora (l'opció <code>-c</code> vol dir "crea").</p>
+    <p>Si ja la tenies creada d'una altra sessió:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git switch aea1</code></pre>
+    </div>
+    <p>➜ Entra a la branca <code>aea1</code> ja existent (sense <code>-c</code>).</p>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Un <strong>servidor web</strong> és, simplement, un programa que espera peticions (per exemple, "envia'm la pàgina principal") i respon enviant fitxers (HTML, imatges...). Apache és un dels servidors web més utilitzats del món.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <h3>Què passa quan obres una pàgina web?</h3>
+    <p>Imagina que demanes un llibre a un bibliotecari: tu el demanes i ell te'l porta. A la web passa el mateix. El teu navegador (Chrome, Firefox...) fa de <strong>client</strong>: demana una pàgina. Una altra màquina fa de <strong>servidor</strong>: la busca i te l'envia. Aquesta conversa es fa amb un "idioma" anomenat <strong>HTTP</strong>.</p>
+
+    <div class="term" style="background:#fff;border-color:var(--hairline)">
+      <div class="term-bar" style="background:var(--slate-soft);border-color:var(--hairline)"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t" style="color:var(--slate-ink)">com es comuniquen client i servidor</span></div>
+      <div style="padding:1.2rem">
+        <svg viewBox="0 0 640 180" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+          <!-- Client -->
+          <rect x="20" y="55" width="150" height="70" rx="12" fill="#FBEFE0" stroke="#E07B1E" stroke-width="1.5"/>
+          <text x="95" y="88" text-anchor="middle" font-size="15" font-weight="600" fill="#1A2230">Client</text>
+          <text x="95" y="108" text-anchor="middle" font-size="11" fill="#5A6677">navegador</text>
+          <!-- Servidor -->
+          <rect x="470" y="55" width="150" height="70" rx="12" fill="#EDF1F6" stroke="#3A4658" stroke-width="1.5"/>
+          <text x="545" y="88" text-anchor="middle" font-size="15" font-weight="600" fill="#1A2230">Servidor</text>
+          <text x="545" y="108" text-anchor="middle" font-size="11" fill="#5A6677">Apache</text>
+          <!-- Peticio -->
+          <line x1="175" y1="75" x2="465" y2="75" stroke="#E07B1E" stroke-width="2" marker-end="url(#arrO)"/>
+          <text x="320" y="66" text-anchor="middle" font-size="11.5" fill="#9c5813">1. "envia'm la pàgina" (HTTP)</text>
+          <!-- Resposta -->
+          <line x1="465" y1="105" x2="175" y2="105" stroke="#3A4658" stroke-width="2" marker-end="url(#arrS)"/>
+          <text x="320" y="125" text-anchor="middle" font-size="11.5" fill="#3A4658">2. et torna la pàgina (HTML)</text>
+          <defs>
+            <marker id="arrO" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#E07B1E"/></marker>
+            <marker id="arrS" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#3A4658"/></marker>
+          </defs>
+        </svg>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr><th>Paper</th><th>Qui és</th><th>Què fa</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Client</strong></td><td>El navegador (Chrome, Firefox...)</td><td>Demana una pàgina web escrivint una adreça o IP.</td></tr>
+        <tr><td><strong>Servidor</strong></td><td>La màquina amb Apache instal·lat</td><td>Rep la petició i envia el fitxer <code>index.html</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Com viatja la petició: el protocol HTTP</h3>
+    <p>Cada cop que demanes una pàgina, el servidor respon amb la pàgina i un <strong>codi</strong> de tres xifres que diu si tot ha anat bé. Segur que algun cop has vist un <strong>404</strong>:</p>
+    <table>
+      <thead><tr><th>Codi</th><th>Vol dir</th><th>Exemple habitual</th></tr></thead>
+      <tbody>
+        <tr><td><strong>2xx</strong></td><td>Tot correcte</td><td>200 OK</td></tr>
+        <tr><td><strong>3xx</strong></td><td>T'envio a un altre lloc</td><td>301 mogut</td></tr>
+        <tr><td><strong>4xx</strong></td><td>Has demanat una cosa que no existeix o no pots veure</td><td>404 no trobat</td></tr>
+        <tr><td><strong>5xx</strong></td><td>El servidor ha tingut un problema</td><td>500 error intern</td></tr>
+      </tbody>
+    </table>
+
+    <h3>De què està feta una pàgina web?</h3>
+    <p>Una web senzilla està feta de tres tipus d'ingredients:</p>
+    <ul>
+      <li><strong>HTML</strong> — el contingut i l'estructura (títols, paràgrafs, imatges).</li>
+      <li><strong>CSS</strong> — com es veu (colors, mides, tipus de lletra).</li>
+      <li><strong>Imatges</strong> i altres arxius.</li>
+    </ul>
+    <p>Quan aquests arxius no canvien mai, parlem d'una <strong>pàgina estàtica</strong> (com la que farem avui). Si la pàgina es fabrica al moment segons qui la demana (per exemple, mostrant el teu nom quan inicies sessió), és una <strong>pàgina dinàmica</strong>.</p>
+
+    <h3>Les "capes" d'una web</h3>
+    <p>Les webs s'organitzen en capes. La d'avui només té la primera; les webs grans en tenen tres:</p>
+
+    <div class="term" style="background:#fff;border-color:var(--hairline)">
+      <div class="term-bar" style="background:var(--slate-soft);border-color:var(--hairline)"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t" style="color:var(--slate-ink)">arquitectura de 3 capes</span></div>
+      <div style="padding:1.2rem">
+        <svg viewBox="0 0 640 150" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+          <!-- Presentacio -->
+          <rect x="20" y="30" width="180" height="90" rx="12" fill="#FBEFE0" stroke="#E07B1E" stroke-width="1.5"/>
+          <text x="110" y="62" text-anchor="middle" font-size="14" font-weight="600" fill="#1A2230">Presentació</text>
+          <text x="110" y="82" text-anchor="middle" font-size="11" fill="#5A6677">el que veu l'usuari</text>
+          <text x="110" y="98" text-anchor="middle" font-size="10.5" fill="#9c5813">← la d'avui</text>
+          <!-- Negoci -->
+          <rect x="230" y="30" width="180" height="90" rx="12" fill="#EDF1F6" stroke="#3A4658" stroke-width="1.5"/>
+          <text x="320" y="62" text-anchor="middle" font-size="14" font-weight="600" fill="#1A2230">Negoci</text>
+          <text x="320" y="82" text-anchor="middle" font-size="11" fill="#5A6677">decideix què mostrar</text>
+          <!-- Dades -->
+          <rect x="440" y="30" width="180" height="90" rx="12" fill="#EDF1F6" stroke="#3A4658" stroke-width="1.5"/>
+          <text x="530" y="62" text-anchor="middle" font-size="14" font-weight="600" fill="#1A2230">Dades</text>
+          <text x="530" y="82" text-anchor="middle" font-size="11" fill="#5A6677">base de dades</text>
+          <!-- fletxes -->
+          <line x1="200" y1="75" x2="228" y2="75" stroke="#98a3b3" stroke-width="2" marker-end="url(#arrG)"/>
+          <line x1="410" y1="75" x2="438" y2="75" stroke="#98a3b3" stroke-width="2" marker-end="url(#arrG)"/>
+          <defs><marker id="arrG" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#98a3b3"/></marker></defs>
+        </svg>
+      </div>
+    </div>
+
+    <h3>On es posa un servidor web?</h3>
+    <p>El mateix servidor es pot posar en marxa de tres maneres. En aquesta AEA les provarem <strong>totes tres</strong>, sempre amb el mateix resultat final (la teva pàgina al navegador):</p>
+    <ol>
+      <li>Directament sobre una màquina <strong>Linux</strong> → <em>això és el que farem avui (A1)</em>.</li>
+      <li>Dins d'un <strong>contenidor Docker</strong> → A2.</li>
+      <li>Al <strong>núvol</strong>, en un servei d'internet com AWS → A3.</li>
+    </ol>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><strong>Apache</strong> és el programa servidor web que farem servir. N'hi ha d'altres (nginx, o Tomcat per a aplicacions Java, que veuràs a l'AEA3), però Apache és dels més utilitzats del món.</p>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Avui la mateixa màquina farà de client i de servidor alhora. Per això parlem de <strong>localhost</strong>, que vol dir "aquest mateix ordinador".</p>
+    </div>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <h3>2.1 · Actualitza el sistema</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt update</code></pre>
+    </div>
+    <p>➜ Actualitza la llista de paquets disponibles. <code>sudo</code> vol dir "fes-ho com a administrador" i <code>apt</code> és el programa que instal·la coses a Debian.</p>
+
+    <h3>2.2 · Instal·la Apache</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt install apache2 -y</code></pre>
+    </div>
+    <p>➜ Instal·la el servidor web Apache. L'opció <code>-y</code> respon "sí" automàticament a les preguntes de confirmació.</p>
+
+    <h3>2.3 · Comprova que el servei està actiu</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo systemctl status apache2</code></pre>
+    </div>
+    <p>➜ Mostra l'estat del servei Apache. Ha de sortir <code>active (running)</code> en verd. Prem la tecla <code>q</code> per sortir d'aquesta pantalla.</p>
+
+    <h3>2.4 · Localitza la carpeta del lloc web</h3>
+    <p>Apache serveix per defecte els fitxers que hi ha a <code>/var/www/html</code>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>ls /var/www/html</code></pre>
+    </div>
+    <p>➜ Llista el contingut d'aquesta carpeta. <code>ls</code> vol dir "list" (llistar). Ara mateix hi hauria d'haver un fitxer <code>index.html</code> per defecte d'Apache.</p>
+
+    <h3>2.5 · Crea la teva pròpia pàgina</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo nano /var/www/html/index.html</code></pre>
+    </div>
+    <p>➜ Obre el fitxer <code>index.html</code> amb l'editor de text <code>nano</code>. Cal <code>sudo</code> perquè aquesta carpeta és protegida.</p>
+    <p>Esborra el contingut que hi hagi i escriu-hi aquest codi, canviant el nom pel teu:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ca"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;El meu servidor web&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Servidor web a Linux — AEA1&lt;/h1&gt;
+  &lt;p&gt;Nom Cognom&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Per desar i sortir de <code>nano</code>: <code>Ctrl+O</code> (desa), <code>Enter</code> (confirma), <code>Ctrl+X</code> (surt).</p>
+    </div>
+
+    <h3>2.6 · Comprova els permisos</h3>
+    <p>Si el navegador dona un error de permisos, comprova que el fitxer sigui llegible:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>ls -l /var/www/html/index.html</code></pre>
+    </div>
+    <p>➜ Mostra els permisos del fitxer. L'opció <code>-l</code> ("long") dona informació detallada: qui el pot llegir, escriure o executar.</p>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <p>Obre el navegador dins de la mateixa màquina i visita:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>
+      <pre><code>http://localhost</code></pre>
+    </div>
+    <p>➜ <code>localhost</code> vol dir "aquest mateix ordinador". Hauries de veure la pàgina amb el teu nom.</p>
+    <p>També ho pots comprovar per terminal:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>curl http://localhost</code></pre>
+    </div>
+    <p>➜ <code>curl</code> demana la pàgina des de la terminal i te'n mostra el codi HTML, sense navegador.</p>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Si veus el teu missatge, tot ha anat bé. Si veus la pàgina per defecte d'Apache, encara no has sobreescrit <code>index.html</code>.</p>
+    </div>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA1 · A1
+  </footer>
+
+</div>
+</body>
+</html>

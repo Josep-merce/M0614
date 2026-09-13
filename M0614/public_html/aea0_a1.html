@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA0·A1 — VS Code sobre Debian, terminal i primer repositori Git/GitHub · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea1_entorn.html"><span class="arrow">←</span> Tornar a la preparació de l'entorn</a>
+
+  <header>
+    <span class="badge">AEA0 · A1</span>
+    <span class="eyebrow">M0614 · Linux</span>
+    <h1>VS Code sobre Debian, terminal integrada <span class="code">i</span> primer repositori Git/GitHub</h1>
+    <p class="lede">Configurarem l'editor i la terminal que farem servir tot el curs, instal·larem Git i el connectarem amb GitHub. En acabar tindràs el teu primer repositori en línia amb un commit fet des de la terminal de VS Code.</p>
+    <div class="meta">
+      <span class="pill">Branca <strong>aea0</strong></span>
+      <span class="pill">RA <strong>RA6</strong></span>
+      <span class="pill">CA <strong>6.5 · 6.7</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En aquesta activitat aprendràs a:</p>
+    <ul>
+      <li>Obrir <strong>VS Code</strong> sobre <strong>Debian</strong> i treballar amb la <strong>terminal integrada</strong>.</li>
+      <li>Instal·lar i configurar <strong>Git</strong> (nom i correu d'usuari).</li>
+      <li>Crear un <strong>compte de GitHub</strong> i connectar-lo amb VS Code.</li>
+      <li>Crear el teu <strong>primer repositori</strong>, fer un <strong>commit</strong> i pujar-lo (<code>push</code>) a GitHub.</li>
+    </ul>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Una màquina Debian (a l'aula, via <strong>IsardVDI</strong>) amb connexió a Internet.</li>
+      <li>VS Code instal·lat (ja ve preparat a l'entorn de l'aula).</li>
+      <li>Un compte de correu per registrar-te a GitHub.</li>
+    </ul>
+
+    <h3>Branca de treball</h3>
+    <p>Tota la feina d'aquesta AEA es fa a la branca <code>aea0</code>. Quan creïs el repositori i la branca, recorda situar-t'hi:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git switch aea0</code></pre>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>En aquesta activitat encara no fem servir cap servei d'AWS. L'objectiu és deixar a punt l'entorn de control de versions que utilitzaràs a totes les AEA.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <p>Durant tot el mòdul desplegaràs aplicacions i serveis. Per no perdre feina i poder demostrar què has fet, des del primer dia ho guardarem tot amb un <strong>sistema de control de versions</strong>.</p>
+
+    <h3>Què és Git?</h3>
+    <p><strong>Git</strong> és un sistema de control de versions: porta un registre de tots els canvis que fas als teus fitxers. Cada vegada que guardes un punt de l'historial fas un <strong>commit</strong>, una "fotografia" del projecte en aquell moment, amb un missatge que explica què has canviat.</p>
+
+    <h3>Què és GitHub?</h3>
+    <p><strong>GitHub</strong> és un servei en línia on pots allotjar els teus repositoris Git. Et permet tenir una còpia del projecte al núvol, compartir-lo i recuperar-lo des de qualsevol ordinador.</p>
+
+    <table>
+      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Repositori (repo)</strong></td><td>La carpeta del projecte amb tot el seu historial de canvis.</td></tr>
+        <tr><td><strong>Commit</strong></td><td>Un punt guardat de l'historial, amb un missatge descriptiu.</td></tr>
+        <tr><td><strong>Branca (branch)</strong></td><td>Una línia de treball independent. Cada AEA va a la seva (<code>aea0</code>, <code>aea1</code>…).</td></tr>
+        <tr><td><strong>Push / Pull</strong></td><td>Pujar els commits a GitHub (<code>push</code>) o baixar-los (<code>pull</code>).</td></tr>
+        <tr><td><strong>README.md</strong></td><td>Fitxer de text en format Markdown que descriu el projecte.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <h3>2.1 · Obrir VS Code i la terminal integrada</h3>
+    <ol>
+      <li>Obre <strong>VS Code</strong> a l'escriptori de Debian.</li>
+      <li>Crea una carpeta per a la feina del curs. Al menú <strong>File → Open Folder…</strong>, crea i obre una carpeta anomenada <code>m0614</code> dins la teva carpeta personal.</li>
+      <li>Obre la <strong>terminal integrada</strong> amb la combinació de tecles <code>Ctrl + J</code> (o des del menú <strong>Terminal → New Terminal</strong>). Apareixerà a la part inferior, ja situada dins la carpeta del projecte.</li>
+    </ol>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>La terminal integrada és la mateixa que faries servir a part, però oberta dins l'editor. Així pots escriure ordres i veure els fitxers alhora. La farem servir a totes les activitats.</p>
+    </div>
+
+    <h3>2.2 · Comprovar que Git està instal·lat</h3>
+    <p>Escriu a la terminal:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git --version</code></pre>
+    </div>
+    <p>➜ Demana a Git que digui quina versió té. Si surt una línia com <code>git version 2.x.x</code>, ja el tens i pots passar al pas 2.3. Si no apareix res, instal·la'l amb els dos passos següents.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt update</code></pre>
+    </div>
+    <p>➜ Actualitza la llista de programes disponibles. <code>sudo</code> vol dir "fes-ho com a administrador" i <code>apt</code> és el programa que instal·la coses a Debian.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt install git -y</code></pre>
+    </div>
+    <p>➜ Instal·la Git. L'opció <code>-y</code> respon "sí" automàticament a les preguntes de confirmació.</p>
+
+    <h3>2.3 · Crear el compte de GitHub</h3>
+    <ol>
+      <li>Obre el navegador i ves a <a href="https://github.com" target="_blank" rel="noopener">github.com</a>.</li>
+      <li>Fes clic a <strong>Sign up</strong> i segueix els passos: correu, contrasenya i nom d'usuari.</li>
+      <li>Verifica el compte amb el codi que rebràs al correu.</li>
+    </ol>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Tria un nom d'usuari seriós i fàcil de recordar: el faràs servir tot el curs i quedarà a la URL pública dels teus repositoris.</p>
+    </div>
+
+    <h3>2.4 · Configurar Git amb el teu nom i correu</h3>
+    <p>Git afegeix el teu nom i correu a cada commit. Configura'ls una sola vegada (substitueix les dades per les teves):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git config --global user.name <span class="c">"El teu Nom"</span></code></pre>
+    </div>
+    <p>➜ Guarda el teu nom. <code>--global</code> vol dir que serveix per a tots els teus projectes, no només per a un.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git config --global user.email <span class="c">"elteucorreu@example.com"</span></code></pre>
+    </div>
+    <p>➜ Guarda el teu correu electrònic.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git config --global --list</code></pre>
+    </div>
+    <p>➜ Mostra la configuració guardada, perquè comprovis que el nom i el correu són correctes.</p>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Fes servir el <strong>mateix correu</strong> amb què t'has registrat a GitHub. Així els teus commits es vincularan correctament al teu compte.</p>
+    </div>
+
+    <h3>2.5 · Connectar VS Code amb GitHub</h3>
+    <p>La manera més senzilla és la identificació des del navegador integrada a VS Code:</p>
+    <ol>
+      <li>A VS Code, fes clic a la icona de <strong>Accounts</strong> (la persona, a baix a l'esquerra).</li>
+      <li>Tria <strong>Sign in with GitHub</strong>.</li>
+      <li>S'obrirà el navegador. Inicia sessió a GitHub i accepta l'autorització.</li>
+      <li>Torna a VS Code: ja hi apareixeràs identificat amb el teu usuari.</li>
+    </ol>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Aquesta autenticació pel navegador és l'opció recomanada a l'aula. Més endavant (AEA2) aprendràs SSH per connectar-te a servidors EC2; per a GitHub, de moment, n'hi ha prou amb aquest mètode.</p>
+    </div>
+
+    <h3>2.6 · Crear el repositori a GitHub</h3>
+    <ol>
+      <li>A <a href="https://github.com" target="_blank" rel="noopener">github.com</a>, fes clic al botó <strong>+</strong> (a dalt a la dreta) → <strong>New repository</strong>.</li>
+      <li>Posa-li de nom <code>m0614</code>.</li>
+      <li>Deixa'l <strong>públic</strong> i marca l'opció <strong>Add a README file</strong>.</li>
+      <li>Fes clic a <strong>Create repository</strong>.</li>
+    </ol>
+
+    <h3>2.7 · Clonar el repositori a la teva màquina</h3>
+    <p>A la pàgina del repositori, fes clic al botó verd <strong>Code</strong> i copia la URL <strong>HTTPS</strong>. Després, a la terminal de VS Code:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code><span class="c"># Substitueix EL_TEU_USUARI pel teu nom d'usuari de GitHub</span>
+git clone https://github.com/EL_TEU_USUARI/m0614.git</code></pre>
+    </div>
+    <p>➜ Descarrega tot el repositori de GitHub al teu ordinador i crea una carpeta anomenada <code>m0614</code>.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>cd m0614</code></pre>
+    </div>
+    <p>➜ Entra dins d'aquesta carpeta. <code>cd</code> vol dir "change directory" (canviar de carpeta). A partir d'ara les ordres de Git s'executen aquí dins.</p>
+    <p>Obre aquesta carpeta clonada a VS Code (<strong>File → Open Folder…</strong> → <code>m0614</code>).</p>
+
+    <h3>2.8 · Omplir el README a la branca main</h3>
+    <p>En crear el repositori, GitHub ha generat un <code>README.md</code> gairebé buit a la branca <strong>main</strong>. Com que <code>main</code> és el que es veu per defecte en obrir el repositori, l'omplirem <strong>abans</strong> de crear la branca <code>aea0</code>.</p>
+    <ol>
+      <li>Comprova que ets a <code>main</code> amb <code>git branch</code> (hi ha d'aparèixer un asterisc al costat).</li>
+      <li>A VS Code, obre el fitxer <code>README.md</code> i escriu-hi una breu presentació del projecte:</li>
+    </ol>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">README.md</span></div>
+      <pre><code># M0614 — Desplegament d'Aplicacions Web
+
+Repositori de la feina del mòdul M0614.
+
+- **Autor:** El teu Nom
+- **Curs:** DAW · Institut La Mercè
+
+La feina s'organitza amb una branca per cada AEA (`aea0`, `aea1`, ...).</code></pre>
+    </div>
+    <p>Desa (<code>Ctrl + S</code>) i registra el canvi al <code>main</code>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git add README.md</code></pre>
+    </div>
+    <p>➜ Prepara el fitxer que vols desar (és com posar-lo dins d'una caixa abans d'enviar-la).</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git commit -m <span class="c">"Omple el README del main amb la presentació del projecte"</span></code></pre>
+    </div>
+    <p>➜ Desa el canvi <strong>al teu ordinador</strong> amb un missatge que explica què has fet. Això es diu fer un <strong>commit</strong>.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git push</code></pre>
+    </div>
+    <p>➜ Envia el commit a GitHub (a internet). Fins que no fas <code>push</code>, el canvi només és al teu ordinador.</p>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Ara, si obres el repositori a GitHub, el <code>main</code> ja mostra una presentació decent en lloc del README buit. A partir d'aquí ja podem crear la branca de treball de l'AEA.</p>
+    </div>
+
+    <h3>2.9 · Crear la branca aea0</h3>
+    <p>Tota la feina d'aquesta AEA va a la branca <code>aea0</code>. La creem a partir del <code>main</code> (que ja té el README ple) i ens hi situem:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git switch -c aea0</code></pre>
+    </div>
+    <p>➜ Crea la branca <code>aea0</code> i hi entra alhora (l'opció <code>-c</code> vol dir "crea"). La branca hereta el README que acabes d'omplir. Per tornar-hi més endavant n'hi haurà prou amb <code>git switch aea0</code> (sense <code>-c</code>).</p>
+
+    <h3>2.10 · Ampliar el README a la branca aea0 i fer el commit</h3>
+    <p>Ja a la branca <code>aea0</code>, amplia el <code>README.md</code> amb el que sigui propi d'aquesta AEA (ho concretaràs al repte). Perquè no el confonguis amb el <code>README</code> del <code>main</code>, <strong>canvia'n el títol</strong> perquè indiqui que és la branca de l'AEA0 (per exemple <code># M0614 · AEA0 — Preparació de l'entorn</code>). Després registra el canvi:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git status</code></pre>
+    </div>
+    <p>➜ Mostra què has canviat des de l'últim cop. És útil per veure què estàs a punt de desar.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git add README.md</code></pre>
+    </div>
+    <p>➜ Prepara el fitxer per desar-lo.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git commit -m <span class="c">"Amplia el README amb la feina de l'AEA0"</span></code></pre>
+    </div>
+    <p>➜ Desa el canvi amb el seu missatge.</p>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>El fitxer segueix anomenant-se <code>README.md</code> a totes les branques (és el nom que GitHub mostra a la portada). El que canvia és el <strong>títol de dins</strong>: així distingeixes d'un cop d'ull el <code>main</code> (presentació general) de la branca <code>aea0</code> (feina de l'AEA0) sense reanomenar cap fitxer.</p>
+    </div>
+
+    <h3>2.11 · Pujar (push) la branca a GitHub</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git push -u origin aea0</code></pre>
+    </div>
+    <p>➜ Envia la branca <code>aea0</code> a GitHub. L'opció <code>-u origin aea0</code> connecta la teva branca local amb la del servidor; a partir d'ara n'hi haurà prou amb <code>git push</code>.</p>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <ul>
+      <li>A la terminal, <code>git log --oneline</code> mostra el teu commit amb el missatge que has escrit.</li>
+      <li>A la terminal, <code>git branch</code> mostra <code>aea0</code> marcada amb un asterisc (és la branca activa).</li>
+      <li>A <strong>github.com</strong>, la branca <strong>main</strong> mostra el README amb la presentació del projecte (no el README buit inicial).</li>
+      <li>A <strong>github.com</strong>, al teu repositori <code>m0614</code>, despleguant el selector de branques apareix <code>aea0</code>.</li>
+      <li>Dins la branca <code>aea0</code> a GitHub, el <code>README.md</code> mostra el text que hi has escrit.</li>
+    </ul>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Si veus el teu commit tant a la terminal com a la pàgina web de GitHub, l'entorn de control de versions ja està a punt.</p>
+    </div>
+  </section>
+
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA0 · A1
+  </footer>
+
+</div>
+</body>
+</html>

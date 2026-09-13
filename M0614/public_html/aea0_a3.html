@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA0·A3 — Alta a AWS Academy i primer accés a la consola · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+  .term .k{color:#7fb3ff}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea1_entorn.html"><span class="arrow">←</span> Tornar a la preparació de l'entorn</a>
+
+  <header>
+    <span class="badge">AEA0 · A3</span>
+    <span class="eyebrow">M0614 · AWS</span>
+    <h1>Alta a AWS Academy <span class="code">i</span> primer accés a la consola</h1>
+    <p class="lede">Acceptarem la invitació a AWS Academy, entrarem per primera vegada a la consola d'AWS des d'un laboratori i deixarem documentat l'accés al repositori amb branques i un README en Markdown. És la porta d'entrada al núvol que farem servir tot el curs.</p>
+    <div class="meta">
+      <span class="pill">Branca <strong>aea0</strong></span>
+      <span class="pill">RA <strong>RA6</strong></span>
+      <span class="pill">CA <strong>6.1 · 6.2 · 6.3 · 6.4</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En aquesta activitat aprendràs a:</p>
+    <ul>
+      <li>Acceptar la invitació i fer l'alta a <strong>AWS Academy</strong>.</li>
+      <li>Accedir per primera vegada a la <strong>consola d'AWS</strong> a través d'un laboratori del Learner Lab.</li>
+      <li>Orientar-te per la consola: regió, cercador de serveis i pressupost de crèdits.</li>
+      <li>Organitzar el repositori amb <strong>branques</strong> i escriure un <strong>README en Markdown</strong> que documenti l'estructura de la feina.</li>
+    </ul>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Haver completat <strong>AEA0·A1</strong> (repositori <code>m0614</code> i branca <code>aea0</code>) i <strong>AEA0·A2</strong> (Docker).</li>
+      <li>Tenir el correu d'invitació a AWS Academy enviat pel professorat.</li>
+      <li>Navegador web i connexió a Internet.</li>
+    </ul>
+
+    <h3>Serveis AWS implicats</h3>
+    <p>En aquesta activitat encara no crearem recursos. Només accedirem a la <strong>consola d'AWS</strong> mitjançant el <strong>Learner Lab</strong> d'AWS Academy per familiaritzar-nos amb l'entorn.</p>
+
+    <h3>Branca de treball</h3>
+    <p>Continuem a la branca <code>aea0</code>. A la terminal de VS Code, dins <code>m0614</code>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git switch aea0</code></pre>
+    </div>
+
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>AWS Academy es fa servir <strong>sense targeta de crèdit</strong>: treballaràs amb crèdits assignats. Vés amb compte d'aturar els recursos quan acabis (a partir de l'AEA1) per no esgotar-los.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <p><strong>AWS (Amazon Web Services)</strong> és una plataforma de núvol que ofereix serveis sota demanda: servidors, emmagatzematge, bases de dades, xarxes, etc. Durant el mòdul desplegaràs els teus serveis al núvol fent servir AWS.</p>
+
+    <h3>Què és AWS Academy?</h3>
+    <p><strong>AWS Academy</strong> és el programa educatiu d'Amazon per a centres de formació. Permet a l'alumnat accedir a serveis reals d'AWS mitjançant <strong>crèdits</strong>, sense necessitat de targeta de crèdit ni d'obrir un compte personal de pagament.</p>
+
+    <h3>El Learner Lab</h3>
+    <p>L'accés a la consola es fa a través d'un <strong>laboratori (Learner Lab)</strong>. Quan l'inicies, AWS et dona un entorn temporal amb un pressupost limitat. Dins el laboratori trobaràs un botó per obrir la consola d'AWS ja autenticada.</p>
+
+    <table>
+      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Consola d'AWS</strong></td><td>La interfície web des d'on gestiones tots els serveis.</td></tr>
+        <tr><td><strong>Regió</strong></td><td>La ubicació geogràfica on s'allotgen els recursos (per exemple, <code>us-east-1</code>).</td></tr>
+        <tr><td><strong>Learner Lab</strong></td><td>Entorn temporal d'AWS Academy amb crèdits per practicar.</td></tr>
+        <tr><td><strong>Markdown</strong></td><td>Llenguatge de marques senzill per escriure documentació (fitxers <code>.md</code>).</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <h3>2.1 · Acceptar la invitació a AWS Academy</h3>
+    <ol>
+      <li>Obre el correu d'invitació que t'ha enviat el professorat (assumpte amb "AWS Academy").</li>
+      <li>Fes clic a l'enllaç <strong>Get Started</strong> / <strong>Accept invitation</strong>.</li>
+      <li>Crea el compte amb les teves dades i una contrasenya, o inicia sessió si ja en tens un.</li>
+      <li>Accepta les condicions del programa per completar l'alta.</li>
+    </ol>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Si l'enllaç de la invitació ha caducat, demana al professorat que te'n reenviï una de nova. Les invitacions tenen data de validesa.</p>
+    </div>
+
+    <h3>2.2 · Entrar al curs i obrir els mòduls</h3>
+    <ol>
+      <li>Un cop dins, ves a <strong>Canvas</strong> (la plataforma d'AWS Academy).</li>
+      <li>Selecciona el curs <strong>AWS Academy Learner Lab</strong> al qual t'han matriculat.</li>
+      <li>Al menú lateral, obre <strong>Modules</strong> i després <strong>Learner Lab</strong>.</li>
+    </ol>
+
+    <h3>2.3 · Iniciar el laboratori</h3>
+    <ol>
+      <li>Dins el Learner Lab, fes clic a <strong>Start Lab</strong>.</li>
+      <li>Espera que l'indicador del costat de <strong>AWS</strong> es posi <strong>verd</strong> (pot trigar uns segons).</li>
+      <li>Fixa't en el comptador de <strong>crèdits restants</strong> que apareix a la part superior: és el teu pressupost.</li>
+    </ol>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>El cercle al costat de "AWS" indica l'estat del laboratori: vermell = aturat, groc = iniciant-se, verd = a punt. Quan acabis, fes <strong>End Lab</strong> per estalviar crèdits.</p>
+    </div>
+
+    <h3>2.4 · Obrir la consola d'AWS</h3>
+    <ol>
+      <li>Amb l'indicador en verd, fes clic a <strong>AWS</strong> (el text al costat del cercle).</li>
+      <li>S'obrirà una pestanya nova amb la <strong>consola d'AWS</strong> ja autenticada. No cal posar usuari ni contrasenya.</li>
+    </ol>
+
+    <h3>2.5 · Orientar-te per la consola</h3>
+    <p>Fes una exploració bàsica per familiaritzar-te:</p>
+    <ul>
+      <li><strong>Cercador de serveis:</strong> a la barra superior, escriu el nom d'un servei (per exemple, <code>EC2</code> o <code>S3</code>) per accedir-hi.</li>
+      <li><strong>Regió:</strong> a la part superior dreta es mostra la regió activa. A AWS Academy sol ser <code>N. Virginia (us-east-1)</code>. Comprova-la, però <strong>no la canviïs</strong> tret que t'ho indiquin.</li>
+      <li><strong>Menú de serveis:</strong> el botó de quadrícula (a dalt a l'esquerra) llista totes les categories de serveis.</li>
+    </ul>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Treballa sempre a la mateixa regió durant tot el curs. Els recursos creats en una regió no es veuen en una altra.</p>
+    </div>
+
+    <h3>2.6 · Estructurar el repositori amb branques</h3>
+    <p>Recordem com es treballa amb branques: cada AEA té la seva. A la terminal de VS Code pots veure-les i moure't entre elles:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git branch</code></pre>
+    </div>
+    <p>➜ Mostra la llista de branques i, amb un asterisc, en quina et trobes ara.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git switch aea0</code></pre>
+    </div>
+    <p>➜ Entra (canvia) a la branca <code>aea0</code> per treballar-hi.</p>
+
+    <h3>2.7 · Escriure un README en Markdown</h3>
+    <p>Markdown és el format estàndard per documentar repositoris. Obre el <code>README.md</code> a VS Code i amplia'l amb una secció que descrigui com s'organitza la feina del mòdul. Recorda la sintaxi bàsica:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">README.md</span></div>
+      <pre><code><span class="k"># Títol de nivell 1</span>
+<span class="k">## Títol de nivell 2</span>
+
+Text normal amb **negreta** i *cursiva*.
+
+- Element de llista
+- Un altre element
+
+1. Llista numerada
+2. Segon pas
+
+`codi en línia`  i enllaços: [text](https://exemple.com)</code></pre>
+    </div>
+    <p>A VS Code pots veure com queda amb la previsualització: clic dret sobre el fitxer → <strong>Open Preview</strong> (o <code>Ctrl + Shift + V</code>).</p>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Un bon README explica què és el projecte, com s'organitza (les branques per AEA) i com es navega per la feina. És la primera cosa que es veu en obrir el repositori a GitHub. A la branca <code>aea0</code>, posa-hi un títol que indiqui que és de l'AEA0 (per exemple <code># M0614 · AEA0 — Preparació de l'entorn</code>) per no confondre'l amb el <code>README</code> del <code>main</code>; el fitxer segueix anomenant-se <code>README.md</code> a totes les branques.</p>
+    </div>
+
+    <h3>2.8 · Enllaçar (o incrustar) la captura al README</h3>
+    <p>Per fer referència a la captura des del <code>README.md</code> hi ha dues sintaxis de Markdown molt semblants. La diferència és l'admiració <code>!</code> del davant:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">README.md</span></div>
+      <pre><code><span class="c"># Incrusta la imatge (es veu dins el README)</span>
+![Consola AWS amb el lab actiu](evidencies/aea0/a3/aws-lab-actiu.png)
+
+<span class="c"># Enllaç clicable (porta a la imatge en fer-hi clic)</span>
+[Consola AWS amb el lab actiu](evidencies/aea0/a3/aws-lab-actiu.png)</code></pre>
+    </div>
+    <p>El text entre <code>[ ]</code> és la descripció i el text entre <code>( )</code> és la <strong>ruta del fitxer</strong>.</p>
+
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>La ruta és <strong>relativa al README</strong>. Com que el <code>README.md</code> ja és a l'arrel del repositori <code>m0614</code>, la ruta comença per <code>evidencies/…</code> i <strong>no</strong> per <code>M0614/evidencies/…</code> (si hi poses <code>M0614/</code>, GitHub buscarà una carpeta inexistent i l'enllaç es trencarà).</p>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Anomena el fitxer <strong>sense espais ni majúscules</strong>: <code>aws-lab-actiu.png</code>, no <code>AWS Lab Actiu.png</code>. Si per força hi ha un espai, s'ha d'escriure com <code>%20</code>, però és molt millor canviar el nom. Comprova que l'enllaç funciona amb <code>Ctrl + Shift + V</code>.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <ul>
+      <li>Pots iniciar sessió a AWS Academy i veure el curs <strong>Learner Lab</strong>.</li>
+      <li>En fer <strong>Start Lab</strong>, l'indicador d'AWS es posa verd i veus els crèdits restants.</li>
+      <li>El botó <strong>AWS</strong> obre la consola sense demanar credencials.</li>
+      <li>A la consola identifiques el cercador de serveis i la regió activa.</li>
+      <li>El <code>README.md</code> de la branca <code>aea0</code> es veu correctament formatat a la previsualització de VS Code i a GitHub.</li>
+    </ul>
+  </section>
+
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA0 · A3
+  </footer>
+
+</div>
+</body>
+</html>

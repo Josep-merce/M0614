@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA1·A3 — El mateix servidor a AWS (S3) · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea1.html"><span class="arrow">←</span> Tornar a l'AEA1</a>
+
+  <header>
+    <span class="badge">AEA1 · A3</span>
+    <span class="eyebrow">M0614 · RA1 · AWS</span>
+    <h1>El mateix servidor <span class="code">a AWS, amb S3</span></h1>
+    <p class="lede">Ja has muntat el servidor a Linux (A1) i amb Docker (A2). Ara el portarem al núvol amb <strong>Amazon S3</strong>, sense crear cap màquina virtual.</p>
+    <div class="meta">
+      <span class="pill">Branca <strong>aea1</strong></span>
+      <span class="pill">RA <strong>RA1</strong></span>
+      <span class="pill">CA <strong>1.5 · 1.6 · 1.7 · 1.9</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En aquesta activitat aprendràs a:</p>
+    <ul>
+      <li>Entrar al <strong>AWS Learner Lab</strong> i crear un <strong>bucket S3</strong>.</li>
+      <li>Activar l'<strong>allotjament de lloc web estàtic</strong> d'aquest bucket.</li>
+      <li>Pujar-hi el teu fitxer <code>index.html</code> i fer-lo públic.</li>
+    </ul>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Haver completat l'<a href="aea1_a1.html">A1</a> (reutilitzaràs el mateix <code>index.html</code>).</li>
+      <li>Tenir accés al <strong>AWS Academy Learner Lab</strong> (fet a l'AEA0).</li>
+    </ul>
+
+    <h3>Branca de treball</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git switch aea1</code></pre>
+    </div>
+    <p>➜ Entra a la branca <code>aea1</code>, la mateixa que has fet servir a l'A1 i l'A2.</p>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><strong>S3</strong> (Simple Storage Service) és un servei d'AWS pensat per emmagatzemar fitxers. No és un servidor tradicional com Apache, però pot servir fitxers HTML directament per internet.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <p>A l'A1 i l'A2 vas instal·lar Apache: un programa que escolta peticions i respon amb fitxers. Amb S3 no instal·les cap programa: simplement <strong>puges els fitxers a un bucket</strong> i AWS els serveix, sense cap "màquina" que hagis de configurar.</p>
+
+    <table>
+      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bucket</strong></td><td>Una "carpeta" a S3. El nom ha de ser únic a tot AWS.</td></tr>
+        <tr><td><strong>Allotjament de lloc web estàtic</strong></td><td>Opció del bucket que fa que els HTML es vegin com una pàgina web.</td></tr>
+        <tr><td><strong>Accés públic</strong></td><td>Permís que cal activar per a que qualsevol pugui veure els fitxers.</td></tr>
+        <tr><td><strong>Endpoint del lloc web</strong></td><td>L'URL que AWS genera per accedir a la teva pàgina.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <h3>2.1 · Entra al Learner Lab i inicia'l</h3>
+    <ol>
+      <li>Accedeix a AWS Academy amb el teu usuari de l'institut.</li>
+      <li>Entra al <strong>Learner Lab</strong> i fes clic a <strong>Start Lab</strong>.</li>
+      <li>Espera el punt <strong>verd</strong> i fes clic a <strong>AWS</strong> per obrir la consola.</li>
+    </ol>
+
+    <h3>2.2 · Crea el bucket</h3>
+    <ol>
+      <li>Cerca el servei <strong>S3</strong> i fes clic a <strong>Create bucket</strong>.</li>
+      <li>Posa-li un nom <strong>únic</strong>, per exemple <code>aea1-nomcognom-2026</code>.</li>
+      <li>Desmarca <strong>Block all public access</strong> i confirma.</li>
+      <li>Fes clic a <strong>Create bucket</strong>.</li>
+    </ol>
+
+    <h3>2.3 · Activa l'allotjament de lloc web estàtic</h3>
+    <ol>
+      <li>Entra al bucket i vés a <strong>Properties</strong>.</li>
+      <li>Baixa fins a <strong>Static website hosting</strong> i fes clic a <strong>Edit</strong>.</li>
+      <li>Activa <strong>Enable</strong> i escriu <code>index.html</code> a <strong>Index document</strong>.</li>
+      <li>Desa i apunta l'adreça de <strong>Bucket website endpoint</strong>.</li>
+    </ol>
+
+    <h3>2.4 · Prepara el teu <code>index.html</code></h3>
+    <p>Pots reutilitzar el de l'A1 canviant el text:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ca"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;El meu lloc web a S3&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Lloc web a AWS S3 — AEA1&lt;/h1&gt;
+  &lt;p&gt;Nom Cognom&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+
+    <h3>2.5 · Puja el fitxer al bucket</h3>
+    <ol>
+      <li>A la pestanya <strong>Objects</strong>, fes clic a <strong>Upload</strong>.</li>
+      <li><strong>Add files</strong> → selecciona <code>index.html</code> → <strong>Upload</strong>.</li>
+    </ol>
+
+    <h3>2.6 · Fes públic el fitxer</h3>
+    <ol>
+      <li>Vés a <strong>Permissions</strong> del bucket.</li>
+      <li>A <strong>Bucket policy</strong>, fes clic a <strong>Edit</strong> i enganxa (canviant <code>NOM-DEL-TEU-BUCKET</code>):</li>
+    </ol>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bucket policy — JSON</span></div>
+      <pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AccesPublicLectura",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::NOM-DEL-TEU-BUCKET/*"
+    }
+  ]
+}</code></pre>
+    </div>
+    <p>Desa amb <strong>Save changes</strong>.</p>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <p>Obre el navegador i visita l'adreça de l'endpoint:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>
+      <pre><code>http://NOM-DEL-TEU-BUCKET.s3-website-us-east-1.amazonaws.com</code></pre>
+    </div>
+    <p>➜ És l'adreça web que et dona S3 (l'endpoint que vas apuntar). Substitueix <code>NOM-DEL-TEU-BUCKET</code> pel nom real del teu bucket. Hauries de veure la teva pàgina.</p>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Quan acabis, torna al Learner Lab i fes clic a <strong>End Lab</strong>.</p>
+    </div>
+  </section>
+
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA1 · A3
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA0·A2 — Instal·lació de Docker i docker-compose · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+  .term .o{color:#8Fd6a0}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea1_entorn.html"><span class="arrow">←</span> Tornar a la preparació de l'entorn</a>
+
+  <header>
+    <span class="badge">AEA0 · A2</span>
+    <span class="eyebrow">M0614 · Docker</span>
+    <h1>Instal·lació de Docker <span class="code">i</span> docker-compose</h1>
+    <p class="lede">Instal·larem Docker i Docker Compose sobre Debian, entendrem la diferència entre una imatge i un contenidor i farem la primera prova amb <code>hello-world</code>. És la base de la "via Docker" que recorre tot el mòdul.</p>
+    <div class="meta">
+      <span class="pill">Branca <strong>aea0</strong></span>
+      <span class="pill">RA <strong>RA6</strong></span>
+      <span class="pill">CA <strong>6.6</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En aquesta activitat aprendràs a:</p>
+    <ul>
+      <li>Instal·lar <strong>Docker Engine</strong> i el plugin <strong>Docker Compose</strong> sobre Debian.</li>
+      <li>Executar Docker sense <code>sudo</code> afegint el teu usuari al grup <code>docker</code>.</li>
+      <li>Distingir entre <strong>imatge</strong> i <strong>contenidor</strong> i fer la primera prova amb <code>hello-world</code>.</li>
+      <li>Conèixer les ordres bàsiques per llistar, executar i esborrar imatges i contenidors.</li>
+    </ul>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Haver completat <strong>AEA0·A1</strong>: VS Code, terminal integrada i repositori <code>m0614</code> ja clonat.</li>
+      <li>Connexió a Internet per descarregar Docker i les imatges.</li>
+      <li>Permisos d'administrador (<code>sudo</code>) a la màquina Debian.</li>
+    </ul>
+
+    <h3>Branca de treball</h3>
+    <p>Continuem a la branca <code>aea0</code>. Obre VS Code dins la carpeta <code>m0614</code> i situa-t'hi:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git switch aea0</code></pre>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Encara no fem servir AWS. Docker ens permetrà, més endavant, empaquetar serveis (servidor web, base de dades…) en contenidors abans de portar-los al núvol.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <p><strong>Docker</strong> és una plataforma que permet executar aplicacions dins de <strong>contenidors</strong>: entorns aïllats i lleugers que inclouen tot el que l'aplicació necessita per funcionar. Així, una aplicació funciona igual a la teva màquina, a la d'un company o al núvol.</p>
+
+    <h3>Imatge vs. contenidor</h3>
+    <table>
+      <thead><tr><th>Concepte</th><th>Què és</th><th>Analogia</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Imatge</strong></td><td>Plantilla de només lectura amb l'aplicació i les seves dependències.</td><td>La recepta o el motlle.</td></tr>
+        <tr><td><strong>Contenidor</strong></td><td>Una instància en execució creada a partir d'una imatge.</td><td>El plat cuinat a partir de la recepta.</td></tr>
+      </tbody>
+    </table>
+    <p>D'una mateixa imatge es poden crear molts contenidors. Les imatges es descarreguen d'un <strong>registre</strong>, normalment <a href="https://hub.docker.com" target="_blank" rel="noopener">Docker Hub</a>.</p>
+
+    <h3>Què és Docker Compose?</h3>
+    <p><strong>Docker Compose</strong> permet definir i executar diversos contenidors alhora amb un únic fitxer de configuració (<code>docker-compose.yml</code>). El farem servir a partir de l'AEA1 per aixecar serveis complets (per exemple, un servidor web i una base de dades junts).</p>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <h3>2.1 · Actualitzar el sistema i instal·lar dependències</h3>
+    <p>Obre la terminal integrada de VS Code (<code>Ctrl + ç</code>) i executa:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt update</code></pre>
+    </div>
+    <p>➜ Actualitza la llista de programes disponibles a Debian.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt install -y ca-certificates curl gnupg</code></pre>
+    </div>
+    <p>➜ Instal·la programes que Docker necessita per baixar-se de manera segura: <code>ca-certificates</code> (certificats de seguretat), <code>curl</code> (descarrega coses d'internet des de la terminal) i <code>gnupg</code> (comprova que el que descarregues és autèntic).</p>
+
+    <h3>2.2 · Afegir el repositori oficial de Docker</h3>
+    <p>Afegim la clau i el repositori oficials perquè <code>apt</code> instal·li la versió més recent de Docker:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code><span class="c"># Crear el directori per a la clau i descarregar-la</span>
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | \
+    sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+<span class="c"># Afegir el repositori a les fonts d'apt</span>
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/debian $(. /etc/os-release &amp;&amp; echo $VERSION_CODENAME) stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null</code></pre>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Copia cada bloc sencer. Les barres <code>\</code> al final de línia indiquen que l'ordre continua a la línia següent: és una sola ordre tot i ocupar diverses línies.</p>
+    </div>
+
+    <h3>2.3 · Instal·lar Docker i Docker Compose</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt update</code></pre>
+    </div>
+    <p>➜ Torna a actualitzar la llista perquè Debian "vegi" els programes del repositori de Docker que acabes d'afegir.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt install -y docker-ce docker-ce-cli containerd.io \
+    docker-buildx-plugin docker-compose-plugin</code></pre>
+    </div>
+    <p>➜ Instal·la Docker i tots els seus components. El paquet <code>docker-compose-plugin</code> instal·la Compose com a subordre de Docker: l'invocaràs amb <code>docker compose</code> (amb espai).</p>
+
+    <h3>2.4 · Executar Docker sense sudo</h3>
+    <p>Per no haver d'escriure <code>sudo</code> a cada ordre, afegeix el teu usuari al grup <code>docker</code>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo usermod -aG docker $USER</code></pre>
+    </div>
+    <p>➜ Afegeix el teu usuari (<code>$USER</code>) al grup <code>docker</code>, que té permís per fer servir Docker sense <code>sudo</code>.</p>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Aquest canvi no té efecte fins que <strong>tanquis i tornis a obrir la sessió</strong> (logout / login). Si no vols tancar sessió ara, pots executar <code>newgrp docker</code> a la terminal per aplicar-ho al terminal actual.</p>
+    </div>
+
+    <h3>2.5 · Comprovar la instal·lació</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker --version
+<span class="o">Docker version 27.x.x, build ...</span></code></pre>
+    </div>
+    <p>➜ Comprova que Docker s'ha instal·lat, mostrant-ne la versió.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker compose version
+<span class="o">Docker Compose version v2.x.x</span></code></pre>
+    </div>
+    <p>➜ Comprova que Docker Compose també ha quedat instal·lat.</p>
+
+    <h3>2.6 · La primera prova: hello-world</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker run hello-world</code></pre>
+    </div>
+    <p>➜ Descarrega la imatge <code>hello-world</code> i en crea un contenidor que escriu un missatge i s'atura. Si tot va bé, veuràs un text que comença per <code>Hello from Docker!</code>: això confirma que Docker pot descarregar imatges i executar contenidors.</p>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Què ha passat? Docker no tenia la imatge localment, l'ha baixat de Docker Hub, n'ha creat un contenidor, l'ha executat (ha imprès el missatge) i el contenidor ha acabat la seva feina.</p>
+    </div>
+
+    <h3>2.7 · Ordres bàsiques d'imatges i contenidors</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker images</code></pre>
+    </div>
+    <p>➜ Mostra les <strong>imatges</strong> que tens descarregades (les "receptes" dels programes).</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker ps</code></pre>
+    </div>
+    <p>➜ Mostra els <strong>contenidors</strong> que s'estan executant ara mateix. Com que <code>hello-world</code> ja ha acabat, no hi sortirà.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker ps -a</code></pre>
+    </div>
+    <p>➜ Mostra <strong>tots</strong> els contenidors, també els que ja han acabat. L'opció <code>-a</code> vol dir "all" (tots).</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker rm &lt;ID&gt;</code></pre>
+    </div>
+    <p>➜ Esborra un contenidor que ja no facis servir. Substitueix <code>&lt;ID&gt;</code> per l'identificador que veus a la primera columna de <code>docker ps -a</code>.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker rmi hello-world</code></pre>
+    </div>
+    <p>➜ Esborra una imatge que ja no necessitis (<code>rmi</code> = "remove image").</p>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <ul>
+      <li><code>docker --version</code> i <code>docker compose version</code> mostren un número de versió.</li>
+      <li><code>docker run hello-world</code> imprimeix el missatge <code>Hello from Docker!</code>.</li>
+      <li><code>docker images</code> mostra la imatge <code>hello-world</code> a la llista.</li>
+      <li><code>docker ps -a</code> mostra el contenidor de <code>hello-world</code> amb estat <em>Exited</em>.</li>
+      <li>Pots executar ordres <code>docker</code> <strong>sense</strong> <code>sudo</code> (després de reiniciar la sessió).</li>
+    </ul>
+  </section>
+
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA0 · A2
+  </footer>
+
+</div>
+</body>
+</html>

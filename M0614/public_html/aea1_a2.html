@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA1·A2 — El mateix servidor amb Docker · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea1.html"><span class="arrow">←</span> Tornar a l'AEA1</a>
+
+  <header>
+    <span class="badge">AEA1 · A2</span>
+    <span class="eyebrow">M0614 · RA1 · Docker</span>
+    <h1>El mateix servidor <span class="code">amb Docker</span></h1>
+    <p class="lede">A l'A1 vas instal·lar Apache directament sobre Linux. Ara farem exactament el mateix, però dins d'un contenidor Docker.</p>
+    <div class="meta">
+      <span class="pill">Branca <strong>aea1</strong></span>
+      <span class="pill">RA <strong>RA1</strong></span>
+      <span class="pill">CA <strong>1.5 · 1.6 · 1.7</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En aquesta activitat aprendràs a:</p>
+    <ul>
+      <li>Explicar amb les teves paraules què és un <strong>contenidor</strong> i en què es diferencia d'instal·lar un programa directament.</li>
+      <li>Descarregar una imatge d'Apache des de Docker Hub.</li>
+      <li>Executar un contenidor i publicar-hi la teva pàgina web.</li>
+    </ul>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Haver completat l'<a href="aea1_a1.html">A1</a>.</li>
+      <li>Tenir <strong>Docker</strong> instal·lat (fet a l'AEA0).</li>
+    </ul>
+
+    <h3>Branca de treball</h3>
+    <p>Continuem a la mateixa branca <code>aea1</code>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git switch aea1</code></pre>
+    </div>
+    <p>➜ Entra a la branca <code>aea1</code>, la mateixa que vas fer servir a l'A1.</p>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Un <strong>contenidor</strong> és com una "caixa" que porta a dins tot el que un programa necessita per funcionar, llesta per executar-se a qualsevol màquina amb Docker instal·lat.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <p>A l'A1, Apache es va quedar instal·lat "per sempre" a la teva màquina, barrejat amb tot el sistema. Amb Docker, Apache viu <strong>tancat dins la seva pròpia caixa (imatge)</strong>, separat de la resta del sistema.</p>
+
+    <table>
+      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Imatge</strong></td><td>La "recepta" que conté Apache i tot el que necessita (<code>httpd</code>).</td></tr>
+        <tr><td><strong>Contenidor</strong></td><td>Una còpia de la imatge <strong>en execució</strong>.</td></tr>
+        <tr><td><strong>Port</strong></td><td>La "porta" per on el navegador es connecta.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Farem servir la imatge oficial <code>httpd</code> (el nom del projecte Apache a Docker Hub).</p>
+    </div>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <h3>2.1 · Comprova que Docker funciona</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker --version</code></pre>
+    </div>
+    <p>➜ Comprova que Docker està instal·lat, mostrant-ne la versió. (El vas instal·lar a l'AEA0.)</p>
+
+    <h3>2.2 · Descarrega la imatge d'Apache</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker pull httpd</code></pre>
+    </div>
+    <p>➜ Descarrega la imatge oficial d'Apache (<code>httpd</code>) des de Docker Hub. Una <strong>imatge</strong> és la "recepta" amb el programa i tot el que necessita.</p>
+
+    <h3>2.3 · Crea una carpeta local amb la teva pàgina</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>mkdir -p ~/aea1-docker</code></pre>
+    </div>
+    <p>➜ Crea una carpeta anomenada <code>aea1-docker</code> a la teva carpeta personal (el símbol <code>~</code>). L'opció <code>-p</code> evita errors si ja existeix.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>nano ~/aea1-docker/index.html</code></pre>
+    </div>
+    <p>➜ Obre l'editor <code>nano</code> per crear el fitxer <code>index.html</code> dins d'aquesta carpeta.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ca"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;El meu servidor amb Docker&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Servidor web amb Docker — AEA1&lt;/h1&gt;
+  &lt;p&gt;Nom Cognom&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+
+    <h3>2.4 · Executa el contenidor amb la teva pàgina dins</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker run -d -p 8080:80 --name servidor-aea1 -v ~/aea1-docker:/usr/local/apache2/htdocs/ httpd</code></pre>
+    </div>
+    <p>➜ Engega un contenidor d'Apache amb la teva pàgina dins. Cada opció vol dir:</p>
+    <ul>
+      <li><code>-d</code> → l'executa en segon pla (no bloqueja la terminal).</li>
+      <li><code>-p 8080:80</code> → connecta el port 8080 del teu ordinador amb el port 80 del contenidor.</li>
+      <li><code>--name servidor-aea1</code> → li posa un nom fàcil de recordar.</li>
+      <li><code>-v ~/aea1-docker:/usr/local/apache2/htdocs/</code> → "munta" la teva carpeta dins del contenidor, on Apache busca les pàgines.</li>
+      <li><code>httpd</code> → la imatge que fa servir.</li>
+    </ul>
+
+    <h3>2.5 · Comprova que el contenidor s'està executant</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker ps</code></pre>
+    </div>
+    <p>➜ Mostra els contenidors en marxa. Hi ha d'aparèixer <code>servidor-aea1</code> amb estat <code>Up</code>.</p>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>
+      <pre><code>http://localhost:8080</code></pre>
+    </div>
+    <p>➜ Obre la pàgina servida pel contenidor. Fixa't que ara el port és <code>8080</code>, el que vas obrir amb <code>-p</code>.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>curl http://localhost:8080</code></pre>
+    </div>
+    <p>➜ Comprova el mateix des de la terminal, sense navegador.</p>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Ara la pàgina viu al port <strong>8080</strong>, no al 80 com a l'A1: hem dit a Docker que redirigís la porta 8080 de la nostra màquina cap a la porta 80 del contenidor.</p>
+    </div>
+  </section>
+
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA1 · A2
+  </footer>
+
+</div>
+</body>
+</html>

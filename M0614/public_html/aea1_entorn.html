@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA1 · Configuració de l'entorn: Linux, Git/GitHub i Docker · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.9rem,5vw,3rem);letter-spacing:-.02em;line-height:1.06;margin:1.1rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.18rem);max-width:58ch;margin-top:1.1rem}
+  .meta{margin-top:1.6rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.9rem,2vw,1.4rem)}
+  .card{position:relative;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--hairline);border-radius:16px;padding:1.6rem 1.6rem 1.4rem;text-decoration:none;color:inherit;overflow:hidden;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);transform:scaleY(0);transform-origin:top;transition:transform .26s ease}
+  .card:hover,.card:focus-visible{transform:translateY(-4px);border-color:#D6DEE8;box-shadow:0 14px 34px -18px rgba(26,34,48,.34);outline:none}
+  .card:hover::before,.card:focus-visible::before{transform:scaleY(1)}
+  .card:focus-visible{box-shadow:0 0 0 3px var(--accent-soft),0 14px 34px -18px rgba(26,34,48,.34)}
+  .card-top{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+  .aea-code{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px}
+  .tags{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:flex-end}
+  .tag{font-family:var(--mono);font-size:.7rem;padding:.28rem .55rem;border-radius:6px;white-space:nowrap}
+  .tag.via{background:var(--slate-soft);color:var(--slate-ink)}
+  .card h2{font-family:var(--display);font-weight:600;font-size:1.1rem;letter-spacing:-.01em;line-height:1.25}
+  .card p{color:var(--muted);font-size:.9rem;margin-top:.55rem;flex:1}
+  .open{margin-top:1.25rem;font-family:var(--mono);font-size:.8rem;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;gap:.4rem}
+  .open .arrow{transition:transform .22s ease}
+  .card:hover .open .arrow,.card:focus-visible .open .arrow{transform:translateX(4px)}
+
+  .card.disabled{cursor:not-allowed;background:#FAFBFC;opacity:.6;filter:grayscale(.4)}
+  .card.disabled:hover,.card.disabled:focus-visible{transform:none;box-shadow:none;border-color:var(--hairline)}
+  .card.disabled:hover::before,.card.disabled:focus-visible::before{transform:scaleY(0)}
+  .card.disabled .aea-code{background:#9aa4b2}
+  .card.disabled .open{color:#9aa4b2}
+  .card.disabled:hover .open .arrow,.card.disabled:focus-visible .open .arrow{transform:none}
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:880px){.grid{grid-template-columns:1fr}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="index.html"><span class="arrow">←</span> Totes les AEA</a>
+
+  <header>
+    <span class="eyebrow">M0614 · AEA1</span>
+    <h1>AEA1 <span class="code">—</span> Configuració de l'entorn</h1>
+    <p class="lede">Preparem l'entorn de treball del curs: editor, terminal, control de versions amb Git/GitHub, Docker i l'accés a AWS Academy. És el punt de partida que registrarà tota la feina.</p>
+    <div class="meta">
+      <span class="pill">Branca <strong>aea0</strong></span>
+      <span class="pill">Part de <strong>AEA1</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!--
+  ============================================================
+   COM OBRIR UNA ACTIVITAT QUAN AVANCEM EL CURS
+   Cada targeta comença desactivada amb  class="card".
+   Per activar-la, esborra només la paraula  disabled :
+        class="card"   ->   class="card"
+  ============================================================
+  -->
+
+  <main class="grid">
+
+    <a class="card" href="aea0_a1.html">
+      <div class="card-top">
+        <span class="aea-code">AEA0·A1</span>
+        <span class="tags"><span class="tag via">Linux</span></span>
+      </div>
+      <h2>VS Code sobre Debian, terminal integrada i primer repositori Git/GitHub</h2>
+      <p>Configuració de VS Code sobre Debian, ús de la terminal integrada i creació del primer repositori Git connectat a GitHub.</p>
+      <span class="open">Obrir <span class="arrow">→</span></span>
+    </a>
+
+    <a class="card" href="aea0_a2.html">
+      <div class="card-top">
+        <span class="aea-code">AEA0·A2</span>
+        <span class="tags"><span class="tag via">Docker</span></span>
+      </div>
+      <h2>Instal·lació de Docker i docker-compose</h2>
+      <p>Instal·lació de Docker i docker-compose i primers conceptes d'imatge i contenidor amb hello-world.</p>
+      <span class="open">Obrir <span class="arrow">→</span></span>
+    </a>
+
+    <a class="card" href="aea0_a3.html">
+      <div class="card-top">
+        <span class="aea-code">AEA0·A3</span>
+        <span class="tags"><span class="tag via">AWS</span></span>
+      </div>
+      <h2>Alta a AWS Academy i primer accés a la consola</h2>
+      <p>Alta a AWS Academy, primer accés a la consola, creació de branques i README en Markdown.</p>
+      <span class="open">Obrir <span class="arrow">→</span></span>
+    </a>
+  </main>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA0
+  </footer>
+
+</div>
+
+<script>
+  document.querySelectorAll('.card').forEach(function(card){
+    if(card.classList.contains('disabled')){
+      card.setAttribute('aria-disabled','true');
+      card.setAttribute('tabindex','-1');
+    }
+    card.addEventListener('click', function(e){
+      if(card.classList.contains('disabled')) e.preventDefault();
+    });
+  });
+</script>
+</body>
+</html>
