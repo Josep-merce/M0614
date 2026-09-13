@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA6·A2 — Treball en parella amb branques · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --prop-bg:#FBEFE0;--prop-border:#F1D7B4;--prop-ink:#A85610;
+    --collab-bg:#E1F5EE;--collab-border:#9FE1CB;--collab-ink:#0F6E56;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+  .evid{background:var(--slate-soft);border:1px solid var(--hairline);border-radius:12px;padding:1.3rem 1.4rem;margin:1.2rem 0}
+
+  /* Rols en parella */
+  .role-box{border-radius:12px;padding:1.1rem 1.3rem;margin:1.1rem 0;border:1px solid}
+  .role-box.prop{background:var(--prop-bg);border-color:var(--prop-border)}
+  .role-box.collab{background:var(--collab-bg);border-color:var(--collab-border)}
+  .role-box.both{background:var(--slate-soft);border-color:var(--hairline)}
+  .role-label{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+  .role-label.prop{color:var(--prop-ink)}
+  .role-label.collab{color:var(--collab-ink)}
+  .role-label.both{color:var(--slate-ink)}
+  .pair-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.1rem 0}
+  .pair-grid .role-box{margin:0}
+  @media (max-width:680px){.pair-grid{grid-template-columns:1fr}}
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea6.html"><span class="arrow">←</span> Tornar a l'AEA6</a>
+
+  <header>
+    <span class="badge">AEA6 · A2</span>
+    <span class="eyebrow">M0614 · Linux</span>
+    <h1>Treball en parella <span class="code">amb</span> branques</h1>
+    <p class="lede">Cadascú edita una part diferent de la pàgina en la seva pròpia branca, la puja a GitHub i la fusiona amb un Pull Request. Aplicareu també una mica de seguretat bàsica al repositori.</p>
+    <div class="meta">
+      <span class="pill">Repositori <strong>compartit</strong></span>
+      <span class="pill">RA <strong>RA6</strong></span>
+      <span class="pill">CA <strong>6.6</strong></span>
+      <span class="pill">En parella <strong>Propietari · Col·laborador</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>Seguiu treballant amb els mateixos rols i el mateix repositori de l'A1 (<code>aea6-usuari1-usuari2</code>). En aquesta activitat, cadascú afegirà una part diferent a la pàgina <code>index.html</code>, sense trepitjar-se, i aprendreu a protegir una mica el repositori.</p>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Haver completat l'A1: el repositori existeix, els dos hi teniu accés i teniu la mateixa còpia local.</li>
+    </ul>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <h3>Què farem en aquesta activitat</h3>
+    <p>Cadascú treballarà a la seva pròpia branca del repositori: el Propietari afegirà una capçalera a la pàgina i el Col·laborador un formulari. Els dos canvis es fusionaran a la branca principal amb un <em>Pull Request</em>. També aplicareu dues mesures de seguretat: un token d'accés personal i la protecció de la branca principal.</p>
+
+    <p><strong>Termes nous que apareixeran:</strong></p>
+    <ul>
+      <li><strong>Branca</strong> (<em>branch</em>): una còpia paral·lela del projecte on pots treballar tu sol sense afectar la còpia principal. La branca principal es diu <code>main</code>.</li>
+      <li><strong>Pull Request</strong> (PR): una proposta que fas des de GitHub: "vull incorporar els canvis de la meva branca a <code>main</code>". L'altra persona pot revisar-lo abans d'acceptar-lo.</li>
+      <li><strong>Merge</strong>: fusionar els canvis d'una branca dins d'una altra. Quan acceptes un Pull Request, GitHub fa un merge.</li>
+      <li><strong>Token d'accés personal</strong>: una contrasenya especial que fem servir per identificar-nos davant de GitHub des del terminal, en lloc de la contrasenya del compte.</li>
+      <li><strong>Protecció de branca</strong>: una regla a GitHub que impedeix pujar canvis directament a <code>main</code>: obliga a fer-ho sempre a través d'un Pull Request.</li>
+    </ul>
+
+    <svg viewBox="0 0 640 180" style="width:100%;max-width:640px;margin:.8rem 0;display:block" role="img" aria-label="Dues branques que es fusionen a main sense conflicte">
+      <defs>
+        <marker id="arrow3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#5A6677"/>
+        </marker>
+      </defs>
+      <line x1="40" y1="90" x2="600" y2="90" stroke="#E3E8EF" stroke-width="3"/>
+      <text x="40" y="75" font-family="JetBrains Mono, monospace" font-size="11" fill="#3A4658">main</text>
+
+      <path d="M120,90 Q160,40 220,40 L340,40" stroke="#F1D7B4" stroke-width="3" fill="none"/>
+      <text x="225" y="30" font-family="JetBrains Mono, monospace" font-size="10" fill="#A85610">feature/header</text>
+      <path d="M340,40 Q400,40 430,90" stroke="#F1D7B4" stroke-width="3" fill="none" marker-end="url(#arrow3)"/>
+
+      <path d="M180,90 Q220,140 280,140 L400,140" stroke="#9FE1CB" stroke-width="3" fill="none"/>
+      <text x="285" y="157" font-family="JetBrains Mono, monospace" font-size="10" fill="#0F6E56">feature/footer</text>
+      <path d="M400,140 Q460,140 490,90" stroke="#9FE1CB" stroke-width="3" fill="none" marker-end="url(#arrow3)"/>
+
+      <circle cx="120" cy="90" r="5" fill="#3A4658"/>
+      <circle cx="180" cy="90" r="5" fill="#3A4658"/>
+      <circle cx="430" cy="90" r="5" fill="#A85610"/>
+      <circle cx="490" cy="90" r="5" fill="#0F6E56"/>
+    </svg>
+
+    <h3>Per què cal aplicar seguretat</h3>
+    <p>Als passos 2.10 i 2.11 configurareu les dues mesures de seguretat que hem esmentat als termes nous:</p>
+
+    <p><strong>Per què cal un token?</strong> Perquè GitHub, per motius de seguretat, ja no accepta la contrasenya del compte des del terminal. Fem servir un token: si algú te'l roba, el pots revocar sense haver de canviar la contrasenya del compte.</p>
+
+    <p><strong>Per què protegir <code>main</code>?</strong> Perquè un push directe amb un error trenca el codi que tots compartiu. La protecció obliga a passar per un Pull Request perquè l'altra persona pugui revisar els canvis primer.</p>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <p>Anirem <strong>molt a poc a poc</strong>: cada comanda surt sola, amb una explicació de què fa exactament abans de continuar amb la següent.</p>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Els passos 2.2-2.3 (Propietari) i 2.4-2.6 (Col·laborador) es poden fer <strong>alhora</strong>, cadascú al seu ordinador: no cal esperar que l'altre acabi.</p>
+    </div>
+
+    <h3>2.1 · Crear la vostra branca</h3>
+    <div class="pair-grid">
+      <div class="role-box prop">
+        <span class="role-label prop">Propietari</span>
+        <div class="term">
+          <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+          <pre><code>git checkout -b feature/header</code></pre>
+        </div>
+        <p>➜ Crea una branca nova anomenada <code>feature/header</code> i et hi situa.</p>
+      </div>
+      <div class="role-box collab">
+        <span class="role-label collab">Col·laborador</span>
+        <div class="term">
+          <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+          <pre><code>git checkout -b feature/footer</code></pre>
+        </div>
+        <p>➜ El mateix, però amb una branca anomenada <code>feature/footer</code>.</p>
+      </div>
+    </div>
+
+    <h3>2.2 · Propietari: afegir la capçalera</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p>Obre <code>index.html</code> i afegeix això just després de l'obertura del <code>&lt;body&gt;</code>:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
+        <pre><code>&lt;header&gt;
+  &lt;nav&gt;
+    &lt;a href="#"&gt;Inici&lt;/a&gt;
+    &lt;a href="#"&gt;Sobre nosaltres&lt;/a&gt;
+  &lt;/nav&gt;
+&lt;/header&gt;</code></pre>
+      </div>
+      <p>➜ Un <code>&lt;header&gt;</code> amb un <code>&lt;nav&gt;</code> a dins: dos enllaços senzills de navegació.</p>
+    </div>
+
+    <h3>2.3 · Propietari: pujar el canvi</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git add index.html</code></pre>
+      </div>
+      <p>➜ Marca l'<code>index.html</code> modificat com "a punt per guardar".</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git commit -m "Afegeix capçalera de navegació"</code></pre>
+      </div>
+      <p>➜ Guarda una "fotografia" d'aquest canvi, amb un missatge que l'explica.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git push origin feature/header</code></pre>
+      </div>
+      <p>➜ Envia aquest commit a GitHub, però a la teva branca <code>feature/header</code>, no a <code>main</code>.</p>
+    </div>
+
+    <h3>2.4 · Col·laborador: afegir el peu de pàgina</h3>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <p>Obre <code>index.html</code> i afegeix això just abans de tancar el <code>&lt;/body&gt;</code>:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
+        <pre><code>&lt;footer&gt;
+  &lt;input type="text" id="nomContacte" placeholder="El teu nom"&gt;
+  &lt;button onclick="validarContacte()"&gt;Enviar&lt;/button&gt;
+&lt;/footer&gt;
+&lt;script src="js/main.js"&gt;&lt;/script&gt;</code></pre>
+      </div>
+      <p>➜ Un <code>&lt;footer&gt;</code> amb un camp de text, un botó, i una etiqueta <code>&lt;script&gt;</code> que carregarà un fitxer JavaScript que encara hem de crear.</p>
+    </div>
+
+    <h3>2.5 · Col·laborador: crear el fitxer JavaScript</h3>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>mkdir js</code></pre>
+      </div>
+      <p>➜ <code>mkdir</code> (<em>make directory</em>) crea una carpeta nova anomenada <code>js</code>.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>nano js/main.js</code></pre>
+      </div>
+      <p>➜ Obre l'editor de text <code>nano</code> per crear i escriure el fitxer <code>main.js</code> dins d'aquesta carpeta.</p>
+      <p>Escriu-hi aquest contingut:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">js/main.js</span></div>
+        <pre><code>/**
+ * Comprova si un camp de text no està buit.
+ * @param {string} valor - El text introduït al camp.
+ * @returns {boolean} true si el camp té contingut, false si està buit.
+ */
+function campOmplert(valor) {
+  return valor.trim().length > 0;
+}</code></pre>
+      </div>
+      <p>➜ Una funció que rep un text i retorna <code>true</code> o <code>false</code> segons si té contingut o no.</p>
+      <p>Afegeix-hi a continuació aquesta segona funció:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">js/main.js</span></div>
+        <pre><code>function validarContacte() {
+  const valor = document.getElementById('nomContacte').value;
+  alert(campOmplert(valor) ? "Gràcies!" : "Omple el camp abans d'enviar.");
+}</code></pre>
+      </div>
+      <p>➜ Aquesta funció s'executa quan es clica el botó "Enviar": llegeix el que hi ha escrit al camp de text, crida <code>campOmplert()</code> per comprovar-lo, i mostra un missatge diferent segons el resultat.</p>
+    </div>
+
+    <h3>2.6 · Col·laborador: pujar els canvis</h3>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git add index.html js/main.js</code></pre>
+      </div>
+      <p>➜ Marca els dos fitxers modificats/nous com "a punt per guardar".</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git commit -m "Afegeix formulari de contacte i validació"</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git push origin feature/footer</code></pre>
+      </div>
+      <p>➜ Igual que al pas 2.3, però pujant a la teva branca <code>feature/footer</code>.</p>
+    </div>
+
+    <h3>2.7 · Obrir el Pull Request</h3>
+    <div class="role-box both">
+      <span class="role-label both">Ambdós</span>
+      <ol>
+        <li>Ves al repositori a GitHub. Hi apareixerà un avís groc amb la teva branca acabada de pujar.</li>
+        <li>Fes clic a <strong>Compare & pull request</strong>.</li>
+        <li>Revisa el resum de canvis que es mostra.</li>
+        <li>Fes clic a <strong>Create pull request</strong>.</li>
+      </ol>
+      <p>➜ Cadascú fa aquests 4 clics amb la seva pròpia branca: el Propietari amb <code>feature/header</code>, el Col·laborador amb <code>feature/footer</code>.</p>
+    </div>
+
+    <h3>2.8 · Revisar-vos mútuament i fer el merge</h3>
+    <div class="role-box both">
+      <span class="role-label both">Ambdós</span>
+      <ol>
+        <li>Obre el Pull Request <strong>del teu company/a</strong> (no el teu).</li>
+        <li>Ves a la pestanya <strong>Files changed</strong> i mira quines línies ha afegit.</li>
+        <li>Deixa un comentari curt (per exemple, "Tot correcte").</li>
+        <li>Fes clic a <strong>Merge pull request</strong>.</li>
+      </ol>
+      <p>➜ Repetiu-ho amb els dos Pull Requests (l'ordre no importa, ja que toqueu parts diferents del fitxer i no hi haurà conflicte).</p>
+    </div>
+
+    <h3>2.9 · Actualitzar la vostra còpia local</h3>
+    <div class="role-box both">
+      <span class="role-label both">Ambdós</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git checkout main</code></pre>
+      </div>
+      <p>➜ Et poses a la branca <code>main</code>, on ara ja hi ha els dos Pull Requests fusionats.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git pull origin main</code></pre>
+      </div>
+      <p>➜ Baixes aquests canvis al teu ordinador. Obre <code>index.html</code>: ara hi han d'aparèixer tant el <code>&lt;header&gt;</code> com el <code>&lt;footer&gt;</code>, encara que cadascú només hagi editat una part.</p>
+    </div>
+
+    <h3>2.10 · Seguretat: crear un token d'accés personal</h3>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Aquest pas el fan <strong>tots dos</strong>, cadascú al seu propi compte de GitHub. Cadascú tindrà el seu token.</p>
+    </div>
+
+    <div class="role-box both">
+      <span class="role-label both">Ambdós — Pas A: obrir la pàgina dels tokens</span>
+      <ol>
+        <li>A GitHub, fes clic a la teva <strong>foto de perfil</strong> (a dalt a la dreta) → <strong>Settings</strong>.</li>
+        <li>Baixa fins al final del menú de l'esquerra i fes clic a <strong>Developer settings</strong>.</li>
+        <li>Fes clic a <strong>Personal access tokens</strong> → <strong>Tokens (classic)</strong>.</li>
+      </ol>
+    </div>
+
+    <div class="role-box both">
+      <span class="role-label both">Ambdós — Pas B: generar el token</span>
+      <ol>
+        <li>Fes clic al botó <strong>Generate new token</strong> → <strong>Generate new token (classic)</strong>. Potser et demanarà que confirmis la contrasenya del compte.</li>
+        <li>A <strong>Note</strong>, escriu un nom qualsevol, per exemple: <code>Ordinador de l'escola</code>.</li>
+        <li>A <strong>Expiration</strong>, tria <code>90 days</code>.</li>
+        <li>A <strong>Select scopes</strong>, marca la casella <strong><code>repo</code></strong> (s'activaran soles les de sota).</li>
+        <li>Baixa fins al final i fes clic a <strong>Generate token</strong>.</li>
+      </ol>
+    </div>
+
+    <div class="role-box both">
+      <span class="role-label both">Ambdós — Pas C: copiar i desar el token</span>
+      <div class="callout warn">
+        <span class="ico">⚠️</span>
+        <p>El token només es veu <strong>una vegada</strong>. Copia'l ara mateix (clica la icona ⧉ al costat) i enganxa'l en un lloc segur (una nota al mòbil, un gestor de contrasenyes...). Si el perds, hauràs de generar-ne un altre.</p>
+      </div>
+      <p>La propera vegada que Git et demani <code>Password for 'https://...'</code>, en lloc de la contrasenya de GitHub, <strong>enganxa aquest token</strong>. El nom d'usuari sí que és el de GitHub.</p>
+    </div>
+
+    <h3>2.11 · Seguretat: protegir la branca <code>main</code></h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p>Aquesta configuració la fa només el Propietari, perquè és qui té permisos d'administració sobre el repositori.</p>
+      <ol>
+        <li>Ves al <strong>repositori</strong> a GitHub (no al teu compte).</li>
+        <li>A dalt de tot fes clic a la pestanya <strong>Settings</strong>.</li>
+        <li>Al menú de l'esquerra, dins del grup "Code and automation", fes clic a <strong>Branches</strong>.</li>
+        <li>Fes clic al botó <strong>Add branch ruleset</strong> (o <strong>Add rule</strong>, depenent de la versió de la interfície).</li>
+        <li>Al camp <strong>Ruleset Name</strong> (o <strong>Branch name pattern</strong>), escriu: <code>main</code>.</li>
+        <li>A <strong>Enforcement status</strong>, tria <strong>Active</strong> (si apareix aquesta opció).</li>
+        <li>A la secció <strong>Target branches</strong>, fes clic a <strong>Add target</strong> i tria <strong>Include default branch</strong>. Això aplicarà la regla a <code>main</code>.</li>
+        <li>Baixa fins a la secció <strong>Rules</strong> i marca la casella <strong>Require a pull request before merging</strong>.</li>
+        <li>Baixa fins al final i fes clic a <strong>Create</strong> (o <strong>Save changes</strong>).</li>
+      </ol>
+      <p>➜ A partir d'ara, ningú (ni tu mateix) podrà fer <code>git push</code> directe a <code>main</code>: tot haurà de passar per un Pull Request, com heu fet als passos 2.7-2.8.</p>
+    </div>
+
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <p>Per comprovar que la protecció funciona, prova d'esborrar temporalment la branca <code>main</code> del teu ordinador i tornar a fer un push amb un canvi qualsevol. Git t'hauria de retornar un error semblant a aquest:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>remote: error: GH006: Protected branch update failed for refs/heads/main.
+remote: error: Cannot push to a protected branch, use a pull request instead.</code></pre>
+      </div>
+      <p>➜ Si veus aquest missatge, la protecció està activa. Si el push passa igualment, torna al pas 2.11 i comprova que has desat la regla correctament.</p>
+    </div>
+
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <ul>
+      <li><code>index.html</code> a <code>main</code> conté tant el <code>&lt;header&gt;</code> com el <code>&lt;footer&gt;</code>.</li>
+      <li>A GitHub, la pestanya <strong>Pull requests</strong> mostra els <strong>dos</strong> PR com a fusionats (<em>Merged</em>): <code>feature/header</code> i <code>feature/footer</code>.</li>
+      <li>A <strong>Settings → Branches</strong>, la branca <code>main</code> té una regla de protecció activa.</li>
+    </ul>
+  </section>
+
+  <!-- ============ 4 · COM S'ENTREGA AQUESTA ACTIVITAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">4</span>
+      <h2>Com s'entrega aquesta activitat</h2>
+    </div>
+
+    <div class="evid">
+      <p>Igual que a l'A1: no cal copiar res enlloc. El mateix repositori públic <code>aea6-usuari1-usuari2</code> és l'entrega. El professor demanarà l'enllaç i hi comprovarà:</p>
+      <ul>
+        <li>Els dos Pull Requests fusionats (<code>feature/header</code>, <code>feature/footer</code>), amb commits d'autors diferents.</li>
+        <li>La regla de protecció de la branca <code>main</code>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 5 · ERRORS FREQÜENTS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">5</span>
+      <h2>Errors freqüents</h2>
+    </div>
+
+    <table>
+      <thead><tr><th>Problema</th><th>Causa</th><th>Solució</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>El botó "Merge pull request" no apareix, o surt en gris</td>
+          <td>Encara no s'ha activat la regla de protecció, o el PR té conflictes.</td>
+          <td>Comprova que els dos heu editat zones diferents del fitxer; si hi ha conflicte, reviseu-lo junts abans de fer merge.</td>
+        </tr>
+        <tr>
+          <td>Després del merge, <code>git pull</code> no baixa els canvis de l'altre</td>
+          <td>Estàs situat a la teva branca <code>feature/...</code> en lloc de <code>main</code>.</td>
+          <td>Fes <code>git checkout main</code> abans de <code>git pull origin main</code>.</td>
+        </tr>
+        <tr>
+          <td>GitHub rebutja el <code>git push</code> a <code>main</code></td>
+          <td>És exactament el comportament esperat: la protecció de branca ho impedeix.</td>
+          <td>Fes els canvis a una branca <code>feature/...</code> i obre un Pull Request, com als passos 2.1–2.3.</td>
+        </tr>
+        <tr>
+          <td>El formulari no mostra cap missatge en clicar "Enviar"</td>
+          <td><code>js/main.js</code> no s'ha enllaçat correctament, o hi ha un error d'escriptura en el nom de la funció.</td>
+          <td>Comprova a la consola del navegador (F12) si hi ha errors, i que l'etiqueta <code>&lt;script&gt;</code> apunta a <code>js/main.js</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA6 · A2
+  </footer>
+
+</div>
+</body>
+</html>

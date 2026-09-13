@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA6·A6 — Integració contínua · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --prop-bg:#FBEFE0;--prop-border:#F1D7B4;--prop-ink:#A85610;
+    --collab-bg:#E1F5EE;--collab-border:#9FE1CB;--collab-ink:#0F6E56;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+  .evid{background:var(--slate-soft);border:1px solid var(--hairline);border-radius:12px;padding:1.3rem 1.4rem;margin:1.2rem 0}
+
+  /* Rols en parella */
+  .role-box{border-radius:12px;padding:1.1rem 1.3rem;margin:1.1rem 0;border:1px solid}
+  .role-box.prop{background:var(--prop-bg);border-color:var(--prop-border)}
+  .role-box.collab{background:var(--collab-bg);border-color:var(--collab-border)}
+  .role-box.both{background:var(--slate-soft);border-color:var(--hairline)}
+  .role-label{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+  .role-label.prop{color:var(--prop-ink)}
+  .role-label.collab{color:var(--collab-ink)}
+  .role-label.both{color:var(--slate-ink)}
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea6.html"><span class="arrow">←</span> Tornar a l'AEA6</a>
+
+  <header>
+    <span class="badge">AEA6 · A6</span>
+    <span class="eyebrow">M0614 · Linux</span>
+    <h1>Integració <span class="code">contínua</span></h1>
+    <p class="lede">Configurareu un workflow de GitHub Actions que comprova automàticament el vostre codi cada vegada que algú hi fa un canvi. Anirem molt a poc a poc, línia a línia.</p>
+    <div class="meta">
+      <span class="pill">Repositori <strong>compartit</strong></span>
+      <span class="pill">RA <strong>RA6</strong></span>
+      <span class="pill">CA <strong>6.8</strong></span>
+      <span class="pill">En parella <strong>Propietari · Col·laborador</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>Última activitat de l'AEA6, al mateix repositori compartit (<code>aea6-usuari1-usuari2</code>). Configurareu un robot que revisa automàticament el codi cada vegada que algú fa <code>push</code>, sense que ningú hagi de fer-ho a mà.</p>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Haver completat l'A1-A5: <code>index.html</code>, <code>style.css</code>, <code>js/main.js</code> amb <code>campOmplert()</code>, i la branca <code>main</code> protegida.</li>
+    </ul>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Com sempre, <code>main</code> segueix protegida: tots els canvis es faran a una branca nova, <code>ci/actions</code>, i es fusionaran amb un Pull Request al final.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <h3>Què farem en aquesta activitat</h3>
+    <p>Configurareu una "sentinella" que revisi automàticament el vostre codi cada vegada que algú pugi un canvi al repositori. Aquesta sentinella és un <strong>workflow</strong> de GitHub Actions: un fitxer de configuració que li diu a GitHub què ha d'executar i quan.</p>
+
+    <p><strong>Termes nous que apareixeran:</strong></p>
+    <ul>
+      <li><strong>Integració contínua</strong> (CI, <em>Continuous Integration</em>): la pràctica de comprovar el codi automàticament cada vegada que canvia, en lloc de fer-ho a mà de tant en tant.</li>
+      <li><strong>GitHub Actions</strong>: l'eina de CI integrada a GitHub. No cal instal·lar-la: només cal desar un fitxer de configuració al repositori i GitHub s'encarrega d'executar-lo.</li>
+      <li><strong>Workflow</strong>: (en anglès, "flux de treball"): una llista de passos que GitHub executa automàticament quan passa alguna cosa al repositori (per exemple, un <code>push</code>). Cada workflow és un fitxer <code>.yml</code> desat a <code>.github/workflows/</code>.</li>
+      <li><strong>YAML</strong>: un format de text senzill per escriure fitxers de configuració, basat en indentacions (espais al davant de cada línia). Els workflows de GitHub Actions s'escriuen en YAML.</li>
+    </ul>
+
+    <svg viewBox="0 0 640 140" style="width:100%;max-width:640px;margin:.8rem 0;display:block" role="img" aria-label="Flux: push a GitHub, GitHub Actions executa comprovacions, resultat verd o vermell">
+      <defs>
+        <marker id="arrow4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#5A6677"/>
+        </marker>
+      </defs>
+      <rect x="10" y="30" width="150" height="80" rx="12" fill="#EDF1F6" stroke="#E3E8EF"/>
+      <text x="85" y="65" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#3A4658">git push</text>
+      <text x="85" y="85" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#3A4658">el teu ordinador</text>
+
+      <line x1="166" y1="70" x2="204" y2="70" stroke="#5A6677" stroke-width="1.5" marker-end="url(#arrow4)"/>
+
+      <rect x="210" y="30" width="180" height="80" rx="12" fill="#FBEFE0" stroke="#F1D7B4"/>
+      <text x="300" y="63" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600" fill="#A85610">GitHub Actions</text>
+      <text x="300" y="85" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#A85610">executa comprovacions</text>
+
+      <line x1="396" y1="70" x2="434" y2="70" stroke="#5A6677" stroke-width="1.5" marker-end="url(#arrow4)"/>
+
+      <rect x="440" y="30" width="190" height="80" rx="12" fill="#E1F5EE" stroke="#9FE1CB"/>
+      <text x="535" y="63" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#0F6E56">✅ / ❌</text>
+      <text x="535" y="85" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#0F6E56">resultat a la pestanya Actions</text>
+    </svg>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <p>Anirem <strong>molt a poc a poc</strong>: cada comanda i cada línia del fitxer de configuració surt sola, amb la seva explicació.</p>
+
+    <h3>2.1 · Crear la branca</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git checkout main</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git pull origin main</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git checkout -b ci/actions</code></pre>
+      </div>
+      <p>➜ Les tres comandes de sempre: et poses al dia amb <code>main</code> i crees una branca nova, <code>ci/actions</code>.</p>
+    </div>
+
+    <h3>2.2 · Crear la carpeta del workflow</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>mkdir -p .github/workflows</code></pre>
+      </div>
+      <p>➜ <code>mkdir -p</code> crea la carpeta <code>.github</code> i, a dins, la carpeta <code>workflows</code>, totes dues d'un cop. GitHub Actions només busca fitxers de configuració exactament en aquesta ruta.</p>
+    </div>
+
+    <h3>2.3 · Crear el fitxer de configuració</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>nano .github/workflows/ci.yml</code></pre>
+      </div>
+      <p>➜ Obre l'editor per crear el fitxer <code>ci.yml</code>. El nom del fitxer el pots triar tu; l'important és que estigui dins de <code>.github/workflows/</code> i acabi en <code>.yml</code>.</p>
+    </div>
+
+    <h3>2.4 · Escriure el workflow, línia a línia</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p>Comença amb el nom del workflow:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">ci.yml</span></div>
+        <pre><code>name: Comprovacions de qualitat</code></pre>
+      </div>
+      <p>➜ El nom que es mostrarà a la pestanya "Actions" de GitHub.</p>
+
+      <p>Indica quan s'ha d'executar:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">ci.yml</span></div>
+        <pre><code>on: push</code></pre>
+      </div>
+      <p>➜ <code>on: push</code> vol dir "executa't cada vegada que algú faci <code>git push</code>", a qualsevol branca.</p>
+
+      <p>Defineix un "job" (una feina):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">ci.yml</span></div>
+        <pre><code>jobs:
+  comprovar:</code></pre>
+      </div>
+      <p>➜ <code>jobs</code> pot contenir diverses feines; nosaltres només en tindrem una, que anomenem <code>comprovar</code>.</p>
+
+      <p>Indica on s'ha d'executar:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">ci.yml</span></div>
+        <pre><code>    runs-on: ubuntu-latest</code></pre>
+      </div>
+      <p>➜ GitHub farà servir un ordinador virtual amb Ubuntu (la mateixa distribució que feu servir vosaltres) per executar les comprovacions.</p>
+
+      <p>Ara la llista de passos. El primer sempre és descarregar el codi:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">ci.yml</span></div>
+        <pre><code>    steps:
+      - uses: actions/checkout@v4</code></pre>
+      </div>
+      <p>➜ <code>uses: actions/checkout@v4</code> és una acció ja feta per GitHub que descarrega el teu repositori a l'ordinador virtual. Sense això, l'ordinador virtual no tindria els teus fitxers.</p>
+
+      <p>Segon pas: comprovar que <code>index.html</code> existeix:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">ci.yml</span></div>
+        <pre><code>      - name: Comprova que index.html existeix
+        run: test -f index.html</code></pre>
+      </div>
+      <p>➜ <code>name</code> és només l'etiqueta descriptiva d'aquest pas. <code>run</code> executa una comanda de terminal normal: <code>test -f</code> comprova que un fitxer existeix, i falla (atura tot el workflow) si no el troba.</p>
+
+      <p>Tercer pas: comprovar que <code>js/main.js</code> no té errors de sintaxi:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">ci.yml</span></div>
+        <pre><code>      - name: Comprova la sintaxi del JavaScript
+        run: node --check js/main.js</code></pre>
+      </div>
+      <p>➜ <code>node --check</code> llegeix un fitxer JavaScript i comprova que estigui ben escrit (claus tancades, punts i comes, etc.), sense arribar a executar-lo. Si hi ha un error d'escriptura, aquest pas falla.</p>
+    </div>
+
+    <h3>2.5 · Veure el fitxer complet</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">.github/workflows/ci.yml</span></div>
+      <pre><code>name: Comprovacions de qualitat
+
+on: push
+
+jobs:
+  comprovar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Comprova que index.html existeix
+        run: test -f index.html
+      - name: Comprova la sintaxi del JavaScript
+        run: node --check js/main.js</code></pre>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>La indentació (els espais al principi de cada línia) és <strong>obligatòria</strong> en YAML: si una línia no comença amb el mateix nombre d'espais que les del seu grup, el fitxer no és vàlid. Copia-la exactament com es mostra.</p>
+    </div>
+
+    <h3>2.6 · Pujar el workflow</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git add .github/workflows/ci.yml</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git commit -m "Afegeix workflow de integració contínua"</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git push origin ci/actions</code></pre>
+      </div>
+    </div>
+
+    <h3>2.7 · Veure el resultat a la pestanya Actions</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <ol>
+        <li>Al repositori a GitHub, fes clic a la pestanya <strong>Actions</strong> (a dalt).</li>
+        <li>Hi veuràs una execució en marxa, amb un <strong>punt groc</strong> (en procés).</li>
+        <li>Fes-hi clic a sobre per veure el detall dels 3 passos executant-se.</li>
+        <li>Quan acabi, el punt es tornarà <strong>verd ✅</strong> (tot correcte) o <strong>vermell ❌</strong> (alguna comprovació ha fallat).</li>
+      </ol>
+    </div>
+
+    <h3>2.8 · Col·laborador: comprovar que també s'executa al seu Pull Request</h3>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git fetch origin</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git checkout ci/actions</code></pre>
+      </div>
+      <p>Afegeix un petit comentari al final de <code>js/main.js</code>, per exemple:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">js/main.js</span></div>
+        <pre><code>// Revisat pel Col·laborador</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git add js/main.js</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git commit -m "Afegeix comentari de revisió"</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git push origin ci/actions</code></pre>
+      </div>
+      <p>➜ En pujar aquest commit a la mateixa branca, el workflow es torna a executar automàticament. Ves a la pestanya <strong>Actions</strong> i comprova que hi apareix aquesta segona execució, també en verd.</p>
+    </div>
+
+    <h3>2.9 · Fusionar els canvis</h3>
+    <div class="role-box both">
+      <span class="role-label both">Ambdós</span>
+      <p>A GitHub, obriu el Pull Request des de <code>ci/actions</code> cap a <code>main</code> (amb els commits dels dos). Fixeu-vos que, dins del mateix Pull Request, GitHub mostra si la comprovació de CI ha passat o no abans de deixar-vos fer el merge. Reviseu-lo i fusioneu-lo. Després, cadascú fa <code>git checkout main</code> i <code>git pull origin main</code>.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <ul>
+      <li>El fitxer <code>.github/workflows/ci.yml</code> existeix, amb la indentació correcta.</li>
+      <li>La pestanya <strong>Actions</strong> mostra com a mínim 2 execucions, totes en verd.</li>
+      <li>El Pull Request <code>ci/actions</code> apareix fusionat, amb commits dels dos membres.</li>
+    </ul>
+  </section>
+
+  <!-- ============ 4 · COM S'ENTREGA AQUESTA ACTIVITAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">4</span>
+      <h2>Com s'entrega aquesta activitat</h2>
+    </div>
+
+    <div class="evid">
+      <p>Igual que a la resta d'AEA6: el mateix repositori públic <code>aea6-usuari1-usuari2</code> és l'entrega, i és també el tancament de tota l'AEA6. El professor demanarà l'enllaç i hi comprovarà:</p>
+      <ul>
+        <li>El fitxer <code>.github/workflows/ci.yml</code>.</li>
+        <li>L'historial d'execucions a la pestanya <strong>Actions</strong>, amb els resultats en verd.</li>
+        <li>El Pull Request <code>ci/actions</code> fusionat.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 5 · ERRORS FREQÜENTS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">5</span>
+      <h2>Errors freqüents</h2>
+    </div>
+
+    <table>
+      <thead><tr><th>Problema</th><th>Causa</th><th>Solució</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>El workflow no apareix a la pestanya Actions</td>
+          <td>El fitxer no està exactament a <code>.github/workflows/</code>, o no acaba en <code>.yml</code>.</td>
+          <td>Comprova la ruta i el nom del fitxer amb <code>ls .github/workflows/</code>.</td>
+        </tr>
+        <tr>
+          <td>L'execució surt en vermell ❌ des del primer pas</td>
+          <td>Un error d'indentació al fitxer YAML.</td>
+          <td>Revisa que cada nivell (<code>jobs:</code>, <code>comprovar:</code>, <code>steps:</code>...) tingui exactament els espais indicats a l'exemple del pas 2.5.</td>
+        </tr>
+        <tr>
+          <td>Falla el pas "Comprova la sintaxi del JavaScript"</td>
+          <td>Hi ha un error d'escriptura real a <code>js/main.js</code> (per exemple, una clau <code>{</code> sense tancar).</td>
+          <td>Executa <code>node --check js/main.js</code> al teu propi ordinador per veure l'error exacte abans de tornar a pujar-ho.</td>
+        </tr>
+        <tr>
+          <td>El Pull Request no deixa fer merge</td>
+          <td>El workflow encara s'està executant, o ha fallat.</td>
+          <td>Espera que acabi (punt groc → verd), o soluciona l'error que indica en vermell.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA6 · A6
+  </footer>
+
+</div>
+</body>
+</html>

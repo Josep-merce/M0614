@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA6·A3 — Documentació amb Markdown · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --prop-bg:#FBEFE0;--prop-border:#F1D7B4;--prop-ink:#A85610;
+    --collab-bg:#E1F5EE;--collab-border:#9FE1CB;--collab-ink:#0F6E56;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+  .evid{background:var(--slate-soft);border:1px solid var(--hairline);border-radius:12px;padding:1.3rem 1.4rem;margin:1.2rem 0}
+
+  /* Rols en parella */
+  .role-box{border-radius:12px;padding:1.1rem 1.3rem;margin:1.1rem 0;border:1px solid}
+  .role-box.prop{background:var(--prop-bg);border-color:var(--prop-border)}
+  .role-box.collab{background:var(--collab-bg);border-color:var(--collab-border)}
+  .role-box.both{background:var(--slate-soft);border-color:var(--hairline)}
+  .role-label{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+  .role-label.prop{color:var(--prop-ink)}
+  .role-label.collab{color:var(--collab-ink)}
+  .role-label.both{color:var(--slate-ink)}
+
+  /* Mostra de Markdown: codi + resultat */
+  .md-demo{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:.8rem 0}
+  .md-demo .col{border:1px solid var(--hairline);border-radius:10px;overflow:hidden}
+  .md-demo .col-label{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:.5rem .8rem;background:var(--slate-soft);border-bottom:1px solid var(--hairline)}
+  .md-demo .col-body{padding:.8rem .9rem;font-size:.88rem}
+  .md-demo .col.code .col-body{background:#1A2230;font-family:var(--mono);color:#E6ECF5;white-space:pre-wrap}
+  @media (max-width:680px){.md-demo{grid-template-columns:1fr}}
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea6.html"><span class="arrow">←</span> Tornar a l'AEA6</a>
+
+  <header>
+    <span class="badge">AEA6 · A3</span>
+    <span class="eyebrow">M0614 · Linux</span>
+    <h1>Documentació <span class="code">amb</span> Markdown</h1>
+    <p class="lede">Aprendreu la sintaxi bàsica de Markdown i l'aplicareu documentant, al <code>README.md</code>, la instal·lació, la configuració i l'ús de Git que heu fet a l'A1 i l'A2.</p>
+    <div class="meta">
+      <span class="pill">Repositori <strong>compartit</strong></span>
+      <span class="pill">RA <strong>RA6</strong></span>
+      <span class="pill">CA <strong>6.7</strong></span>
+      <span class="pill">En parella <strong>Propietari · Col·laborador</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>Continueu al mateix repositori compartit (<code>aea6-usuari1-usuari2</code>). Fins ara heu escrit codi (HTML, CSS, JS); en aquesta activitat escriureu <strong>documentació</strong>, en un format de text molt utilitzat a GitHub: <strong>Markdown</strong>.</p>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Haver completat l'A1 i l'A2: repositori creat, header i footer fusionats, branca <code>main</code> protegida.</li>
+    </ul>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Com sempre, <code>main</code> està protegida: els canvis d'aquesta activitat es faran a una branca nova, <code>docs/readme</code>, i es fusionaran amb un Pull Request al final.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <h3>Què farem en aquesta activitat</h3>
+    <p>Aprendreu la sintaxi bàsica de Markdown (uns quants símbols per donar format al text) i l'aplicareu al fitxer <code>README.md</code> del vostre repositori, per documentar la instal·lació, configuració i ús de Git que heu fet a les activitats anteriors.</p>
+
+    <p><strong>Termes nous que apareixeran:</strong></p>
+    <ul>
+      <li><strong>Markdown</strong>: un format de text senzill on escrius amb el teclat normal, amb uns quants símbols especials (com <code>#</code>, <code>*</code>, <code>-</code>...), i el text acaba mostrant-se amb format (títols, negreta, llistes...). L'extensió dels fitxers Markdown és <code>.md</code>.</li>
+      <li><strong>README.md</strong>: el fitxer principal de documentació d'un repositori. Escrit en Markdown, GitHub el mostra automàticament a la portada del repositori.</li>
+    </ul>
+
+    <h3>Sintaxi de Markdown</h3>
+    <p>A l'esquerra de cada exemple hi ha el que <strong>escrius</strong>; a la dreta, com es <strong>veu</strong> un cop desat.</p>
+
+    <h3>Capçaleres</h3>
+    <div class="md-demo">
+      <div class="col code">
+        <div class="col-label">Escrius</div>
+        <div class="col-body"># Títol 1
+## Títol 2
+### Títol 3</div>
+      </div>
+      <div class="col">
+        <div class="col-label">Es veu</div>
+        <div class="col-body">
+          <p style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.3rem;margin:0 0 .3rem">Títol 1</p>
+          <p style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.1rem;margin:0 0 .3rem">Títol 2</p>
+          <p style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.95rem;margin:0">Títol 3</p>
+        </div>
+      </div>
+    </div>
+    <p>➜ Com més coixinets (<code>#</code>) al davant, més petit és el títol. Cal deixar un espai entre els coixinets i el text.</p>
+
+    <h3>Llistes</h3>
+    <div class="md-demo">
+      <div class="col code">
+        <div class="col-label">Escrius</div>
+        <div class="col-body">- Element 1
+- Element 2
+  - Element 2a
+
+1. Primer pas
+2. Segon pas</div>
+      </div>
+      <div class="col">
+        <div class="col-label">Es veu</div>
+        <div class="col-body">
+          <ul style="margin:0 0 .6rem 1.1rem"><li>Element 1</li><li>Element 2<ul style="margin:.2rem 0 0 1.1rem"><li>Element 2a</li></ul></li></ul>
+          <ol style="margin:0 0 0 1.1rem"><li>Primer pas</li><li>Segon pas</li></ol>
+        </div>
+      </div>
+    </div>
+    <p>➜ Un guió (<code>-</code>) fa una llista sense ordre; un número seguit de punt (<code>1.</code>) fa una llista ordenada. La indentació (espais al davant) crea sub-elements.</p>
+
+    <h3>Negreta i cursiva</h3>
+    <div class="md-demo">
+      <div class="col code">
+        <div class="col-label">Escrius</div>
+        <div class="col-body">**Això és negreta**
+*Això és cursiva*</div>
+      </div>
+      <div class="col">
+        <div class="col-label">Es veu</div>
+        <div class="col-body">
+          <p style="margin:0 0 .4rem"><strong>Això és negreta</strong></p>
+          <p style="margin:0"><em>Això és cursiva</em></p>
+        </div>
+      </div>
+    </div>
+    <p>➜ Dos asteriscs a cada costat (<code>**text**</code>) per negreta; un asterisc (<code>*text*</code>) per cursiva.</p>
+
+    <h3>Enllaços i imatges</h3>
+    <div class="md-demo">
+      <div class="col code">
+        <div class="col-label">Escrius</div>
+        <div class="col-body">[GitHub](https://github.com)
+
+![Text alternatiu](imatge.png)</div>
+      </div>
+      <div class="col">
+        <div class="col-label">Es veu</div>
+        <div class="col-body">
+          <p style="margin:0 0 .6rem"><a href="#" style="color:#E07B1E;text-decoration:underline">GitHub</a></p>
+          <div style="background:#EDF1F6;border:1px solid #E3E8EF;border-radius:6px;height:50px;display:flex;align-items:center;justify-content:center;color:#5A6677;font-size:.75rem">🖼️ imatge.png</div>
+        </div>
+      </div>
+    </div>
+    <p>➜ Un enllaç és <code>[text que es veu](adreça)</code>. Una imatge és exactament el mateix, però amb un signe d'exclamació <code>!</code> al davant.</p>
+
+    <h3>Blocs de codi</h3>
+    <div class="md-demo">
+      <div class="col code">
+        <div class="col-label">Escrius</div>
+        <div class="col-body">```bash
+git status
+```</div>
+      </div>
+      <div class="col">
+        <div class="col-label">Es veu</div>
+        <div class="col-body">
+          <div style="background:#1A2230;border-radius:6px;padding:.5rem .7rem"><code style="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#E6ECF5;background:transparent;padding:0">git status</code></div>
+        </div>
+      </div>
+    </div>
+    <p>➜ Tres cometes inclinades <code>```</code> abans i després del text el converteixen en un bloc de codi, amb lletra de programació. És exactament el que fareu servir sense saber-ho a l'A4 i l'A5, a les pàgines de la Wiki.</p>
+
+    <h3>Taules</h3>
+    <div class="md-demo">
+      <div class="col code">
+        <div class="col-label">Escrius</div>
+        <div class="col-body">| Nom | Rol |
+|-----|-----|
+| Anna | Propietària |
+| Jordi | Col·laborador |</div>
+      </div>
+      <div class="col">
+        <div class="col-label">Es veu</div>
+        <div class="col-body">
+          <table style="margin:0;font-size:.82rem"><thead><tr><th>Nom</th><th>Rol</th></tr></thead><tbody><tr><td>Anna</td><td>Propietària</td></tr><tr><td>Jordi</td><td>Col·laborador</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+    <p>➜ Una línia amb guions (<code>|-----|-----|</code>) separa la capçalera de la resta de files. Cada columna es separa amb una barra vertical <code>|</code>.</p>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <p>Ara aplicareu això que acabeu de veure per documentar, de veritat, la instal·lació, la configuració i l'ús de Git que heu fet fins ara.</p>
+
+    <h3>2.1 · Preparar la branca</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git checkout main</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git pull origin main</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git checkout -b docs/readme</code></pre>
+      </div>
+      <p>➜ Les tres comandes de sempre: et poses al dia amb <code>main</code> i crees la branca <code>docs/readme</code>.</p>
+    </div>
+
+    <h3>2.2 · Propietari: documentar la instal·lació i la configuració</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p>Obre (o crea) el <code>README.md</code> i escriu-hi això, fent servir el que heu vist a la secció 1:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">README.md</span></div>
+        <pre><code>## Instal·lació i configuració de Git
+
+Instal·lació a Ubuntu/Debian:
+
+```bash
+sudo apt install git
+```
+
+Configuració del nom i correu (una sola vegada):
+
+```bash
+git config --global user.name "El teu nom"
+git config --global user.email "el-teu-correu@exemple.com"
+```</code></pre>
+      </div>
+      <p>➜ Fixa't que has fet servir un títol (<code>##</code>) i dos blocs de codi (<code>```bash</code>). Això documenta la part <strong>"instal·lació i configuració"</strong> del criteri d'avaluació.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git add README.md</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git commit -m "Documenta la instal·lació i configuració de Git"</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git push origin docs/readme</code></pre>
+      </div>
+      <p>➜ El cicle de sempre. <strong>Encara no obris el Pull Request:</strong> el Col·laborador ha d'afegir la seva part primer.</p>
+    </div>
+
+    <h3>2.3 · Col·laborador: documentar l'ús</h3>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git fetch origin</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git checkout docs/readme</code></pre>
+      </div>
+      <p>Afegeix això <strong>a sota</strong> del que ha escrit el Propietari, dins del mateix <code>README.md</code>:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">README.md</span></div>
+        <pre><code>## Ús del control de versions
+
+Cada canvi es fa en una branca pròpia (`feature/...`). En acabar,
+es puja amb `git push` i s'obre un **Pull Request** a GitHub perquè
+l'altra persona el revisi abans de fusionar-lo a `main`.
+
+La branca `main` té activada la protecció de branca: no s'hi pot
+fer `git push` directament, només mitjançant un Pull Request
+revisat. L'autenticació es fa amb un *token d'accés personal* en
+lloc de contrasenya.
+
+| Branca | Autor |
+|--------|-------|
+| feature/header | Propietari |
+| feature/footer | Col·laborador |</code></pre>
+      </div>
+      <p>➜ Aquí has fet servir un títol, negreta (<code>**Pull Request**</code>), cursiva (<code>*token d'accés personal*</code>) i una taula. Això documenta la part <strong>"ús"</strong> del criteri d'avaluació.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git add README.md</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git commit -m "Documenta l'ús del control de versions"</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git push origin docs/readme</code></pre>
+      </div>
+    </div>
+
+    <h3>2.4 · Fusionar la documentació</h3>
+    <div class="role-box both">
+      <span class="role-label both">Ambdós</span>
+      <p>A GitHub, obriu un únic Pull Request des de <code>docs/readme</code> cap a <code>main</code> (ara conté els dos commits, un de cadascú). Reviseu-lo junts i fes-ne el merge. Després, cadascú fa <code>git checkout main</code> i <code>git pull origin main</code>.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <ul>
+      <li>El <code>README.md</code> inclou les seccions "Instal·lació i configuració de Git" i "Ús del control de versions".</li>
+      <li>Cada secció fa servir com a mínim un títol, un bloc de codi, i (a la segona) negreta, cursiva i una taula.</li>
+      <li>El Pull Request <code>docs/readme</code> apareix fusionat, amb un commit de cada membre.</li>
+    </ul>
+  </section>
+
+  <!-- ============ 4 · COM S'ENTREGA AQUESTA ACTIVITAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">4</span>
+      <h2>Com s'entrega aquesta activitat</h2>
+    </div>
+
+    <div class="evid">
+      <p>Igual que a la resta d'AEA6: el mateix repositori públic <code>aea6-usuari1-usuari2</code> és l'entrega. El professor demanarà l'enllaç i hi comprovarà:</p>
+      <ul>
+        <li>El Pull Request <code>docs/readme</code> fusionat, amb commits dels dos.</li>
+        <li>Les dues seccions del <code>README.md</code>, amb la sintaxi Markdown ben aplicada.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 5 · ERRORS FREQÜENTS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">5</span>
+      <h2>Errors freqüents</h2>
+    </div>
+
+    <table>
+      <thead><tr><th>Problema</th><th>Causa</th><th>Solució</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>El títol no es veu més gran, es veu tal qual (amb els <code>#</code>)</td>
+          <td>Falta l'espai entre els coixinets i el text.</td>
+          <td>Escriu <code>## Títol</code>, no <code>##Títol</code>.</td>
+        </tr>
+        <tr>
+          <td>El bloc de codi es veu tot en una línia, sense format</td>
+          <td>Falten les cometes inclinades d'obertura o tancament (<code>```</code>).</td>
+          <td>Comprova que hi ha exactament 3 cometes abans i després del codi, cada una en la seva pròpia línia.</td>
+        </tr>
+        <tr>
+          <td>La taula no es veu com a taula</td>
+          <td>Falta la línia de guions just sota la capçalera, o el nombre de columnes no coincideix a totes les files.</td>
+          <td>Revisa que totes les files tinguin el mateix nombre de barres verticals <code>|</code>.</td>
+        </tr>
+        <tr>
+          <td>El Col·laborador no veu la secció que ha escrit el Propietari</td>
+          <td>No ha fet <code>git fetch</code> i <code>git checkout docs/readme</code> abans d'editar.</td>
+          <td>Repeteix el pas 2.3 des del principi.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA6 · A3
+  </footer>
+
+</div>
+</body>
+</html>

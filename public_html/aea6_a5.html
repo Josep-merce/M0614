@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA6·A5 — Disseny visual i documentació col·laborativa · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --prop-bg:#FBEFE0;--prop-border:#F1D7B4;--prop-ink:#A85610;
+    --collab-bg:#E1F5EE;--collab-border:#9FE1CB;--collab-ink:#0F6E56;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+  .evid{background:var(--slate-soft);border:1px solid var(--hairline);border-radius:12px;padding:1.3rem 1.4rem;margin:1.2rem 0}
+
+  /* Rols en parella */
+  .role-box{border-radius:12px;padding:1.1rem 1.3rem;margin:1.1rem 0;border:1px solid}
+  .role-box.prop{background:var(--prop-bg);border-color:var(--prop-border)}
+  .role-box.collab{background:var(--collab-bg);border-color:var(--collab-border)}
+  .role-box.both{background:var(--slate-soft);border-color:var(--hairline)}
+  .role-label{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+  .role-label.prop{color:var(--prop-ink)}
+  .role-label.collab{color:var(--collab-ink)}
+  .role-label.both{color:var(--slate-ink)}
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea6.html"><span class="arrow">←</span> Tornar a l'AEA6</a>
+
+  <header>
+    <span class="badge">AEA6 · A5</span>
+    <span class="eyebrow">M0614 · Linux</span>
+    <h1>Disseny visual <span class="code">i</span> documentació col·laborativa</h1>
+    <p class="lede">Donareu estil a la vostra pàgina amb CSS i documentareu el resultat en una Wiki compartida, com a segona forma de documentació diferent de la web generada per JSDoc. Anirem pas a pas, amb exemples concrets de cada clic.</p>
+    <div class="meta">
+      <span class="pill">Repositori <strong>compartit</strong></span>
+      <span class="pill">RA <strong>RA6</strong></span>
+      <span class="pill">CA <strong>6.3 · 6.4</strong></span>
+      <span class="pill">En parella <strong>Propietari · Col·laborador</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>Continueu al mateix repositori compartit (<code>aea6-usuari1-usuari2</code>). A l'A4 vau generar una web de documentació amb JSDoc; ara documentareu el mateix projecte d'una <strong>manera diferent</strong>: donant-li estil visual amb CSS i explicant-ho en una Wiki, en lloc d'una web generada automàticament.</p>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Haver completat l'A1-A4: <code>index.html</code> amb header/footer, <code>js/main.js</code>, la carpeta <code>docs/</code> generada amb JSDoc, i el <code>README.md</code> documentat en Markdown.</li>
+    </ul>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Com sempre, <code>main</code> està protegida: tots els canvis d'aquesta activitat es faran a una branca nova, <code>design/wiki</code>, i es fusionaran amb un Pull Request al final.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <h3>Què farem en aquesta activitat</h3>
+    <p>Donareu estil visual (colors, tipus de lletra, marges...) a la vostra pàgina web fent servir CSS, i documentareu el resultat a la Wiki del repositori amb una captura de pantalla i un fragment del codi. Serà una segona manera de documentar el projecte, diferent de la que vau fer amb JSDoc a l'A4.</p>
+
+    <p><strong>Termes nous que apareixeran:</strong></p>
+    <ul>
+      <li><strong>CSS</strong> (<em>Cascading Style Sheets</em>, "fulls d'estil en cascada"): un llenguatge que serveix per dir com s'ha de veure una pàgina HTML: colors, tipus de lletra, marges, mides, etc. Es guarda en un fitxer separat amb extensió <code>.css</code> i s'enllaça des de l'HTML.</li>
+      <li><strong>Full d'estil</strong>: un fitxer <code>.css</code> amb regles d'aparença. Cada regla diu "tal element ha de ser així".</li>
+      <li><strong>Wiki de GitHub</strong>: un conjunt de pàgines en Markdown, dins del mateix repositori, que qualsevol col·laborador pot crear o editar des del navegador. És diferent del <code>README.md</code> perquè permet tenir moltes pàgines organitzades.</li>
+      <li><strong>Captura de pantalla</strong>: una foto de la pantalla del vostre ordinador. Al Linux es fa amb la tecla <em>Print Screen</em> (o <em>ImprPant</em>).</li>
+    </ul>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <h3>2.1 · Crear la branca de disseny</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git checkout main</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git pull origin main</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git checkout -b design/wiki</code></pre>
+      </div>
+      <p>➜ Les tres comandes de sempre: posar-te al dia amb <code>main</code> i crear una branca nova per a aquesta feina.</p>
+    </div>
+
+    <h3>2.2 · Crear el full d'estil (CSS)</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p>Crea un fitxer nou anomenat <code>style.css</code> a l'arrel del projecte (al mateix nivell que <code>index.html</code>):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>nano style.css</code></pre>
+      </div>
+      <p>Escriu-hi aquest contingut:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">style.css</span></div>
+        <pre><code>body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 2rem;
+  background: #F6F8FB;
+  color: #1A2230;
+}</code></pre>
+      </div>
+      <p>➜ Aquest primer bloc afecta tota la pàgina (<code>body</code>): tipus de lletra, marges i colors de fons i de text.</p>
+      <p>Afegeix-hi a continuació aquest segon bloc:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">style.css</span></div>
+        <pre><code>header nav a {
+  margin-right: 1rem;
+  color: #E07B1E;
+  text-decoration: none;
+}</code></pre>
+      </div>
+      <p>➜ Aquest bloc només afecta els enllaços (<code>a</code>) que estan dins d'un <code>nav</code> dins d'un <code>header</code>: els posa taronja, sense subratllat, amb espai entre ells.</p>
+      <p>I finalment aquest tercer bloc:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">style.css</span></div>
+        <pre><code>footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+}</code></pre>
+      </div>
+      <p>➜ Aquest bloc separa visualment el peu de pàgina (<code>footer</code>) amb una línia i una mica d'espai per sobre.</p>
+    </div>
+
+    <h3>2.3 · Enllaçar el CSS des de l'index.html</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p>Obre <code>index.html</code> i afegeix aquesta línia dins de <code>&lt;head&gt;</code>, abans de <code>&lt;/head&gt;</code>:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
+        <pre><code>&lt;link rel="stylesheet" href="style.css"&gt;</code></pre>
+      </div>
+      <p>➜ Aquesta línia li diu al navegador: "abans de mostrar aquesta pàgina, aplica també els estils del fitxer <code>style.css</code>".</p>
+      <p>Obre <code>index.html</code> directament al navegador (sense necessitat de servidor) i comprova que s'ha aplicat el disseny: fons clar, enllaços taronja, línia sobre el peu.</p>
+    </div>
+
+    <h3>2.4 · Pujar el CSS</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git add style.css index.html</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git commit -m "Afegeix estils CSS a la pàgina"</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git push origin design/wiki</code></pre>
+      </div>
+    </div>
+
+    <h3>2.5 · Fer la captura de pantalla</h3>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <p>Primer, baixa't la branca amb el CSS ja aplicat:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git fetch origin</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git checkout design/wiki</code></pre>
+      </div>
+      <p>Obre <code>index.html</code> al navegador i fes una captura de pantalla de la finestra sencera. Desa-la al teu ordinador (per exemple, a l'Escriptori, amb el nom <code>disseny.png</code>).</p>
+    </div>
+
+    <h3>2.6 · Crear la pàgina de la Wiki</h3>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Una Wiki de GitHub és com un document de text amb format (Markdown): <strong>no pot executar CSS de veritat</strong>. Per això, en lloc de "publicar la pàgina en viu", hi posarem una foto de com queda i el codi que l'ha fet possible.</p>
+    </div>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <ol>
+        <li>Ves al repositori a GitHub i fes clic a la pestanya <strong>Wiki</strong> (a dalt, al costat de "Pull requests").</li>
+        <li>Fes clic al botó <strong>Create the first page</strong>.</li>
+        <li>Deixa el títol per defecte: <code>Home</code>.</li>
+        <li>Al camp gran de sota, escriu 2 o 3 frases explicant què és el projecte.</li>
+        <li>Fes clic a <strong>Save Page</strong>.</li>
+      </ol>
+    </div>
+
+    <h3>2.7 · Afegir la captura i el codi CSS a la pàgina</h3>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <p>A la mateixa pàgina que ha creat el Propietari, fes clic a <strong>Edit</strong> (a dalt a la dreta). Al final del text que ja hi ha, deixa una línia en blanc i escriu:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">camp de text de la Wiki</span></div>
+        <pre><code>## Disseny visual</code></pre>
+      </div>
+      <p>➜ El <code>##</code> fa que es vegi com un subtítol dins de la pàgina.</p>
+      <p>Deixa una altra línia en blanc i, amb el ratolí, <strong>arrossega el fitxer <code>disseny.png</code></strong> des de l'Escriptori cap a dins d'aquest mateix camp de text. Quan deixis anar el fitxer, GitHub hi escriurà automàticament una línia semblant a aquesta (no cal que la teclegis tu):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">camp de text de la Wiki</span></div>
+        <pre><code>![disseny](https://github.com/usuari1/aea6-usuari1-usuari2/assets/12345/abc-def.png)</code></pre>
+      </div>
+      <p>Just a sota de la imatge, afegeix el codi CSS:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">camp de text de la Wiki</span></div>
+        <pre><code>```css
+body {
+  font-family: sans-serif;
+}
+```</code></pre>
+      </div>
+      <p>➜ Les tres cometes inclinades <code>```</code> seguides de <code>css</code> li diuen a Markdown "el que ve ara és codi CSS, mostra-ho amb lletra de programació". Les tres cometes del final tanquen aquest bloc. No cal que hi posis tot el fitxer <code>style.css</code>, només un fragment representatiu com l'exemple.</p>
+      <p>Fes clic a <strong>Save Page</strong>.</p>
+    </div>
+
+    <h3>2.8 · Com hauria de quedar</h3>
+    <div style="border:1px solid #E3E8EF;border-radius:12px;overflow:hidden;margin:1rem 0;max-width:560px;background:#fff">
+      <div style="display:flex;align-items:center;gap:.4rem;padding:.55rem .8rem;background:#EDF1F6;border-bottom:1px solid #E3E8EF">
+        <span style="width:.55rem;height:.55rem;border-radius:50%;background:#ff5f56;display:inline-block"></span>
+        <span style="width:.55rem;height:.55rem;border-radius:50%;background:#ffbd2e;display:inline-block"></span>
+        <span style="width:.55rem;height:.55rem;border-radius:50%;background:#27c93f;display:inline-block"></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#5A6677;margin-left:.4rem">Wiki · Home</span>
+      </div>
+      <div style="padding:1rem 1.2rem">
+        <p style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.15rem;color:#1A2230;margin:0 0 .5rem">Home</p>
+        <p style="font-size:.85rem;color:#5A6677;margin:0 0 1rem">Projecte de pràctiques de Git i GitHub en parella. Té una pàgina inicial amb capçalera, formulari de contacte i un full d'estil.</p>
+        <p style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1rem;color:#1A2230;margin:0 0 .8rem">Disseny visual</p>
+        <div style="background:#EDF1F6;border:1px solid #E3E8EF;border-radius:8px;height:110px;display:flex;align-items:center;justify-content:center;color:#5A6677;font-size:.8rem;margin-bottom:.9rem">🖼️ captura de index.html</div>
+        <div style="background:#1A2230;border-radius:8px;padding:.7rem .8rem">
+          <code style="font-family:'JetBrains Mono',monospace;font-size:.76rem;color:#E6ECF5;line-height:1.6;background:transparent;padding:0">body {<br>&nbsp;&nbsp;font-family: sans-serif;<br>}</code>
+        </div>
+      </div>
+    </div>
+
+    <h3>2.9 · Fusionar els canvis del CSS</h3>
+    <div class="role-box both">
+      <span class="role-label both">Ambdós</span>
+      <p>A GitHub, obriu el Pull Request des de <code>design/wiki</code> cap a <code>main</code>, reviseu-lo i fusioneu-lo. Després, cadascú fa <code>git checkout main</code> i <code>git pull origin main</code> per actualitzar la seva còpia local.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <ul>
+      <li><code>style.css</code> existeix i <code>index.html</code> l'enllaça amb <code>&lt;link rel="stylesheet"&gt;</code>.</li>
+      <li>La pàgina es veu amb el disseny aplicat en obrir-la al navegador.</li>
+      <li>La Wiki té la pàgina <em>Home</em>, amb la presentació del projecte i una secció "Disseny visual" amb la captura + un fragment del CSS.</li>
+      <li>El Pull Request <code>design/wiki</code> apareix fusionat, amb commits dels dos membres.</li>
+    </ul>
+  </section>
+
+  <!-- ============ 4 · COM S'ENTREGA AQUESTA ACTIVITAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">4</span>
+      <h2>Com s'entrega aquesta activitat</h2>
+    </div>
+
+    <div class="evid">
+      <p>Igual que a la resta d'AEA6: el mateix repositori públic <code>aea6-usuari1-usuari2</code> és l'entrega. El professor demanarà l'enllaç i hi comprovarà:</p>
+      <ul>
+        <li>El Pull Request <code>design/wiki</code> fusionat.</li>
+        <li>El <code>style.css</code> aplicat a <code>index.html</code>.</li>
+        <li>La pàgina <em>Home</em> de la Wiki, amb la captura i el fragment de CSS a la secció "Disseny visual".</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 5 · ERRORS FREQÜENTS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">5</span>
+      <h2>Errors freqüents</h2>
+    </div>
+
+    <table>
+      <thead><tr><th>Problema</th><th>Causa</th><th>Solució</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>La pàgina no mostra cap canvi de disseny</td>
+          <td>La línia <code>&lt;link&gt;</code> no està dins de <code>&lt;head&gt;</code>, o el nom del fitxer no coincideix.</td>
+          <td>Comprova que <code>href="style.css"</code> coincideix exactament amb el nom del fitxer creat.</td>
+        </tr>
+        <tr>
+          <td>La imatge no apareix a la Wiki</td>
+          <td>El fitxer no s'ha arrossegat dins del camp de text, o encara s'estava pujant.</td>
+          <td>Torna a arrossegar-lo i espera uns segons fins que GitHub inserti la línia <code>![...]</code> automàticament.</td>
+        </tr>
+        <tr>
+          <td>El bloc de codi CSS es veu com a text normal, sense colors</td>
+          <td>Falten les tres cometes inicials <code>```css</code> o les finals <code>```</code>.</td>
+          <td>Comprova que hi ha exactament 3 cometes inclinades abans i després del codi.</td>
+        </tr>
+        <tr>
+          <td>El "Merge pull request" no es pot fer</td>
+          <td>Encara no s'ha revisat el Pull Request, o hi ha un conflicte.</td>
+          <td>Revisa els canvis a la pestanya "Files changed" abans de fer merge.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA6 · A5
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA6·A1 — Primeres passes amb Git/GitHub · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --prop-bg:#FBEFE0;--prop-border:#F1D7B4;--prop-ink:#A85610;
+    --collab-bg:#E1F5EE;--collab-border:#9FE1CB;--collab-ink:#0F6E56;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+  .evid{background:var(--slate-soft);border:1px solid var(--hairline);border-radius:12px;padding:1.3rem 1.4rem;margin:1.2rem 0}
+
+  /* Rols en parella */
+  .role-box{border-radius:12px;padding:1.1rem 1.3rem;margin:1.1rem 0;border:1px solid}
+  .role-box.prop{background:var(--prop-bg);border-color:var(--prop-border)}
+  .role-box.collab{background:var(--collab-bg);border-color:var(--collab-border)}
+  .role-box.both{background:var(--slate-soft);border-color:var(--hairline)}
+  .role-label{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+  .role-label.prop{color:var(--prop-ink)}
+  .role-label.collab{color:var(--collab-ink)}
+  .role-label.both{color:var(--slate-ink)}
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea6.html"><span class="arrow">←</span> Tornar a l'AEA6</a>
+
+  <header>
+    <span class="badge">AEA6 · A1</span>
+    <span class="eyebrow">M0614 · Linux</span>
+    <h1>Primeres passes <span class="code">amb</span> Git i GitHub</h1>
+    <p class="lede">El Propietari crearà el repositori compartit de la parella amb una pàgina web bàsica, i el Col·laborador s'hi afegirà i en clonarà una còpia. Al final, tots dos tindreu exactament els mateixos fitxers al vostre ordinador.</p>
+    <div class="meta">
+      <span class="pill">Repositori <strong>compartit</strong></span>
+      <span class="pill">RA <strong>RA6</strong></span>
+      <span class="pill">CA <strong>6.5</strong></span>
+      <span class="pill">En parella <strong>Propietari · Col·laborador</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>Aquesta és la primera de les 4 activitats de l'AEA6, i totes es fan <strong>en parella</strong> amb els mateixos dos rols:</p>
+    <ul>
+      <li><strong>Propietari</strong>: crea el repositori compartit i en manté el control principal.</li>
+      <li><strong>Col·laborador</strong>: s'hi afegeix i hi treballa des del seu propi compte de GitHub.</li>
+    </ul>
+    <p>Decidiu ara qui farà de qui, i mantingueu el mateix rol a la resta d'activitats de l'AEA6 (A2 a A6).</p>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Cada membre de la parella ha de tenir un <strong>compte de GitHub</strong>. Si encara no en teniu, aneu a <a href="https://github.com/signup" target="_blank" rel="noopener">github.com/signup</a> i creeu-vos-en un (és gratuït: només us demanarà un correu electrònic, una contrasenya i un nom d'usuari).</li>
+      <li>Un <strong>editor de codi</strong>. Podeu fer servir <a href="https://code.visualstudio.com/" target="_blank" rel="noopener">Visual Studio Code</a> o <a href="https://netbeans.apache.org/" target="_blank" rel="noopener">NetBeans</a>, el que us vagi millor.</li>
+      <li>Un <strong>terminal</strong> (el que ja ve al sistema).</li>
+    </ul>
+
+    <h3>Repositori de treball</h3>
+    <p>L'AEA6 és <strong>independent</strong> de la resta del mòdul: no fem servir el repositori personal del curs ni cap branca <code>aea6</code>. Tota la feina (aquesta activitat i les 3 següents) es fa en <strong>un únic repositori compartit</strong> entre els dos membres de la parella, anomenat <code>aea6-<em>usuari1</em>-<em>usuari2</em></code> (per exemple, <code>aea6-marta-jordi</code>). Aquest mateix repositori és el que s'entrega — no cal copiar res enlloc més.</p>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <h3>Què farem en aquesta activitat</h3>
+    <p>Instal·lareu Git al vostre ordinador, el Propietari crearà un repositori a GitHub i hi pujarà una pàgina web molt bàsica. El Col·laborador s'hi afegirà com a segon usuari, en clonarà una còpia i comprovareu que tots dos veieu el mateix.</p>
+
+    <p><strong>Termes nous que apareixeran:</strong></p>
+    <ul>
+      <li><strong>Git</strong>: un programa que fem servir al terminal per guardar l'historial dels canvis del projecte. Funciona al vostre ordinador (en local), sense necessitat d'internet.</li>
+      <li><strong>GitHub</strong>: un servei web (una pàgina d'internet) que allotja una còpia central del projecte perquè diverses persones puguin treballar-hi i sincronitzar els canvis. Fa d'"intermediari" entre els vostres dos ordinadors.</li>
+      <li><strong>Repositori</strong>: la carpeta del projecte, amb tots els fitxers i l'historial de canvis. En tindreu una còpia a GitHub (remota) i una còpia a cada ordinador (local).</li>
+      <li><strong>Commit</strong>: una "fotografia" desada d'un moment concret del projecte, amb un missatge que explica què s'ha canviat.</li>
+      <li><strong>Clone</strong>: descarregar per primera vegada una còpia completa del repositori des de GitHub al teu ordinador.</li>
+      <li><strong>Push</strong>: enviar els teus commits des del teu ordinador cap a GitHub.</li>
+    </ul>
+
+    <svg viewBox="0 0 640 150" style="width:100%;max-width:640px;margin:.8rem 0;display:block" role="img" aria-label="Flux: Propietari puja el projecte a GitHub, Col·laborador el descarrega">
+      <defs>
+        <marker id="arrow1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#5A6677"/>
+        </marker>
+      </defs>
+      <rect x="10" y="35" width="170" height="75" rx="12" fill="#FBEFE0" stroke="#F1D7B4"/>
+      <text x="95" y="68" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#A85610">Propietari</text>
+      <text x="95" y="88" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#A85610">ordinador local</text>
+
+      <line x1="186" y1="60" x2="224" y2="60" stroke="#5A6677" stroke-width="1.5" marker-end="url(#arrow1)"/>
+      <text x="205" y="52" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#5A6677">push</text>
+
+      <rect x="230" y="35" width="180" height="75" rx="12" fill="#EDF1F6" stroke="#E3E8EF"/>
+      <text x="320" y="68" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600" fill="#3A4658">GitHub</text>
+      <text x="320" y="88" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#3A4658">repositori remot</text>
+
+      <line x1="416" y1="60" x2="454" y2="60" stroke="#5A6677" stroke-width="1.5" marker-end="url(#arrow1)"/>
+      <text x="435" y="52" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#5A6677">clone</text>
+
+      <rect x="460" y="35" width="170" height="75" rx="12" fill="#E1F5EE" stroke="#9FE1CB"/>
+      <text x="545" y="68" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#0F6E56">Col·laborador</text>
+      <text x="545" y="88" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#0F6E56">ordinador local</text>
+    </svg>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <p>Anirem <strong>molt a poc a poc</strong>: cada comanda surt sola, amb una explicació de què fa exactament abans de continuar amb la següent.</p>
+
+    <h3>2.1 · Instal·lar Git</h3>
+    <div class="role-box both">
+      <span class="role-label both">Ambdós</span>
+      <p>Cadascú al seu ordinador:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>sudo apt update</code></pre>
+      </div>
+      <p>➜ <code>apt update</code> actualitza la llista de programes disponibles per instal·lar. No instal·la res encara, només mira quines versions hi ha.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>sudo apt install -y git</code></pre>
+      </div>
+      <p>➜ <code>apt install git</code> instal·la el programa Git. El <code>-y</code> respon "sí" automàticament quan et pregunti si vols continuar.</p>
+    </div>
+
+    <h3>2.2 · Configurar el teu nom i correu</h3>
+    <div class="role-box both">
+      <span class="role-label both">Ambdós</span>
+      <p>Cada commit que facis queda signat amb un nom i un correu. Ho configures una sola vegada:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git config --global user.name "El teu nom"</code></pre>
+      </div>
+      <p>➜ <code>git config --global</code> desa una preferència que s'aplicarà a tots els projectes del teu ordinador, no només aquest. <code>user.name</code> és el nom que apareixerà als teus commits.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git config --global user.email "el-teu-correu@exemple.com"</code></pre>
+      </div>
+      <p>➜ El mateix, però per al correu. Fes servir el mateix correu que tens associat al teu compte de GitHub.</p>
+    </div>
+
+    <h3>2.3 · Crear el repositori a GitHub</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <ol>
+        <li>Ves a GitHub i fes clic a <strong>New repository</strong>.</li>
+        <li>Al camp "Repository name", escriu <code>aea6-usuari1-usuari2</code> (substituint pels vostres dos noms d'usuari de GitHub).</li>
+        <li>Deixa la marca <strong>Public</strong> seleccionada.</li>
+        <li><strong>No</strong> marquis "Add a README file" ni cap altra opció: el repositori ha de quedar completament buit.</li>
+        <li>Fes clic a <strong>Create repository</strong>.</li>
+      </ol>
+    </div>
+
+    <h3>2.4 · Clonar el repositori al teu ordinador</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>cd ~/Documents</code></pre>
+      </div>
+      <p>➜ <code>cd</code> (<em>change directory</em>) et mou a la carpeta <code>Documents</code>. És on desarem el projecte.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git clone https://github.com/EL-TEU-USUARI/aea6-usuari1-usuari2.git</code></pre>
+      </div>
+      <p>➜ <code>git clone</code> descarrega una còpia completa del repositori de GitHub al teu ordinador, dins d'una carpeta nova amb el mateix nom. Copia aquesta URL exacta des del botó verd <strong>Code</strong> del teu repositori a GitHub.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>cd aea6-usuari1-usuari2</code></pre>
+      </div>
+      <p>➜ Entres dins de la carpeta que <code>git clone</code> acaba de crear.</p>
+    </div>
+
+    <h3>2.5 · Crear la pàgina inicial</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p>Dins d'aquesta carpeta, crea un fitxer <code>index.html</code> amb aquest contingut:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
+        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ca"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;El nostre projecte AEA6&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Projecte AEA6&lt;/h1&gt;
+  &lt;p&gt;Pàgina de pràctiques de Git i GitHub en parella.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+      </div>
+      <p>➜ És una pàgina HTML mínima, només per tenir alguna cosa a versionar. L'ampliareu a les properes activitats.</p>
+    </div>
+
+    <h3>2.6 · Fer el primer commit</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git add index.html</code></pre>
+      </div>
+      <p>➜ <code>git add</code> marca aquest fitxer com "a punt per guardar" al següent commit. Sense aquest pas, Git no el tindria en compte.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git commit -m "Primera versió de la pàgina"</code></pre>
+      </div>
+      <p>➜ <code>git commit</code> guarda una "fotografia" d'aquest estat del projecte. El text darrere de <code>-m</code> és el missatge que explica què has fet.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git push origin main</code></pre>
+      </div>
+      <p>➜ <code>git push</code> envia aquesta fotografia des del teu ordinador cap a GitHub, a la branca <code>main</code>. Ara sí que apareixerà al repositori remot.</p>
+    </div>
+
+    <h3>2.7 · Afegir el Col·laborador al repositori</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <ol>
+        <li>Al repositori a GitHub, ves a <strong>Settings</strong>.</li>
+        <li>Al menú de l'esquerra, fes clic a <strong>Collaborators</strong>.</li>
+        <li>Fes clic a <strong>Add people</strong> i escriu el nom d'usuari de GitHub del teu company/a.</li>
+      </ol>
+    </div>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <ol>
+        <li>Revisa el correu associat al teu compte de GitHub.</li>
+        <li>Obre el correu de la invitació (o la notificació a GitHub.com).</li>
+        <li>Fes clic a <strong>Accept invitation</strong>.</li>
+      </ol>
+    </div>
+
+    <h3>2.8 · Clonar el repositori com a Col·laborador</h3>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <p>Un cop acceptada la invitació, fas exactament el mateix que ha fet el Propietari al pas 2.4:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>cd ~/Documents</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git clone https://github.com/USUARI-DEL-PROPIETARI/aea6-usuari1-usuari2.git</code></pre>
+      </div>
+      <p>➜ Fixa't que ara la URL porta el nom d'usuari <strong>del Propietari</strong>, no el teu, perquè és ell qui ha creat el repositori.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>cd aea6-usuari1-usuari2</code></pre>
+      </div>
+      <p>Comprova que ja tens l'<code>index.html</code> que ha creat el Propietari:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>cat index.html</code></pre>
+      </div>
+      <p>➜ <code>cat</code> mostra el contingut d'un fitxer per pantalla. Si veus el mateix HTML que ha escrit el Propietari, tot ha anat bé.</p>
+    </div>
+
+    <h3>2.9 · Comprovar que tots dos teniu la mateixa còpia</h3>
+    <div class="role-box both">
+      <span class="role-label both">Ambdós</span>
+      <p>Cadascú al seu terminal, dins de la carpeta del projecte:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git log --oneline</code></pre>
+      </div>
+      <p>➜ <code>git log</code> mostra l'historial de commits. <code>--oneline</code> el mostra en una sola línia per commit, en lloc de tot el detall. Els dos heu de veure exactament el mateix identificador de commit ("Primera versió de la pàgina").</p>
+    </div>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <ul>
+      <li><code>git --version</code> funciona correctament als dos ordinadors.</li>
+      <li>El repositori <code>aea6-usuari1-usuari2</code> existeix a GitHub amb l'<code>index.html</code> pujat pel Propietari.</li>
+      <li>El Col·laborador apareix com a col·laborador acceptat del repositori.</li>
+      <li><code>git log --oneline</code> mostra el mateix commit als dos ordinadors.</li>
+    </ul>
+  </section>
+
+  <!-- ============ 4 · COM S'ENTREGA AQUESTA ACTIVITAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">4</span>
+      <h2>Com s'entrega aquesta activitat</h2>
+    </div>
+
+    <div class="evid">
+      <p>No cal copiar res enlloc ni afegir a ningú més: com que heu creat el repositori com a <strong>públic</strong> (pas 2.2), el professor ja hi pot accedir directament amb l'enllaç. El mateix repositori <code>aea6-usuari1-usuari2</code> és l'entrega, tant d'aquesta activitat com de les 3 següents.</p>
+
+      <p style="margin-top:1.1rem">El professor demanarà l'enllaç del repositori i hi comprovarà:</p>
+      <ul>
+        <li>Que existeix i té l'<code>index.html</code> inicial.</li>
+        <li>Que apareixen els dos com a col·laboradors (<strong>Settings → Collaborators</strong>).</li>
+        <li>L'historial de commits (<code>git log --oneline</code> o la pestanya <strong>Commits</strong> a GitHub), que mostra l'autor de cada canvi.</li>
+      </ul>
+
+      <div class="callout tip" style="margin-top:1rem">
+        <span class="ico">💡</span>
+        <p>Aquest mateix repositori seguirà creixent a la resta de l'AEA6 (A2 a A6): no en creareu cap de nou.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5 · ERRORS FREQÜENTS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">5</span>
+      <h2>Errors freqüents</h2>
+    </div>
+
+    <table>
+      <thead><tr><th>Problema</th><th>Causa</th><th>Solució</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>git push</code> demana usuari i contrasenya i la rebutja</td>
+          <td>GitHub ja no accepta contrasenyes normals per Git; cal un token d'accés personal.</td>
+          <td>Genera'n un a GitHub → <strong>Settings → Developer settings → Personal access tokens</strong> i fes-lo servir com a contrasenya.</td>
+        </tr>
+        <tr>
+          <td>El Col·laborador no veu la invitació al repositori</td>
+          <td>La invitació ha arribat a un correu diferent del que fa servir habitualment.</td>
+          <td>Revisa el correu associat al compte a <strong>Settings → Emails</strong>, o accepta-la des de la notificació a GitHub.com.</td>
+        </tr>
+        <tr>
+          <td><code>git clone</code> dona error "repository not found"</td>
+          <td>La URL del repositori està mal copiada, o el repositori encara és privat i no s'ha acceptat la invitació.</td>
+          <td>Torna a copiar la URL exacta des del botó verd <strong>Code</strong> a GitHub.</td>
+        </tr>
+        <tr>
+          <td><code>git commit</code> demana configurar identitat</td>
+          <td>Encara no s'ha executat <code>git config --global user.name/email</code>.</td>
+          <td>Executa les dues comandes del pas 2.1 abans de tornar a fer commit.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA6 · A1
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA6·A4 — Eines de documentació automàtica · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --prop-bg:#FBEFE0;--prop-border:#F1D7B4;--prop-ink:#A85610;
+    --collab-bg:#E1F5EE;--collab-border:#9FE1CB;--collab-ink:#0F6E56;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+  .evid{background:var(--slate-soft);border:1px solid var(--hairline);border-radius:12px;padding:1.3rem 1.4rem;margin:1.2rem 0}
+
+  /* Rols en parella */
+  .role-box{border-radius:12px;padding:1.1rem 1.3rem;margin:1.1rem 0;border:1px solid}
+  .role-box.prop{background:var(--prop-bg);border-color:var(--prop-border)}
+  .role-box.collab{background:var(--collab-bg);border-color:var(--collab-border)}
+  .role-box.both{background:var(--slate-soft);border-color:var(--hairline)}
+  .role-label{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+  .role-label.prop{color:var(--prop-ink)}
+  .role-label.collab{color:var(--collab-ink)}
+  .role-label.both{color:var(--slate-ink)}
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea6.html"><span class="arrow">←</span> Tornar a l'AEA6</a>
+
+  <header>
+    <span class="badge">AEA6 · A4</span>
+    <span class="eyebrow">M0614 · Linux</span>
+    <h1>Eines de documentació <span class="code">automàtica</span></h1>
+    <p class="lede">Generareu la documentació de la funció <code>campOmplert()</code> que ja teniu al projecte, fent servir JSDoc. Anirem molt a poc a poc, explicant cada comanda.</p>
+    <div class="meta">
+      <span class="pill">Repositori <strong>compartit</strong></span>
+      <span class="pill">RA <strong>RA6</strong></span>
+      <span class="pill">CA <strong>6.1 · 6.2</strong></span>
+      <span class="pill">En parella <strong>Propietari · Col·laborador</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>Continueu al mateix repositori compartit (<code>aea6-usuari1-usuari2</code>). A l'A2 i l'A3 vau crear <code>js/main.js</code> amb la funció <code>campOmplert()</code>; ara la documentarem de veritat, no amb un exemple inventat.</p>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Haver completat l'A1, l'A2 i l'A3: <code>index.html</code> amb header i footer, <code>js/main.js</code> amb <code>campOmplert()</code>, la branca <code>main</code> protegida, i el <code>README.md</code> documentat en Markdown.</li>
+      <li>Node.js i npm instal·lats (des de l'AEA0).</li>
+    </ul>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Com que <code>main</code> segueix protegida, tots els canvis d'aquesta activitat es faran a una branca nova, <code>docs/jsdoc</code>, i es fusionaran amb un Pull Request al final, igual que vau fer amb <code>docs/readme</code> a l'A3.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <h3>Què farem en aquesta activitat</h3>
+    <p>Fareu servir <strong>JSDoc</strong>, una eina que llegeix els comentaris que ja teniu a <code>js/main.js</code> i genera automàticament una web de documentació. Instal·lareu JSDoc amb <strong>npm</strong>, el gestor de paquets que fan servir els projectes reals de JavaScript.</p>
+
+    <p><strong>Termes nous que apareixeran:</strong></p>
+    <ul>
+      <li><strong>JSDoc</strong>: una eina que llegeix comentaris especials del codi JavaScript (els que comencen per <code>/**</code>) i genera una web de documentació amb totes les funcions descrites.</li>
+      <li><strong>npm</strong> (Node Package Manager): un programa que descarrega, instal·la i gestiona automàticament altres programes de JavaScript (paquets). Ve amb Node.js.</li>
+      <li><strong>Paquet</strong> (<em>package</em>): una eina o llibreria de JavaScript que es pot instal·lar amb npm. JSDoc és un paquet.</li>
+      <li><strong>package.json</strong>: un fitxer petit que fa de "DNI" del vostre projecte: hi surt el nom, la versió i, sobretot, la llista de paquets que necessita per funcionar.</li>
+      <li><strong>node_modules/</strong>: la carpeta on npm descarrega els paquets instal·lats. Pot pesar molt i mai es puja a GitHub.</li>
+      <li><strong>Dependència de desenvolupament</strong>: un paquet que només fa falta mentre programes (com JSDoc), no quan algú visita la teva pàgina web final.</li>
+    </ul>
+
+    <h3>Com funciona la generació automàtica</h3>
+
+    <svg viewBox="0 0 640 140" style="width:100%;max-width:640px;margin:.8rem 0;display:block" role="img" aria-label="Flux: codi amb comentaris, JSDoc, web de documentació generada">
+      <defs>
+        <marker id="arrow1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#5A6677"/>
+        </marker>
+      </defs>
+      <rect x="10" y="30" width="180" height="80" rx="12" fill="#EDF1F6" stroke="#E3E8EF"/>
+      <text x="100" y="62" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" font-weight="600" fill="#3A4658">/** ... */</text>
+      <text x="100" y="82" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#3A4658">js/main.js</text>
+
+      <line x1="196" y1="70" x2="234" y2="70" stroke="#5A6677" stroke-width="1.5" marker-end="url(#arrow1)"/>
+
+      <rect x="240" y="30" width="160" height="80" rx="12" fill="#FBEFE0" stroke="#F1D7B4"/>
+      <text x="320" y="65" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="600" fill="#A85610">JSDoc</text>
+      <text x="320" y="85" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#A85610">generador</text>
+
+      <line x1="406" y1="70" x2="444" y2="70" stroke="#5A6677" stroke-width="1.5" marker-end="url(#arrow1)"/>
+
+      <rect x="450" y="30" width="180" height="80" rx="12" fill="#EDF1F6" stroke="#E3E8EF"/>
+      <text x="540" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#3A4658">docs/index.html</text>
+      <text x="540" y="82" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#3A4658">Web generada</text>
+    </svg>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>JSDoc no és l'única eina d'aquest tipus: cada llenguatge té la seva. <strong>Javadoc</strong> fa el mateix per a Java, <strong>Doxygen</strong> per a C/C++/PHP/Python, i <strong>Sphinx</strong> per a Python. Totes funcionen igual: llegeixen comentaris del codi i generen una web de documentació.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <p>Aquesta activitat té moltes comandes noves. Anirem <strong>molt a poc a poc</strong>: cada comanda surt sola, amb una explicació de què fa exactament abans de continuar amb la següent.</p>
+
+    <h3>2.1 · Crear la branca de documentació</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p>Igual que a l'A2 i l'A3, primer et poses al dia amb <code>main</code> i crees una branca nova per a aquesta feina:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git checkout main</code></pre>
+      </div>
+      <p>➜ <code>checkout main</code> vol dir "posa't a la branca <code>main</code>", per assegurar-te que parteixes de la versió més recent.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git pull origin main</code></pre>
+      </div>
+      <p>➜ <code>pull origin main</code> baixa qualsevol canvi que hi hagi a GitHub i que tu encara no tinguis al teu ordinador.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git checkout -b docs/jsdoc</code></pre>
+      </div>
+      <p>➜ <code>checkout -b docs/jsdoc</code> crea una branca nova anomenada <code>docs/jsdoc</code> i et hi situa. Tot el que facis a partir d'ara no afectarà <code>main</code> fins que no ho fusioneu amb un Pull Request.</p>
+    </div>
+
+    <h3>2.2 · Què és npm i per què l'hem de fer servir</h3>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><strong>npm</strong> és un gestor de paquets: un programa que descarrega i instal·la eines de programació (com JSDoc) de forma automàtica, en lloc d'haver-les de baixar a mà.</p>
+    </div>
+
+    <h3>2.3 · Inicialitzar el projecte amb npm</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p>Assegura't d'estar a la carpeta del projecte (on hi ha l'<code>index.html</code>) i executa:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>npm init -y</code></pre>
+      </div>
+      <p>➜ <code>npm init</code> crea un fitxer nou anomenat <code>package.json</code>, que és com el "DNI" del projecte: hi diu el nom, la versió, i (més endavant) quines eines necessita per funcionar. El <code>-y</code> respon "sí" a totes les preguntes automàticament, perquè no calen personalitzar-les ara.</p>
+    </div>
+
+    <h3>2.4 · Instal·lar JSDoc com a eina del projecte</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>npm install jsdoc --save-dev</code></pre>
+      </div>
+      <p>Aquesta comanda té 3 parts:</p>
+      <ul>
+        <li><code>npm install</code> — descarrega i instal·la un paquet.</li>
+        <li><code>jsdoc</code> — el nom del paquet que volem: l'eina que genera la documentació.</li>
+        <li><code>--save-dev</code> — apunta a <code>package.json</code> que aquesta eina només fa falta mentre desenvolupem el projecte, no quan algú visita la pàgina web final.</li>
+      </ul>
+      <p>Un cop acabi, veuràs que ha aparegut una carpeta nova: <code>node_modules/</code>. A dins hi ha JSDoc i tot el que necessita per funcionar. Aquesta carpeta pot arribar a pesar molts megabytes.</p>
+    </div>
+
+    <h3>2.5 · Dir-li a Git que ignori <code>node_modules/</code></h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p><code>node_modules/</code> <strong>mai</strong> s'ha de pujar a GitHub: pesa massa, i qualsevol altra persona la pot regenerar sola amb <code>npm install</code> (com faràs al pas 2.7). Obre (o crea) el fitxer <code>.gitignore</code> i afegeix-hi aquesta línia:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">.gitignore</span></div>
+        <pre><code>node_modules/</code></pre>
+      </div>
+      <p>➜ Amb això, Git deixarà d'avisar-te sobre aquesta carpeta i mai la inclourà en un commit.</p>
+    </div>
+
+    <h3>2.6 · Pujar la configuració inicial</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p>Fes commit dels 3 fitxers nous (mai de <code>node_modules/</code>):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git add package.json package-lock.json .gitignore</code></pre>
+      </div>
+      <p>➜ <code>git add</code> marca aquests fitxers com "a punt per guardar".</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git commit -m "Configura npm i JSDoc com a dependència de desenvolupament"</code></pre>
+      </div>
+      <p>➜ <code>git commit</code> guarda una "fotografia" d'aquest estat del projecte, amb un missatge que explica què has fet.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git push origin docs/jsdoc</code></pre>
+      </div>
+      <p>➜ <code>git push</code> envia aquesta fotografia a GitHub, a la branca <code>docs/jsdoc</code> (encara no a <code>main</code>).</p>
+    </div>
+
+    <h3>2.7 · El Col·laborador es posa al dia</h3>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git fetch origin</code></pre>
+      </div>
+      <p>➜ <code>git fetch</code> mira què ha canviat a GitHub, sense aplicar-ho encara al teu ordinador.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git checkout docs/jsdoc</code></pre>
+      </div>
+      <p>➜ Et situes a la branca que ha creat el Propietari (ara ja la veus, perquè acabes de fer <code>fetch</code>).</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>npm install</code></pre>
+      </div>
+      <p>➜ <code>npm install</code> <strong>sense cap nom darrere</strong> llegeix el <code>package.json</code> que ha pujat el Propietari i instal·la exactament les mateixes eines (JSDoc) al teu propi <code>node_modules/</code> local. Per això no calia pujar-lo a GitHub.</p>
+    </div>
+
+    <h3>2.8 · Generar la documentació</h3>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>npx jsdoc js/main.js -d docs</code></pre>
+      </div>
+      <p>Aquesta comanda també té diverses parts:</p>
+      <ul>
+        <li><code>npx jsdoc</code> — executa l'eina JSDoc que acabem d'instal·lar.</li>
+        <li><code>js/main.js</code> — el fitxer que volem llegir i documentar.</li>
+        <li><code>-d docs</code> — <em>destination</em> (destí): la carpeta on volem que es guardi la web generada, en aquest cas <code>docs/</code>.</li>
+      </ul>
+      <p>Obre <code>docs/index.html</code> amb el navegador: hi apareixen <code>campOmplert</code> i <code>validarContacte</code> documentades.</p>
+    </div>
+
+    <div style="border:1px solid #E3E8EF;border-radius:12px;overflow:hidden;margin:1rem 0;max-width:560px;background:#fff">
+      <div style="display:flex;align-items:center;gap:.4rem;padding:.55rem .8rem;background:#EDF1F6;border-bottom:1px solid #E3E8EF">
+        <span style="width:.55rem;height:.55rem;border-radius:50%;background:#ff5f56;display:inline-block"></span>
+        <span style="width:.55rem;height:.55rem;border-radius:50%;background:#ffbd2e;display:inline-block"></span>
+        <span style="width:.55rem;height:.55rem;border-radius:50%;background:#27c93f;display:inline-block"></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#5A6677;margin-left:.4rem">docs/index.html</span>
+      </div>
+      <div style="display:flex">
+        <div style="width:120px;flex-shrink:0;background:#FAFBFC;border-right:1px solid #E3E8EF;padding:.9rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#5A6677">
+          <p style="margin:0 0 .5rem;font-weight:600;color:#1A2230">Globals</p>
+          <p style="margin:.25rem 0;color:#A85610">campOmplert</p>
+          <p style="margin:.25rem 0;color:#A85610">validarContacte</p>
+        </div>
+        <div style="flex:1;padding:1rem 1.2rem">
+          <p style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.92rem;color:#1A2230;margin:0">campOmplert(valor) <span style="font-weight:400;color:#5A6677">→ boolean</span></p>
+          <p style="font-size:.82rem;color:#5A6677;margin:.35rem 0 0">Comprova si un camp de text no està buit.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>2.9 · Pujar els canvis i fusionar-los</h3>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git add package.json package-lock.json docs/</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git commit -m "Genera documentació amb JSDoc"</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git push origin docs/jsdoc</code></pre>
+      </div>
+    </div>
+    <div class="role-box both">
+      <span class="role-label both">Ambdós</span>
+      <p>A GitHub, obriu el Pull Request des de <code>docs/jsdoc</code> cap a <code>main</code> (amb els commits dels dos), reviseu-lo i fusioneu-lo. Després, cadascú fa <code>git checkout main</code> i <code>git pull origin main</code> per actualitzar la seva còpia local.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <ul>
+      <li><code>package.json</code> existeix i té <code>jsdoc</code> com a <code>devDependency</code>.</li>
+      <li><code>node_modules/</code> apareix al <code>.gitignore</code> i no s'ha pujat mai a GitHub.</li>
+      <li><code>docs/index.html</code> mostra <code>campOmplert</code> i <code>validarContacte</code> documentades.</li>
+      <li>El Pull Request <code>docs/jsdoc</code> apareix fusionat, amb commits dels dos membres.</li>
+    </ul>
+  </section>
+
+  <!-- ============ 4 · COM S'ENTREGA AQUESTA ACTIVITAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">4</span>
+      <h2>Com s'entrega aquesta activitat</h2>
+    </div>
+
+    <div class="evid">
+      <p>Igual que a la resta d'AEA6: el mateix repositori públic <code>aea6-usuari1-usuari2</code> és l'entrega. El professor demanarà l'enllaç i hi comprovarà:</p>
+      <ul>
+        <li>El Pull Request <code>docs/jsdoc</code> fusionat, amb commits dels dos.</li>
+        <li>La carpeta <code>docs/</code> generada per JSDoc, amb la documentació de les funcions.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 5 · ERRORS FREQÜENTS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">5</span>
+      <h2>Errors freqüents</h2>
+    </div>
+
+    <table>
+      <thead><tr><th>Problema</th><th>Causa</th><th>Solució</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>npx jsdoc: command not found</code></td>
+          <td>No s'ha executat <code>npm install</code> a la carpeta del projecte, o no hi ha <code>package.json</code>.</td>
+          <td>Comprova que estàs dins de la carpeta del projecte i que <code>node_modules/jsdoc</code> existeix.</td>
+        </tr>
+        <tr>
+          <td><code>node_modules/</code> apareix a <code>git status</code></td>
+          <td>El <code>.gitignore</code> no s'ha creat o no conté la línia correcta.</td>
+          <td>Revisa que el fitxer <code>.gitignore</code> existeix a l'arrel del projecte i conté exactament <code>node_modules/</code>.</td>
+        </tr>
+        <tr>
+          <td>El Col·laborador no té les mateixes dependències que el Propietari</td>
+          <td>No ha fet <code>npm install</code> després de baixar la branca <code>docs/jsdoc</code>.</td>
+          <td>Executa <code>git checkout docs/jsdoc</code> seguit de <code>npm install</code> abans de generar la documentació.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA6 · A4
+  </footer>
+
+</div>
+</body>
+</html>
