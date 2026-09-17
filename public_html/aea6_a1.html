@@ -187,39 +187,22 @@
 
     <p>Anirem <strong>molt a poc a poc</strong>: cada comanda surt sola, amb una explicació de què fa exactament abans de continuar amb la següent.</p>
 
-    <h3>2.1 · Instal·lar Git</h3>
+    <h3>2.1 · Comprovar que ho teniu tot llest de l'A0</h3>
     <div class="role-box both">
       <span class="role-label both">Ambdós</span>
-      <p>Cadascú al seu ordinador:</p>
+      <p>A l'A0 ja vau instal·lar Git i la GitHub CLI, i us vau autenticar. Comproveu-ho cadascú al seu ordinador:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>sudo apt update</code></pre>
+        <pre><code>git config --global --list</code></pre>
       </div>
-      <p>➜ <code>apt update</code> actualitza la llista de programes disponibles per instal·lar. No instal·la res encara, només mira quines versions hi ha.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>sudo apt install -y git</code></pre>
+      <p>➜ Hi ha de sortir el teu <code>user.name</code> i <code>user.email</code>. Si no hi surten, torna al pas 2.5 de l'A0 abans de continuar.</p>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>Si vas fer <code>gh auth login</code> a l'A0, <code>git push</code> i <code>git pull</code> ja funcionaran sense demanar-te res més.</p>
       </div>
-      <p>➜ <code>apt install git</code> instal·la el programa Git. El <code>-y</code> respon "sí" automàticament quan et pregunti si vols continuar.</p>
     </div>
 
-    <h3>2.2 · Configurar el teu nom i correu</h3>
-    <div class="role-box both">
-      <span class="role-label both">Ambdós</span>
-      <p>Cada commit que facis queda signat amb un nom i un correu. Ho configures una sola vegada:</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>git config --global user.name "El teu nom"</code></pre>
-      </div>
-      <p>➜ <code>git config --global</code> desa una preferència que s'aplicarà a tots els projectes del teu ordinador, no només aquest. <code>user.name</code> és el nom que apareixerà als teus commits.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>git config --global user.email "el-teu-correu@exemple.com"</code></pre>
-      </div>
-      <p>➜ El mateix, però per al correu. Fes servir el mateix correu que tens associat al teu compte de GitHub.</p>
-    </div>
-
-    <h3>2.3 · Crear el repositori a GitHub</h3>
+    <h3>2.2 · Crear el repositori a GitHub</h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
       <ol>
@@ -231,7 +214,7 @@
       </ol>
     </div>
 
-    <h3>2.4 · Clonar el repositori al teu ordinador</h3>
+    <h3>2.3 · Clonar el repositori al teu ordinador</h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
       <div class="term">
@@ -251,7 +234,7 @@
       <p>➜ Entres dins de la carpeta que <code>git clone</code> acaba de crear.</p>
     </div>
 
-    <h3>2.5 · Crear la pàgina inicial</h3>
+    <h3>2.4 · Crear la pàgina inicial</h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
       <p>Dins d'aquesta carpeta, crea un fitxer <code>index.html</code> amb aquest contingut:</p>
@@ -272,7 +255,7 @@
       <p>➜ És una pàgina HTML mínima, només per tenir alguna cosa a versionar. L'ampliareu a les properes activitats.</p>
     </div>
 
-    <h3>2.6 · Fer el primer commit</h3>
+    <h3>2.5 · Fer el primer commit</h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
       <div class="term">
@@ -292,7 +275,7 @@
       <p>➜ <code>git push</code> envia aquesta fotografia des del teu ordinador cap a GitHub, a la branca <code>main</code>. Ara sí que apareixerà al repositori remot.</p>
     </div>
 
-    <h3>2.7 · Afegir el Col·laborador al repositori</h3>
+    <h3>2.6 · Afegir el Col·laborador al repositori</h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
       <ol>
@@ -310,10 +293,10 @@
       </ol>
     </div>
 
-    <h3>2.8 · Clonar el repositori com a Col·laborador</h3>
+    <h3>2.7 · Clonar el repositori com a Col·laborador</h3>
     <div class="role-box collab">
       <span class="role-label collab">Col·laborador</span>
-      <p>Un cop acceptada la invitació, fas exactament el mateix que ha fet el Propietari al pas 2.4:</p>
+      <p>Un cop acceptada la invitació, fas exactament el mateix que ha fet el Propietari al pas 2.3:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>cd ~/Documents</code></pre>
@@ -335,7 +318,7 @@
       <p>➜ <code>cat</code> mostra el contingut d'un fitxer per pantalla. Si veus el mateix HTML que ha escrit el Propietari, tot ha anat bé.</p>
     </div>
 
-    <h3>2.9 · Comprovar que tots dos teniu la mateixa còpia</h3>
+    <h3>2.8 · Comprovar que tots dos teniu la mateixa còpia</h3>
     <div class="role-box both">
       <span class="role-label both">Ambdós</span>
       <p>Cadascú al seu terminal, dins de la carpeta del projecte:</p>
@@ -413,7 +396,7 @@
         <tr>
           <td><code>git commit</code> demana configurar identitat</td>
           <td>Encara no s'ha executat <code>git config --global user.name/email</code>.</td>
-          <td>Executa les dues comandes del pas 2.1 abans de tornar a fer commit.</td>
+          <td>Executa <code>git config --global user.name "..."</code> i <code>user.email "..."</code> (pas 2.5 de l'A0) abans de tornar a fer commit.</td>
         </tr>
       </tbody>
     </table>

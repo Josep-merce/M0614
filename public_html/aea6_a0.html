@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA6·A0 — Primers passos amb Git i GitHub · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+  td code{white-space:nowrap}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea6.html"><span class="arrow">←</span> Tornar a l'AEA6</a>
+
+  <header>
+    <span class="badge">AEA6 · A0</span>
+    <span class="eyebrow">M0614 · Linux</span>
+    <h1>Primers passos <span class="code">amb</span> Git i GitHub</h1>
+    <p class="lede">Abans de treballar en parella, cadascú instal·larà les eines i practicarà tot sol amb un repositori d'usar i llençar. L'objectiu és agafar el ritme dels 4 comandaments bàsics de Git i veure l'historial de commits créixer.</p>
+    <div class="meta">
+      <span class="pill">Individual <strong>abans de l'A1</strong></span>
+      <span class="pill">RA <strong>RA6</strong></span>
+      <span class="pill">Repositori <strong>de pràctiques</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>Aquesta activitat és <strong>individual</strong>: cadascú la fa sol, amb un repositori propi que no es farà servir més enllà d'aquesta pràctica. A l'A1 ja treballareu en parella amb el repositori "de veritat" de l'AEA6.</p>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Una màquina <strong>Debian</strong> amb connexió a Internet i permisos per instal·lar programes (<code>sudo</code>).</li>
+      <li>Un compte de correu electrònic per registrar-te a GitHub, si encara no en tens.</li>
+    </ul>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <h3>Què farem en aquesta activitat</h3>
+    <p>Instal·larem l'editor de codi i Git al teu ordinador, crearem el teu compte de GitHub i l'autenticarem des del terminal. Després practicarem, amb un repositori d'usar i llençar, els 4 comandaments que faràs servir tota la resta del curs.</p>
+
+    <p><strong>Termes nous que apareixeran:</strong></p>
+    <ul>
+      <li><strong>Terminal</strong>: la finestra on escrius ordres de text en lloc de fer clic amb el ratolí. És l'eina principal per treballar amb Git.</li>
+      <li><strong>Git</strong>: el programa que guarda l'historial de canvis del teu projecte, al teu ordinador (en local).</li>
+      <li><strong>GitHub</strong>: el servei web que allotja una còpia central (remota) dels teus repositoris, perquè els puguis recuperar des de qualsevol ordinador o compartir-los amb altres persones.</li>
+      <li><strong>GitHub CLI</strong> (<code>gh</code>): un programa que et permet fer accions de GitHub (com autenticar-te) directament des del terminal, sense haver de generar cap contrasenya especial a mà.</li>
+      <li><strong>Repositori</strong>: la carpeta del teu projecte, amb tot el seu historial de canvis.</li>
+    </ul>
+
+    <h3>Els 4 comandaments bàsics</h3>
+    <p>De totes les ordres que té Git, amb aquestes 4 ja pots treballar-hi el dia a dia. Les faràs servir constantment durant tot el curs:</p>
+    <table>
+      <thead><tr><th>Comandament</th><th>Què fa</th></tr></thead>
+      <tbody>
+        <tr><td><code>git add .</code></td><td>Prepara els canvis (els posa "a la safata de sortida").</td></tr>
+        <tr><td><code>git commit -m "..."</code></td><td>Guarda una foto del moment, amb un missatge que explica què has fet.</td></tr>
+        <tr><td><code>git push</code></td><td>Puja els teus commits a GitHub.</td></tr>
+        <tr><td><code>git pull</code></td><td>Baixa a l'ordinador els canvis que hi hagi a GitHub (per exemple, els d'un company).</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Per connectar per primera vegada una carpeta del teu ordinador amb un repositori de GitHub, faràs servir un cinquè comandament, <code>git clone</code>, que descarrega tot el repositori. Un cop clonat, ja només et faran falta els 4 de la taula.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <h3>2.1 · Actualitzar la llista de programes</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt update</code></pre>
+    </div>
+    <p>➜ Actualitza la llista de programes disponibles al sistema. Cal fer-ho abans d'instal·lar res de nou.</p>
+
+    <h3>2.2 · Instal·lar Visual Studio Code</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt install wget gpg -y</code></pre>
+    </div>
+    <p>➜ Instal·la dues eines petites (<code>wget</code> per descarregar fitxers, <code>gpg</code> per comprovar-ne l'origen) que calen per al pas següent.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
+rm packages.microsoft.gpg</code></pre>
+    </div>
+    <p>➜ Descarrega la "signatura digital" de Microsoft i la desa al sistema. Serveix perquè Debian pugui comprovar que els programes que vindran d'aquest origen són autèntics.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null</code></pre>
+    </div>
+    <p>➜ Afegeix el "magatzem" (repositori) de Microsoft d'on Debian podrà descarregar VS Code.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt update</code></pre>
+    </div>
+    <p>➜ Torna a actualitzar la llista, ara que Debian ja coneix el magatzem nou.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt install code -y</code></pre>
+    </div>
+    <p>➜ Instal·la Visual Studio Code.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>code --version</code></pre>
+    </div>
+    <p>➜ Comprova que s'ha instal·lat correctament: ha de mostrar un número de versió.</p>
+
+    <h3>2.3 · Instal·lar Git i la GitHub CLI</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt install git gh -y</code></pre>
+    </div>
+    <p>➜ Instal·la Git (el control de versions) i <code>gh</code> (la GitHub CLI, que farem servir al pas 2.6 per autenticar-nos sense complicacions).</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git --version
+gh --version</code></pre>
+    </div>
+    <p>➜ Comprova que tots dos s'han instal·lat correctament.</p>
+
+    <h3>2.4 · Crear el compte de GitHub</h3>
+    <p>Si encara no en tens un: ves a <a href="https://github.com/signup" target="_blank" rel="noopener">github.com/signup</a> i registra't (correu, contrasenya i nom d'usuari; és gratuït).</p>
+
+    <h3>2.5 · Configurar el teu nom i correu a Git</h3>
+    <p>Git afegeix el teu nom i correu a cada commit. Es configura una sola vegada:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git config --global user.name <span class="c">"El teu Nom"</span></code></pre>
+    </div>
+    <p>➜ Guarda el teu nom. <code>--global</code> vol dir que val per a tots els projectes, no només un.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git config --global user.email <span class="c">"el-teu-correu@exemple.com"</span></code></pre>
+    </div>
+    <p>➜ Guarda el teu correu. Fes servir el mateix amb què t'has registrat a GitHub.</p>
+
+    <h3>2.6 · Autenticar-te amb GitHub des del terminal</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>gh auth login</code></pre>
+    </div>
+    <p>➜ T'anirà fent preguntes; respon-les així:</p>
+    <ol>
+      <li><strong>What account do you want to log into?</strong> → <code>GitHub.com</code></li>
+      <li><strong>What is your preferred protocol for Git operations?</strong> → <code>HTTPS</code></li>
+      <li><strong>Authenticate Git with your GitHub credentials?</strong> → <code>Yes</code></li>
+      <li><strong>How would you like to authenticate?</strong> → <code>Login with a web browser</code></li>
+    </ol>
+    <p>Et sortirà un codi de 8 caràcters i s'obrirà (o t'oferirà obrir) una pàgina al navegador. Enganxa el codi, inicia sessió a GitHub si cal, i accepta l'autorització.</p>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Aquest pas és el que fa que <code>git push</code> i <code>git pull</code> funcionin sense demanar-te contrasenya cada vegada: <code>gh</code> guarda l'autenticació i Git la reutilitza automàticament.</p>
+    </div>
+
+    <h3>2.7 · Crear el repositori de pràctiques a GitHub</h3>
+    <ol>
+      <li>A <a href="https://github.com" target="_blank" rel="noopener">github.com</a>, fes clic al botó <strong>+</strong> (a dalt a la dreta) → <strong>New repository</strong>.</li>
+      <li>Posa-li de nom <code>practica-git</code>.</li>
+      <li>Deixa'l <strong>públic</strong> i marca l'opció <strong>Add a README file</strong>.</li>
+      <li>Fes clic a <strong>Create repository</strong>.</li>
+    </ol>
+
+    <h3>2.8 · Obrir VS Code i clonar el repositori</h3>
+    <ol>
+      <li>Obre <strong>VS Code</strong>.</li>
+      <li>Crea (si no en tens ja) una carpeta per a la feina del curs, per exemple <code>m0614</code> dins la teva carpeta personal. A VS Code, <strong>File → Open Folder…</strong> i selecciona-la (o crea-la des del mateix diàleg).</li>
+      <li>Obre la <strong>terminal integrada</strong> amb <code>Ctrl + J</code> (o <strong>Terminal → New Terminal</strong>). S'obrirà ja situada dins la carpeta que acabes d'obrir.</li>
+    </ol>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>La terminal integrada és la mateixa que faries servir a part, però oberta dins l'editor: així pots escriure ordres i veure els fitxers alhora. La faràs servir a totes les activitats del curs.</p>
+    </div>
+    <p>A la pàgina del repositori a GitHub, fes clic al botó verd <strong>Code</strong> i copia la URL <strong>HTTPS</strong>. Després, a la terminal integrada:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code><span class="c"># Substitueix EL_TEU_USUARI pel teu nom d'usuari de GitHub</span>
+git clone https://github.com/EL_TEU_USUARI/practica-git.git</code></pre>
+    </div>
+    <p>➜ Descarrega el repositori i crea, dins la carpeta que tenies oberta, una subcarpeta anomenada <code>practica-git</code>.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>cd practica-git</code></pre>
+    </div>
+    <p>➜ Entra a la carpeta clonada. A partir d'ara, totes les ordres de Git d'aquesta activitat s'executen des d'aquí.</p>
+    <p>Finalment, obre aquesta carpeta a VS Code (<strong>File → Open Folder…</strong> → <code>practica-git</code>) perquè l'explorador de fitxers i la terminal apuntin al mateix lloc.</p>
+
+    <h3>2.9 · Crear un fitxer i fer el primer commit</h3>
+    <p>Ja amb la carpeta oberta a VS Code, crea un fitxer <code>index.html</code> amb el teu nom, per exemple:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ca"&gt;
+&lt;body&gt;
+  &lt;h1&gt;Hola, sóc [El teu nom]&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+    <p>Desa el fitxer i, al terminal:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git add .</code></pre>
+    </div>
+    <p>➜ Prepara tots els fitxers nous o modificats (el punt <code>.</code> vol dir "tot el que hi ha en aquesta carpeta").</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git commit -m <span class="c">"Afegeix la meva pàgina inicial"</span></code></pre>
+    </div>
+    <p>➜ Guarda la "foto" del moment, amb un missatge que explica què has fet.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git push</code></pre>
+    </div>
+    <p>➜ Puja el commit a GitHub. Recarrega la pàgina del repositori al navegador: hi hauria d'aparèixer el teu <code>index.html</code>.</p>
+
+    <h3>2.10 · Simular el canvi d'un company (des de GitHub)</h3>
+    <p>Ara faràs una modificació <strong>directament a la pàgina web de GitHub</strong>, sense passar pel teu ordinador. Serveix per simular que un company ha fet un canvi que tu encara no tens:</p>
+    <ol>
+      <li>Al repositori a GitHub, obre el fitxer <code>index.html</code>.</li>
+      <li>Fes clic a la icona del llapis (<strong>Edit this file</strong>).</li>
+      <li>Afegeix una línia, per exemple: <code>&lt;p&gt;Aquest canvi ve de GitHub&lt;/p&gt;</code>.</li>
+      <li>Baixa fins al final i fes clic a <strong>Commit changes...</strong> → <strong>Commit changes</strong> (deixant-ho pujar directament a <code>main</code>).</li>
+    </ol>
+    <p>Aquest canvi ja existeix a GitHub, però <strong>encara no al teu ordinador</strong>. Comprova-ho obrint <code>index.html</code> a VS Code: la línia nova encara no hi surt.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git pull</code></pre>
+    </div>
+    <p>➜ Baixa els canvis fets a GitHub. Torna a mirar <code>index.html</code> a VS Code (si ja el tenies obert, es refrescarà sol): ara ja hi surt la línia que has afegit des del navegador.</p>
+
+    <h3>2.11 · Fer un altre canvi i tornar a pujar-lo</h3>
+    <p>Ara des del teu ordinador (a VS Code), afegeix una altra línia qualsevol a <code>index.html</code>, desa-la, i repeteix el cicle:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git add .</code></pre>
+    </div>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git commit -m <span class="c">"Segon canvi de prova"</span></code></pre>
+    </div>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git push</code></pre>
+    </div>
+    <p>➜ Ja portes 3 commits: el primer, el de GitHub (que has baixat amb <code>pull</code>), i aquest darrer.</p>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <ul>
+      <li>Al terminal, <code>git log --oneline</code> mostra els 3 commits, amb els missatges que has escrit tu i el que has fet des del navegador.</li>
+      <li>A <strong>github.com</strong>, al teu repositori <code>practica-git</code>, la pestanya de commits (número al costat de "Commits") mostra el mateix historial.</li>
+      <li><code>index.html</code> conté les línies afegides des de l'ordinador i des del navegador, totes juntes.</li>
+    </ul>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Aquest repositori <code>practica-git</code> ja no el necessitaràs més: era només per agafar el ritme. A l'A1 crearàs, en parella, el repositori de veritat de l'AEA6.</p>
+    </div>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA6 · A0
+  </footer>
+
+</div>
+</body>
+</html>
