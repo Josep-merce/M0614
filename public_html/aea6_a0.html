@@ -221,6 +221,10 @@ gh --version</code></pre>
       <pre><code>git config --global user.email <span class="c">"el-teu-correu@exemple.com"</span></code></pre>
     </div>
     <p>➜ Guarda el teu correu. Fes servir el mateix amb què t'has registrat a GitHub.</p>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Vigila: és <code>user.email</code>, amb totes les lletres. Si t'equivoques i escrius <code>user.mail</code> (sense la "e"), Git no es queixarà — simplement guardarà una clau inútil que no farà res, i seguiràs sense identitat configurada. Comprova-ho sempre amb <code>git config --global --list</code>: hi han de sortir exactament <code>user.name</code> i <code>user.email</code>.</p>
+    </div>
 
     <h3>2.6 · Autenticar-te amb GitHub des del terminal</h3>
     <div class="term">
@@ -352,6 +356,34 @@ git clone https://github.com/EL_TEU_USUARI/practica-git.git</code></pre>
     <div class="callout tip">
       <span class="ico">💡</span>
       <p>Aquest repositori <code>practica-git</code> ja no el necessitaràs més: era només per agafar el ritme. A l'A1 crearàs, en parella, el repositori de veritat de l'AEA6.</p>
+    </div>
+
+    <h3>Esborrar el repositori de pràctiques</h3>
+    <p>Un cop fetes les comprovacions d'aquí a dalt, esborra'l per no deixar-lo rondant.</p>
+
+    <p><strong>Al núvol (GitHub):</strong></p>
+    <ol>
+      <li>Al repositori <code>practica-git</code> a GitHub, ves a la pestanya <strong>Settings</strong>.</li>
+      <li>Baixa fins al final de tot, a la secció vermella <strong>Danger Zone</strong>.</li>
+      <li>Fes clic a <strong>Delete this repository</strong>.</li>
+      <li>GitHub et demanarà que escriguis el nom complet del repositori (<code>EL_TEU_USUARI/practica-git</code>) per confirmar-ho. Escriu-lo exactament igual i confirma.</li>
+    </ol>
+
+    <p><strong>En local (al teu ordinador):</strong></p>
+    <p>Primer surt de la carpeta (no es pot esborrar una carpeta mentre hi ets a dins):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>cd ..</code></pre>
+    </div>
+    <p>➜ Puja un nivell, a la carpeta que conté <code>practica-git</code>.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>rm -rf practica-git</code></pre>
+    </div>
+    <p>➜ Esborra la carpeta <code>practica-git</code> i tot el que hi ha a dins, sense preguntar. També pots tancar-la des de VS Code (<strong>File → Close Folder</strong>) abans d'esborrar-la, per si la tens oberta.</p>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><code>rm -rf</code> esborra de veritat, sense passar per la paperera i sense demanar confirmació. Comprova sempre amb <code>pwd</code> que estàs on toca abans d'executar-la, i que el nom de la carpeta (<code>practica-git</code>) és exactament el correcte.</p>
     </div>
   </section>
 
