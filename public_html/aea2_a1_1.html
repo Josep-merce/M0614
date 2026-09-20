@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA2·A1.1 — Servidor web segur administrat per SSH (3 màquines) · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --admin-bg:#FBEFE0;--admin-border:#F1D7B4;--admin-ink:#A85610;
+    --server-bg:#E1F5EE;--server-border:#9FE1CB;--server-ink:#0F6E56;
+    --client-bg:#E8EFFC;--client-border:#BBD3F0;--client-ink:#1D4E89;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+  .callout.switch{background:#EAF1FB;border-color:#BBD3F0}
+  .callout.switch strong{color:#1D4E89}
+
+  /* Capses de màquina: qui fa cada pas */
+  .role-box{border-radius:12px;padding:1.1rem 1.3rem;margin:1.1rem 0;border:1px solid}
+  .role-box.admin{background:var(--admin-bg);border-color:var(--admin-border)}
+  .role-box.server{background:var(--server-bg);border-color:var(--server-border)}
+  .role-box.client{background:var(--client-bg);border-color:var(--client-border)}
+  .role-box.all{background:var(--slate-soft);border-color:var(--hairline)}
+  .role-box > *:first-child{margin-top:0}
+  .role-box > *:last-child{margin-bottom:0}
+  .role-label{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+  .role-label.admin{color:var(--admin-ink)}
+  .role-label.server{color:var(--server-ink)}
+  .role-label.client{color:var(--client-ink)}
+  .role-label.all{color:var(--slate-ink)}
+
+  .legend{display:inline;font-size:.86rem;color:var(--slate-ink)}
+  .legend > span{display:inline-block;margin-right:1rem;white-space:nowrap}
+  .legend .sw{display:inline-block;width:.85rem;height:.85rem;border-radius:4px;margin-right:.4rem;vertical-align:-2px;border:1px solid rgba(0,0,0,.12)}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+
+  /* Figura de xarxa (SVG) */
+  .netfig{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;padding:1.2rem 1rem .8rem;margin:1.2rem 0}
+  .netfig svg{width:100%;height:auto;display:block}
+  .netfig figcaption{font-family:var(--mono);font-size:.74rem;color:var(--muted);text-align:center;margin-top:.4rem}
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea2.html"><span class="arrow">←</span> Tornar a l'AEA2</a>
+
+  <header>
+    <span class="badge">AEA2 · A1.1</span>
+    <span class="eyebrow">M0614 · Linux</span>
+    <h1>Munta i administra un servidor web segur <span class="code">per SSH</span></h1>
+    <p class="lede">Muntaràs tres màquines a la mateixa xarxa privada: un servidor, un administrador i un client. L'administrador entrarà al servidor de manera xifrada per SSH per instal·lar-hi Apache i activar HTTPS; el client hi accedirà des del navegador. En acabar tindràs un servidor web administrat de forma remota i segura.</p>
+    <div class="meta">
+      <span class="pill">Branca <strong>aea2</strong></span>
+      <span class="pill">RA <strong>RA2</strong></span>
+      <span class="pill">CA <strong>2.1 · 2.2 · 2.5 · 2.6</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En aquesta activitat aprendràs a:</p>
+    <ul>
+      <li>Muntar una petita <strong>xarxa privada</strong> amb tres màquines: <strong>servidor</strong>, <strong>administrador</strong> i <strong>client</strong>.</li>
+      <li>Configurar una <strong>IP fixa</strong> a la targeta de xarxa interna de cada màquina.</li>
+      <li>Administrar el servidor de manera remota i xifrada amb <strong>SSH</strong>.</li>
+      <li>Instal·lar <strong>Apache</strong> i activar el web segur amb <strong>HTTPS</strong> (certificat autofirmat).</li>
+      <li>Comprovar l'accés al web des del <strong>client</strong>.</li>
+    </ul>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Tres màquines <strong>Debian</strong> a <strong>IsardVDI</strong>, cadascuna amb <strong>dues targetes de xarxa</strong>: una <em>default</em> (amb sortida a Internet) i una <em>interna</em> (la xarxa privada que connecta les tres màquines).</li>
+      <li>Saber obrir un terminal i fer servir <code>sudo</code> (AEA0).</li>
+      <li>El teu repositori <code>m0614</code> ja creat i Git configurat (AEA0).</li>
+    </ul>
+
+    <h3>Branca de treball</h3>
+    <p>Tota la feina d'aquesta AEA es fa a la branca <code>aea2</code>. El primer cop la crees; després només t'hi situes:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git switch -c aea2     <span class="c"># el primer cop: crea la branca i hi entra</span>
+git switch aea2        <span class="c"># les vegades següents: només hi entra</span></code></pre>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Fes servir la mateixa branca <code>aea2</code> per a les tres activitats (A1, A2 i A3). El README es va ampliant; no en crearàs un de nou a cada activitat.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <p>Un <strong>servidor web</strong> és un ordinador (o programa) que rep peticions i respon amb pàgines web. Fins ara l'has fet servir a la mateixa màquina (<code>localhost</code>); ara el posarem en una màquina <strong>a part</strong> i l'administrarem <strong>des d'una altra</strong>, com passa a la realitat: els servidors solen estar en una sala tancada i s'hi accedeix per la xarxa.</p>
+
+    <h3>Per què SSH?</h3>
+    <p><strong>SSH</strong> (<em>Secure Shell</em>) obre un terminal del servidor des d'una altra màquina a través d'un <strong>canal xifrat</strong>. Així pots instal·lar i configurar el servidor sense seure-hi al davant, i ningú de la xarxa pot llegir el que hi escrius. És l'estàndard per administrar servidors Linux.</p>
+
+    <h3>Per què HTTPS?</h3>
+    <p><strong>HTTP</strong> transporta les pàgines en clar; <strong>HTTPS</strong> les xifra amb <strong>TLS</strong> gràcies a un <strong>certificat</strong>. En aquesta activitat farem un <strong>certificat autofirmat</strong> (el genera el mateix servidor): és perfecte per practicar en una xarxa interna, tot i que el navegador mostrarà un avís perquè no l'ha emès cap autoritat de confiança.</p>
+
+    <h3>Ampliar el servidor amb mòduls</h3>
+    <p>Apache té un <strong>disseny modular</strong>: pots afegir o treure funcionalitats activant o desactivant <strong>mòduls</strong>. Els mòduls disponibles són a <code>/etc/apache2/mods-available</code> i els activats a <code>/etc/apache2/mods-enabled</code>. Per gestionar-los fem servir dues ordres:</p>
+    <ul>
+      <li><code>sudo a2enmod &lt;mòdul&gt;</code> → <strong>activa</strong> un mòdul (per exemple <code>ssl</code>, que ens caldrà per a l'HTTPS).</li>
+      <li><code>sudo a2dismod &lt;mòdul&gt;</code> → <strong>desactiva</strong> un mòdul.</li>
+    </ul>
+    <p>Després d'activar o desactivar un mòdul cal recarregar Apache perquè el canvi tingui efecte.</p>
+
+    <h3>Les dues targetes de xarxa</h3>
+    <p>Cada màquina d'IsardVDI té <strong>dues targetes</strong> amb funcions diferents:</p>
+    <ul>
+      <li><strong>Targeta <em>default</em></strong> → té sortida a <strong>Internet</strong>. La fem servir per baixar i instal·lar paquets (<code>apt</code>). La seva IP l'assigna IsardVDI automàticament (DHCP), no la controlem nosaltres.</li>
+      <li><strong>Targeta interna</strong> → connecta les <strong>tres màquines entre elles</strong> a la xarxa privada <code>192.168.1.0/24</code>. Aquí posarem <strong>IP fixes</strong> i és per on viatgen l'administració SSH i el servei HTTPS.</li>
+    </ul>
+
+    <h3>Imatge 1 · Arquitectura de xarxa</h3>
+    <p>Cada màquina té dues targetes: la de dalt (discontínua) surt a Internet per DHCP; la de baix les connecta totes tres a la xarxa interna amb IP fixa.</p>
+
+    <figure class="netfig">
+      <svg viewBox="0 0 820 480" role="img" aria-label="Arquitectura de xarxa: tres màquines (Client, Servidor Web, Administrador), cadascuna amb una targeta default que surt a Internet per DHCP i una targeta interna que les connecta totes a la xarxa 192.168.1.0/24 amb IP fixa 192.168.1.30, .10 i .20 respectivament.">
+        <defs>
+          <marker id="arwBus" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6">
+            <circle cx="5" cy="5" r="4" fill="#3A4658"/>
+          </marker>
+        </defs>
+
+        <g>
+          <ellipse cx="410" cy="50" rx="90" ry="30" fill="#EDF1F6" stroke="#D6DEE8"/>
+          <circle cx="356" cy="50" r="24" fill="#EDF1F6" stroke="#D6DEE8"/>
+          <circle cx="464" cy="50" r="22" fill="#EDF1F6" stroke="#D6DEE8"/>
+          <rect x="356" y="48" width="108" height="30" fill="#EDF1F6"/>
+          <text x="410" y="56" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" fill="#3A4658">Internet</text>
+        </g>
+
+        <g stroke="#9aa4b2" stroke-width="1.6" stroke-dasharray="5 5" fill="none">
+          <path d="M356,78 C260,110 155,130 130,166"/>
+          <path d="M410,80 L410,166"/>
+          <path d="M464,78 C560,110 665,130 690,166"/>
+        </g>
+        <text x="70" y="128" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">enp1s0 · default · DHCP</text>
+        <text x="365" y="128" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">enp1s0 · default · DHCP</text>
+        <text x="600" y="128" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">enp1s0 · default · DHCP</text>
+
+        <g>
+          <rect x="30" y="166" width="200" height="118" rx="12" fill="#FFFFFF" stroke="#D6DEE8"/>
+          <rect x="30" y="166" width="200" height="30" rx="12" fill="#1A2230"/>
+          <rect x="30" y="184" width="200" height="12" fill="#1A2230"/>
+          <text x="130" y="186" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="14" fill="#FFFFFF">Client</text>
+          <text x="130" y="226" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#5A6677">Navegador</text>
+          <text x="130" y="254" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="15" fill="#1A2230">192.168.1.30</text>
+          <text x="130" y="273" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">enp2s0 · interna</text>
+        </g>
+
+        <g>
+          <rect x="310" y="166" width="200" height="118" rx="12" fill="#FFFFFF" stroke="#E07B1E" stroke-width="2"/>
+          <rect x="310" y="166" width="200" height="30" rx="12" fill="#E07B1E"/>
+          <rect x="310" y="184" width="200" height="12" fill="#E07B1E"/>
+          <text x="410" y="186" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="14" fill="#FFFFFF">Servidor Web</text>
+          <text x="410" y="226" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#5A6677">Apache · SSH · HTTPS</text>
+          <text x="410" y="254" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="15" fill="#1A2230">192.168.1.10</text>
+          <text x="410" y="273" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">enp2s0 · interna</text>
+        </g>
+
+        <g>
+          <rect x="590" y="166" width="200" height="118" rx="12" fill="#FFFFFF" stroke="#D6DEE8"/>
+          <rect x="590" y="166" width="200" height="30" rx="12" fill="#1A2230"/>
+          <rect x="590" y="184" width="200" height="12" fill="#1A2230"/>
+          <text x="690" y="186" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="14" fill="#FFFFFF">Administrador</text>
+          <text x="690" y="226" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#5A6677">Client SSH</text>
+          <text x="690" y="254" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="15" fill="#1A2230">192.168.1.20</text>
+          <text x="690" y="273" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">enp2s0 · interna</text>
+        </g>
+
+        <g stroke="#3A4658" stroke-width="1.8" fill="none">
+          <line x1="130" y1="284" x2="130" y2="400"/>
+          <line x1="410" y1="284" x2="410" y2="400"/>
+          <line x1="690" y1="284" x2="690" y2="400"/>
+          <line x1="90" y1="400" x2="730" y2="400"/>
+        </g>
+        <circle cx="130" cy="400" r="4" fill="#3A4658"/>
+        <circle cx="410" cy="400" r="4" fill="#3A4658"/>
+        <circle cx="690" cy="400" r="4" fill="#3A4658"/>
+        <rect x="285" y="416" width="250" height="30" rx="8" fill="#EDF1F6" stroke="#D6DEE8"/>
+        <text x="410" y="436" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#3A4658">Xarxa interna · 192.168.1.0/24</text>
+      </svg>
+      <figcaption>Les tres màquines comparteixen la xarxa interna 192.168.1.0/24 per la targeta enp2s0; la targeta enp1s0 només serveix per baixar paquets d'Internet.</figcaption>
+    </figure>
+
+    <h3>Imatge 2 · Flux d'accés</h3>
+    <p>El <strong>Client</strong> accedeix al <strong>Servidor Web</strong> per HTTPS (port 443). L'<strong>Administrador</strong> es connecta per SSH al Servidor Web per configurar-lo, però no participa en el trànsit del web.</p>
+
+    <figure class="netfig">
+      <svg viewBox="0 0 820 340" role="img" aria-label="Arquitectura de l'activitat: el Client accedeix per HTTPS al Servidor Web (Apache, 192.168.1.10); l'Administrador s'hi connecta per SSH per configurar-lo. El Client no administra mai el servidor.">
+        <defs>
+          <marker id="arwO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#E07B1E"/>
+          </marker>
+          <marker id="arwG" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#9aa4b2"/>
+          </marker>
+        </defs>
+
+        <!-- Arc SSH (discontinu) de l'Administrador al Servidor Web -->
+        <path d="M690,150 C690,60 470,55 410,148" fill="none" stroke="#9aa4b2" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#arwG)"/>
+        <rect x="470" y="44" width="212" height="20" rx="6" fill="#EDF1F6"/>
+        <text x="576" y="58" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#3A4658">SSH :22 · administraci&#243;</text>
+
+        <!-- Client -->
+        <g>
+          <rect x="30" y="150" width="200" height="104" rx="12" fill="#FFFFFF" stroke="#D6DEE8"/>
+          <text x="130" y="184" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="16" fill="#1A2230">Client</text>
+          <text x="130" y="207" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#5A6677">Navegador</text>
+          <text x="130" y="232" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="14" fill="#1A2230">192.168.1.30</text>
+        </g>
+
+        <!-- Servidor Web (fosc) -->
+        <g>
+          <rect x="310" y="150" width="200" height="104" rx="12" fill="#1A2230"/>
+          <text x="410" y="184" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="16" fill="#FFFFFF">Servidor Web</text>
+          <text x="410" y="207" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#AEB9C9">Apache &#183; HTTPS &#183; SSH</text>
+          <text x="410" y="232" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="14" fill="#E07B1E">192.168.1.10</text>
+        </g>
+
+        <!-- Administrador -->
+        <g>
+          <rect x="590" y="150" width="200" height="104" rx="12" fill="#FFFFFF" stroke="#D6DEE8"/>
+          <text x="690" y="184" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="16" fill="#1A2230">Administrador</text>
+          <text x="690" y="207" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#5A6677">Client SSH</text>
+          <text x="690" y="232" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="14" fill="#1A2230">192.168.1.20</text>
+        </g>
+
+        <!-- Fletxa HTTPS: Client -> Servidor Web -->
+        <line x1="234" y1="202" x2="306" y2="202" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#arwO)"/>
+        <rect x="234" y="176" width="72" height="19" rx="5" fill="#FBEFE0"/>
+        <text x="270" y="189" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9c5813">HTTPS :443</text>
+
+        <!-- Nota -->
+        <text x="410" y="300" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" fill="#5A6677">El Client mai administra el servidor: nom&#233;s en consumeix el web.</text>
+      </svg>
+      <figcaption>L'Administrador configura el Servidor Web per SSH; el Client hi accedeix per HTTPS.</figcaption>
+    </figure>
+
+    <h3>Conceptes clau</h3>
+    <table>
+      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Servidor</strong></td><td>La màquina que allotja el web i el servei SSH (<code>192.168.1.10</code>).</td></tr>
+        <tr><td><strong>Administrador</strong></td><td>La màquina des d'on entrem al servidor per SSH per configurar-lo (<code>192.168.1.20</code>).</td></tr>
+        <tr><td><strong>Client</strong></td><td>La màquina que consulta el web amb el navegador (<code>192.168.1.30</code>).</td></tr>
+        <tr><td><strong>SSH</strong></td><td>Protocol per obrir un terminal remot xifrat. Port <code>22</code>.</td></tr>
+        <tr><td><strong>HTTP / HTTPS</strong></td><td>Protocol web sense xifrar (port <code>80</code>) i amb xifrat TLS (port <code>443</code>).</td></tr>
+        <tr><td><strong>Certificat autofirmat</strong></td><td>Certificat que genera el mateix servidor per activar HTTPS sense una autoritat externa.</td></tr>
+        <tr><td><strong>Mòdul</strong></td><td>Peça que amplia Apache. S'activa amb <code>a2enmod</code> i es desactiva amb <code>a2dismod</code>.</td></tr>
+        <tr><td><strong>Targeta de xarxa</strong></td><td>Interfície de xarxa. Aquí en tenim dues: <em>default</em> (Internet) i interna (xarxa privada).</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Cada pas ve dins d'una <strong>capsa de color</strong> que indica qui l'ha de fer: <span class="legend"><span><span class="sw" style="background:var(--admin-bg);border-color:var(--admin-border)"></span>Administrador</span><span><span class="sw" style="background:var(--server-bg);border-color:var(--server-border)"></span>Servidor</span><span><span class="sw" style="background:var(--client-bg);border-color:var(--client-border)"></span>Client</span><span><span class="sw" style="background:var(--slate-soft);border-color:var(--hairline)"></span>Totes les màquines</span></span>. Els fitxers de configuració no porten capsa.</p>
+    </div>
+
+    <h3>2.1 · Identificar les dues targetes de cada màquina</h3>
+    <div class="role-box all">
+      <span class="role-label all">Totes les màquines</span>
+      <p>A <strong>cada</strong> màquina, obre un terminal i mira les targetes de xarxa:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>ip a</code></pre>
+      </div>
+      <p>➜ <code>ip a</code> llista totes les targetes de xarxa de la màquina amb la seva adreça IP.</p>
+      <p>Veuràs dues interfícies (a més de <code>lo</code>). A IsardVDI solen anomenar-se <code>enp1s0</code> i <code>enp2s0</code>. La sortida s'assembla a aquesta:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida de ip a</span></div>
+        <pre><code>2: enp1s0: &lt;...&gt; state UP           <span class="c"># targeta DEFAULT (surt a Internet)</span>
+    inet 192.168.120.186/22 ...        <span class="c"># IP posada per DHCP → NO la toquem</span>
+3: enp2s0: &lt;...&gt; state UP           <span class="c"># targeta INTERNA (xarxa privada)</span>
+    (sense línia inet)                 <span class="c"># encara sense IP → aquí posarem la fixa</span></code></pre>
+      </div>
+      <p>Identifica-les així:</p>
+      <ul>
+        <li>La que <strong>ja té una IP</strong> del tipus <code>10.x</code>, <code>172.x</code> o <code>192.168.120.x</code> amb sortida a Internet és la <strong>default</strong> (aquí <code>enp1s0</code>). No la toquis.</li>
+        <li>L'<strong>altra</strong> (sovint sense IP) serà la <strong>interna</strong> (aquí <code>enp2s0</code>), on posarem la IP fixa.</li>
+      </ul>
+      <div class="callout warn">
+        <span class="ico">⚠️</span>
+        <p>Apunta bé el <strong>nom exacte</strong> de la targeta interna de cada màquina (per exemple <code>enp2s0</code>). El necessitaràs al pas següent i pot variar entre màquines.</p>
+      </div>
+    </div>
+
+    <h3>2.2 · Assignar la IP fixa a la targeta interna</h3>
+    <div class="role-box all">
+      <span class="role-label all">Totes les màquines · exemple: servidor</span>
+      <p>A Debian, les IP fixes es configuren al fitxer <code>/etc/network/interfaces</code>. Obre'l amb l'editor <code>nano</code>:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>sudo nano /etc/network/interfaces</code></pre>
+      </div>
+      <p>➜ Obre el fitxer de configuració de xarxa amb l'editor <code>nano</code>. <code>sudo</code> el fa servir com a administrador (cal per editar fitxers del sistema).</p>
+      <p>Afegeix al final aquest bloc, <strong>canviant</strong> <code>enp2s0</code> pel nom real de la teva targeta interna i la IP segons la màquina (servidor <code>.10</code>, administrador <code>.20</code>, client <code>.30</code>). Aquest exemple és el del <strong>servidor</strong>:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">/etc/network/interfaces</span></div>
+        <pre><code><span class="c"># --- Targeta interna (xarxa privada) ---</span>
+auto enp2s0
+iface enp2s0 inet static
+    address 192.168.1.10
+    netmask 255.255.255.0</code></pre>
+      </div>
+      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>). Aplica els canvis reiniciant la xarxa:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>sudo systemctl restart networking</code></pre>
+      </div>
+      <p>➜ Reinicia el servei de xarxa perquè la nova IP fixa tingui efecte.</p>
+      <p>Comprova que la targeta interna ja té la IP correcta:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>ip a show enp2s0</code></pre>
+      </div>
+      <p>➜ Mostra només la targeta <code>enp2s0</code> per comprovar que ja té la IP fixa assignada.</p>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>No toquis la targeta <em>default</em>: ha de continuar amb DHCP perquè les màquines segueixin tenint Internet per instal·lar paquets. Repeteix aquest pas a les tres màquines amb la seva IP (<code>.10</code>, <code>.20</code>, <code>.30</code>).</p>
+      </div>
+    </div>
+
+    <h3>2.3 · Comprovar la connexió entre màquines</h3>
+    <div class="role-box admin">
+      <span class="role-label admin">Administrador</span>
+      <p>Des de l'<strong>administrador</strong>, comprova que arribes al servidor per la xarxa interna:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
+        <pre><code>ping -c 3 192.168.1.10</code></pre>
+      </div>
+      <p>➜ Envia paquets de prova al servidor per veure si hi ha connexió. <code>-c 3</code> en limita el nombre a 3.</p>
+      <p>Si reps respostes, la xarxa interna funciona. Fes la mateixa prova des del <strong>client</strong>.</p>
+    </div>
+
+    <h3>2.4 · Instal·lar el servei SSH al servidor</h3>
+    <div class="role-box server">
+      <span class="role-label server">Servidor</span>
+      <p>Ves a la màquina <strong>servidor</strong>. Instal·la el servidor SSH (es baixa per la targeta <em>default</em>):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — servidor</span></div>
+        <pre><code>sudo apt update</code></pre>
+      </div>
+      <p>➜ Actualitza la llista de paquets disponibles. Convé fer-ho abans d'instal·lar res.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — servidor</span></div>
+        <pre><code>sudo apt install openssh-server -y</code></pre>
+      </div>
+      <p>➜ Instal·la el servei SSH al servidor. <code>-y</code> respon "sí" automàticament a les preguntes de la instal·lació.</p>
+      <p>Comprova que el servei està actiu:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — servidor</span></div>
+        <pre><code>systemctl status ssh</code></pre>
+      </div>
+      <p>➜ Mostra l'estat del servei SSH.</p>
+      <p>Ha d'aparèixer <code>active (running)</code>. Prem <code>q</code> per sortir.</p>
+    </div>
+
+    <h3>2.5 · Connectar-se des de l'administrador per SSH</h3>
+    <div class="role-box admin">
+      <span class="role-label admin">Administrador</span>
+      <p>Torna a la màquina <strong>administrador</strong> i connecta't al servidor (substitueix <code>usuari</code> pel teu nom d'usuari del servidor):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
+        <pre><code>ssh usuari@192.168.1.10</code></pre>
+      </div>
+      <p>➜ Obre una sessió de terminal xifrada al servidor per SSH. Substitueix <code>usuari</code> pel teu nom d'usuari del servidor.</p>
+      <p>El primer cop et demanarà confirmar la <em>fingerprint</em> del servidor: escriu <code>yes</code> i prem <code>Enter</code>. Després introdueix la contrasenya. Quan hi entris, el <em>prompt</em> del terminal canviarà al del servidor: <strong>ja estàs administrant el servidor de manera remota</strong>.</p>
+    </div>
+    <div class="callout switch">
+      <span class="ico">💻→</span>
+      <p>A partir d'aquí, tot el que escrius s'executa <strong>al servidor</strong>, no a l'administrador. Per tornar a l'administrador quan acabis, escriu <code>exit</code>.</p>
+    </div>
+
+    <h3>2.6 · Instal·lar Apache (des de la sessió SSH)</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>Ja connectat per SSH al servidor, instal·la Apache:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo apt install apache2 -y</code></pre>
+      </div>
+      <p>➜ Instal·la el servidor web Apache. <code>-y</code> accepta automàticament la instal·lació.</p>
+    </div>
+
+    <h3>2.7 · Activar el web segur amb HTTPS</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>Activa el mòdul SSL d'Apache:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo a2enmod ssl</code></pre>
+      </div>
+      <p>➜ Activa el mòdul <code>ssl</code>, que permet a Apache servir pàgines per HTTPS.</p>
+      <p>Genera un <strong>certificat autofirmat</strong> vàlid per un any (respon les preguntes; a <em>Common Name</em> pots posar la IP <code>192.168.1.10</code>):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/aea2.key \
+  -out /etc/ssl/certs/aea2.crt</code></pre>
+      </div>
+      <p>➜ Genera el certificat i la clau. És <strong>una sola ordre</strong> (les barres <code>\</code> uneixen les línies): <code>-x509</code> crea un certificat autofirmat, <code>-nodes</code> no posa contrasenya a la clau i <code>-days 365</code> el fa vàlid un any.</p>
+      <p>En executar-la, l'<code>openssl</code> et farà unes quantes preguntes (el <em>subject</em> del certificat). Pots respondre-les així:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">preguntes del certificat</span></div>
+        <pre><code>Country Name (2 letter code):    <span class="c"># país, 2 lletres → ES</span>
+State or Province Name:          <span class="c"># província → Barcelona</span>
+Locality Name (eg, city):        <span class="c"># ciutat → Barcelona</span>
+Organization Name:               <span class="c"># organització → Institut La Merce</span>
+Organizational Unit Name:        <span class="c"># departament (opcional) → DAW</span>
+Common Name:                     <span class="c"># ⚠ EL MÉS IMPORTANT: la IP o domini del servidor → 192.168.1.10</span>
+Email Address:                   <span class="c"># correu (opcional) → pots deixar-ho buit</span></code></pre>
+      </div>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>El camp que de debò importa és el <strong>Common Name (CN)</strong>: ha de coincidir amb l'adreça per la qual accediràs al servidor (aquí la IP <code>192.168.1.10</code>). La resta de camps són informatius i els pots deixar buits prement <code>Enter</code>.</p>
+      </div>
+      <p>Activa el lloc HTTPS que ja ve preparat a Apache i indica-li el certificat. Edita la configuració SSL:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo nano /etc/apache2/sites-available/default-ssl.conf</code></pre>
+      </div>
+      <p>➜ Obre el fitxer de configuració del lloc HTTPS per indicar-hi el teu certificat.</p>
+      <p>Localitza les dues línies <code>SSLCertificateFile</code> i <code>SSLCertificateKeyFile</code> i deixa-les apuntant al teu certificat:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">default-ssl.conf</span></div>
+        <pre><code>SSLCertificateFile      /etc/ssl/certs/aea2.crt
+SSLCertificateKeyFile   /etc/ssl/private/aea2.key</code></pre>
+      </div>
+      <p>Desa i, tot seguit, activa el lloc i recarrega Apache:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo a2ensite default-ssl</code></pre>
+      </div>
+      <p>➜ Activa el lloc HTTPS (<code>default-ssl</code>) a Apache.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo systemctl reload apache2</code></pre>
+      </div>
+      <p>➜ Recarrega Apache perquè apliqui la nova configuració sense aturar el servei.</p>
+    </div>
+
+    <h3>2.8 · Accedir al web des del client</h3>
+    <div class="role-box client">
+      <span class="role-label client">Client</span>
+      <p>Ves a la màquina <strong>client</strong>, obre el navegador i escriu:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador — client</span></div>
+        <pre><code>https://192.168.1.10</code></pre>
+      </div>
+      <p>El navegador mostrarà un <strong>avís de seguretat</strong> (el certificat és autofirmat). Accepta'l per continuar (a Firefox: <em>Avançat → Accepta el risc</em>). Veuràs la pàgina per defecte d'Apache servida per HTTPS.</p>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>Aquest avís és normal i esperat: no hem pagat cap autoritat de certificació. En una xarxa interna de pràctiques és perfectament vàlid.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>Comprova que Apache està actiu i que escolta els ports 22 i 443:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>systemctl status apache2
+sudo ss -tlnp | grep -E <span class="c">':(22|443)'</span></code></pre>
+      </div>
+      <p>Sortida esperada de <code>systemctl status apache2</code> (resumida):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>● apache2.service - The Apache HTTP Server
+     Loaded: loaded (/lib/systemd/system/apache2.service; enabled; ...)
+     Active: active (running) since ...   <span class="c"># ⚠ EL MÉS IMPORTANT</span>
+   Main PID: 1234 (apache2)
+      Tasks: 55 (limit: ...)
+     CGroup: /system.slice/apache2.service
+             ├─1234 /usr/sbin/apache2 -k start
+             ├─1235 /usr/sbin/apache2 -k start
+             └─1236 /usr/sbin/apache2 -k start</code></pre>
+      </div>
+      <p>Sortida esperada de <code>ss -tlnp</code> (una línia per port):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>LISTEN 0 128 0.0.0.0:22    0.0.0.0:*  users:(("sshd",pid=...,fd=3))     <span class="c"># port SSH</span>
+LISTEN 0 128 0.0.0.0:443   0.0.0.0:*  users:(("apache2",pid=1234,fd=6)) <span class="c"># port HTTPS</span></code></pre>
+      </div>
+    </div>
+
+    <div class="role-box admin">
+      <span class="role-label admin">Administrador</span>
+      <p>Demana la pàgina per HTTPS (l'opció <code>-k</code> accepta el certificat autofirmat):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
+        <pre><code>curl -k https://192.168.1.10</code></pre>
+      </div>
+      <p>Sortida esperada (el codi HTML de la pàgina que has creat al pas 4):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>&lt;h1&gt;El meu servidor segur · AEA2&lt;/h1&gt;</code></pre>
+      </div>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>L'opció <code>-k</code> fa que <code>curl</code> accepti el certificat autofirmat sense donar l'error <em>SSL certificate problem</em>. Si l'ordre respon amb HTML (sense error de connexió), la verificació és correcta.</p>
+      </div>
+    </div>
+
+    <ul>
+      <li><code>systemctl status apache2</code> mostra <code>active (running)</code>.</li>
+      <li><code>ss</code> mostra que el servidor escolta els ports <code>22</code> (SSH) i <code>443</code> (HTTPS).</li>
+      <li><code>curl -k</code> retorna el codi HTML de la pàgina d'Apache.</li>
+      <li>El <strong>client</strong> veu la pàgina al navegador per <code>https://192.168.1.10</code>.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA2 · A1.1
+  </footer>
+
+</div>
+</body>
+</html>

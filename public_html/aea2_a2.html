@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA2·A2 — El mateix servidor segur amb Docker · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea2.html"><span class="arrow">←</span> Tornar a l'AEA2</a>
+
+  <header>
+    <span class="badge">AEA2 · A2</span>
+    <span class="eyebrow">M0614 · Docker</span>
+    <h1>El mateix servidor segur <span class="code">amb Docker</span></h1>
+    <p class="lede">Ara muntaràs el mateix servidor web amb HTTPS, però dins d'un contenidor Docker a partir de la imatge oficial d'Apache. Aquí només tenim el servidor: tot passa en una sola màquina, sense la xarxa de tres equips.</p>
+    <div class="meta">
+      <span class="pill">Branca <strong>aea2</strong></span>
+      <span class="pill">RA <strong>RA2</strong></span>
+      <span class="pill">CA <strong>2.5 · 2.6 · 2.9</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En aquesta activitat aprendràs a:</p>
+    <ul>
+      <li>Fer servir la <strong>imatge oficial d'Apache</strong> (<code>httpd</code>) de Docker.</li>
+      <li>Construir una imatge pròpia amb <strong>HTTPS</strong> activat i el teu certificat.</li>
+      <li>Executar el servidor en un <strong>contenidor</strong> i publicar-lo a un port de la teva màquina.</li>
+    </ul>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li><strong>Docker</strong> instal·lat i funcionant (AEA0).</li>
+      <li>Saber la diferència entre <strong>imatge</strong> i <strong>contenidor</strong> (AEA0).</li>
+      <li>El teu repositori <code>m0614</code> amb la branca <code>aea2</code>.</li>
+    </ul>
+
+    <h3>Branca de treball</h3>
+    <p>Continuem a la mateixa branca de l'AEA. Situa-t'hi:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git switch aea2</code></pre>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Aquí no fem la xarxa de tres màquines. Docker ens permet tenir el servidor aïllat en un contenidor a la nostra pròpia màquina, i el provem des del navegador local.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <p>A l'A1 vas instal·lar Apache "a mà" en una màquina. Amb <strong>Docker</strong> aconseguim el mateix servidor, però empaquetat en una <strong>imatge</strong>: una plantilla que ja porta Apache i la nostra configuració. Cada cop que l'executem, en surt un <strong>contenidor</strong> idèntic, sense haver de reinstal·lar res.</p>
+
+    <table>
+      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Imatge oficial <code>httpd</code></strong></td><td>La imatge d'Apache mantinguda a Docker Hub. La fem servir de base.</td></tr>
+        <tr><td><strong>Dockerfile</strong></td><td>Un fitxer de text amb les instruccions per construir la nostra imatge a partir de la base.</td></tr>
+        <tr><td><strong>Construir (<code>build</code>)</strong></td><td>Crear la nostra imatge a partir del Dockerfile.</td></tr>
+        <tr><td><strong>Mapatge de ports (<code>-p</code>)</strong></td><td>Connectar un port de la nostra màquina amb el del contenidor. Ex.: <code>8443:443</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Publicarem el 443 del contenidor al <strong>8443</strong> de la màquina per no xocar amb altres serveis. Hi accedirem amb <code>https://localhost:8443</code>.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <h3>2.1 · Comprovar que Docker funciona</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker --version</code></pre>
+    </div>
+    <p>➜ Mostra la versió de Docker instal·lada; així comproves que funciona.</p>
+
+    <h3>2.2 · Crear l'estructura de carpetes</h3>
+    <p>Crea una carpeta per a aquesta activitat amb dues subcarpetes (una per a la web, una per als certificats):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>mkdir -p aea2-docker/web aea2-docker/certs</code></pre>
+    </div>
+    <p>➜ Crea la carpeta del projecte amb dues subcarpetes. <code>-p</code> crea també les carpetes pare si no existeixen.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>cd aea2-docker</code></pre>
+    </div>
+    <p>➜ Entra dins la carpeta del projecte. <code>cd</code> vol dir "canvia de directori".</p>
+    <p>Quan acabis aquesta activitat, la carpeta quedarà així (cada fitxer el crees als passos següents):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">estructura de aea2-docker/</span></div>
+      <pre><code>aea2-docker/            <span class="c"># carpeta del projecte</span>
+├── Dockerfile          <span class="c"># instruccions de la imatge (pas 2.4)</span>
+├── certs/              <span class="c"># certificats</span>
+│   ├── aea2.crt        <span class="c"># certificat (pas 2.3)</span>
+│   └── aea2.key        <span class="c"># clau privada (pas 2.3)</span>
+└── web/                <span class="c"># fitxers del lloc web</span>
+    └── index.html      <span class="c"># la teva pàgina (a continuació)</span></code></pre>
+    </div>
+    <p>Ara mateix només existeixen les carpetes <code>certs/</code> i <code>web/</code>; els fitxers els aniràs creant tot seguit.</p>
+    <p>Crea una pàgina web senzilla dins <code>web/</code>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">web/index.html</span></div>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ca"&gt;
+&lt;body&gt;
+  &lt;h1&gt;Servidor segur amb Docker · AEA2&lt;/h1&gt;
+  &lt;p&gt;Aquesta pàgina se serveix per HTTPS des d'un contenidor.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+
+    <h3>2.3 · Generar el certificat autofirmat</h3>
+    <p>Genera el certificat dins <code>certs/</code> (a <em>Common Name</em> pots posar <code>localhost</code>):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout certs/aea2.key \
+  -out certs/aea2.crt</code></pre>
+    </div>
+    <p>➜ Genera el certificat i la clau dins <code>certs/</code>. És <strong>una sola ordre</strong> (les barres <code>\</code> uneixen les línies): <code>-x509</code> crea un certificat autofirmat, <code>-nodes</code> no posa contrasenya a la clau i <code>-days 365</code> el fa vàlid un any.</p>
+    <p>En executar-la, l'<code>openssl</code> et farà unes quantes preguntes (el <em>subject</em> del certificat). Pots respondre-les així:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">preguntes del certificat</span></div>
+      <pre><code>Country Name (2 letter code):    <span class="c"># país, 2 lletres → ES</span>
+State or Province Name:          <span class="c"># província → Barcelona</span>
+Locality Name (eg, city):        <span class="c"># ciutat → Barcelona</span>
+Organization Name:               <span class="c"># organització → Institut La Merce</span>
+Organizational Unit Name:        <span class="c"># departament (opcional) → DAW</span>
+Common Name:                     <span class="c"># ⚠ EL MÉS IMPORTANT: l'adreça del servidor → localhost</span>
+Email Address:                   <span class="c"># correu (opcional) → pots deixar-ho buit</span></code></pre>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>El camp que de debò importa és el <strong>Common Name (CN)</strong>: ha de coincidir amb l'adreça per la qual accediràs al servidor (aquí <code>localhost</code>). La resta de camps són informatius i els pots deixar buits prement <code>Enter</code>.</p>
+    </div>
+
+    <h3>2.4 · Escriure el Dockerfile</h3>
+    <p>A l'arrel de <code>aea2-docker/</code>, crea un fitxer anomenat <code>Dockerfile</code> (sense extensió):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">Dockerfile</span></div>
+      <pre><code><span class="c"># Partim de la imatge oficial d'Apache</span>
+FROM httpd:2.4
+
+<span class="c"># Activem els mòduls d'SSL i la configuració HTTPS d'Apache</span>
+RUN sed -i \
+  -e 's/^#\(LoadModule ssl_module .*\)/\1/' \
+  -e 's/^#\(LoadModule socache_shmcb_module .*\)/\1/' \
+  -e 's/^#\(Include .*httpd-ssl.conf\)/\1/' \
+  conf/httpd.conf
+
+<span class="c"># Copiem el nostre certificat (Apache els busca amb aquests noms)</span>
+COPY certs/aea2.crt /usr/local/apache2/conf/server.crt
+COPY certs/aea2.key /usr/local/apache2/conf/server.key
+
+<span class="c"># Copiem la nostra pàgina web</span>
+COPY web/ /usr/local/apache2/htdocs/</code></pre>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Cada línia és una instrucció: <code>FROM</code> tria la base, <code>RUN</code> executa ordres en construir la imatge, i <code>COPY</code> hi posa els nostres fitxers a dins.</p>
+    </div>
+
+    <h3>2.5 · Construir la imatge</h3>
+    <p>Des de dins de <code>aea2-docker/</code> (on hi ha el Dockerfile):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker build -t aea2-web .</code></pre>
+    </div>
+    <p>➜ Construeix la imatge a partir del Dockerfile. <code>-t aea2-web</code> li posa nom i el punt final indica que el Dockerfile és a la carpeta actual.</p>
+
+    <h3>2.6 · Executar el contenidor</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker run -d --name servidor-aea2 -p 8443:443 aea2-web</code></pre>
+    </div>
+    <p>➜ Crea i engega el contenidor. <code>-d</code> l'executa en segon pla, <code>--name servidor-aea2</code> li posa nom i <code>-p 8443:443</code> publica el port HTTPS del contenidor al 8443 de la teva màquina.</p>
+
+    <h3>2.7 · Accedir al web</h3>
+    <p>Obre el navegador de la teva màquina i ves a:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>
+      <pre><code>https://localhost:8443</code></pre>
+    </div>
+    <p>Accepta l'avís del certificat autofirmat i veuràs la teva pàgina servida per HTTPS des del contenidor.</p>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker ps
+curl -k https://localhost:8443</code></pre>
+    </div>
+    <p>Sortida esperada de <code>docker ps</code> (resumida):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+      <pre><code>CONTAINER ID   IMAGE      COMMAND              STATUS         PORTS
+a1b2c3d4e5f6   aea2-web   "httpd-foreground"   Up 2 minutes   <span class="c"># ⚠ EL MÉS IMPORTANT</span>
+                                                                0.0.0.0:8443-&gt;443/tcp
+NAMES
+servidor-aea2</code></pre>
+    </div>
+    <p>Sortida esperada de <code>curl -k https://localhost:8443</code> (el codi HTML de la teva pàgina; el contingut exacte depèn del que hagis posat a <code>web/index.html</code>):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+      <pre><code>&lt;h1&gt;Servidor segur amb Docker · AEA2&lt;/h1&gt;
+&lt;p&gt;Aquesta pàgina se serveix per HTTPS des d'un contenidor.&lt;/p&gt;</code></pre>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>L'opció <code>-k</code> fa que <code>curl</code> accepti el certificat autofirmat sense donar l'error <em>SSL certificate problem</em>. Si l'ordre respon amb HTML (sense error de connexió), la verificació és correcta.</p>
+    </div>
+    <ul>
+      <li><code>docker ps</code> mostra el contenidor <code>servidor-aea2</code> en estat <code>Up</code> amb el mapatge <code>8443-&gt;443</code>.</li>
+      <li><code>curl -k</code> retorna el codi HTML de la teva pàgina.</li>
+      <li>El navegador mostra la pàgina per <code>https://localhost:8443</code>.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA2 · A2
+  </footer>
+
+</div>
+</body>
+</html>

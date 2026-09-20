@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA2·A1.2 — Publica el teu lloc web: host virtual, nom i contrasenya · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --admin-bg:#FBEFE0;--admin-border:#F1D7B4;--admin-ink:#A85610;
+    --server-bg:#E1F5EE;--server-border:#9FE1CB;--server-ink:#0F6E56;
+    --client-bg:#E8EFFC;--client-border:#BBD3F0;--client-ink:#1D4E89;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+  .callout.switch{background:#EAF1FB;border-color:#BBD3F0}
+  .callout.switch strong{color:#1D4E89}
+
+  /* Capses de màquina: qui fa cada pas */
+  .role-box{border-radius:12px;padding:1.1rem 1.3rem;margin:1.1rem 0;border:1px solid}
+  .role-box.admin{background:var(--admin-bg);border-color:var(--admin-border)}
+  .role-box.server{background:var(--server-bg);border-color:var(--server-border)}
+  .role-box.client{background:var(--client-bg);border-color:var(--client-border)}
+  .role-box.all{background:var(--slate-soft);border-color:var(--hairline)}
+  .role-box > *:first-child{margin-top:0}
+  .role-box > *:last-child{margin-bottom:0}
+  .role-label{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+  .role-label.admin{color:var(--admin-ink)}
+  .role-label.server{color:var(--server-ink)}
+  .role-label.client{color:var(--client-ink)}
+  .role-label.all{color:var(--slate-ink)}
+
+  .legend{display:inline;font-size:.86rem;color:var(--slate-ink)}
+  .legend > span{display:inline-block;margin-right:1rem;white-space:nowrap}
+  .legend .sw{display:inline-block;width:.85rem;height:.85rem;border-radius:4px;margin-right:.4rem;vertical-align:-2px;border:1px solid rgba(0,0,0,.12)}
+
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea2.html"><span class="arrow">←</span> Tornar a l'AEA2</a>
+
+  <header>
+    <span class="badge">AEA2 · A1.2</span>
+    <span class="eyebrow">M0614 · Linux</span>
+    <h1>Publica el teu lloc web: <span class="code">host virtual, nom i contrasenya</span></h1>
+    <p class="lede">Continuant amb el servidor de l'A1.1, ara hi publicaràs el teu propi lloc web amb un host virtual, li donaràs un nom perquè el client hi accedeixi (www.aea2.local) i el protegiràs amb usuari i contrasenya. Finalment faràs que l'HTTPS mostri aquest mateix lloc.</p>
+    <div class="meta">
+      <span class="pill">Branca <strong>aea2</strong></span>
+      <span class="pill">RA <strong>RA2</strong></span>
+      <span class="pill">CA <strong>2.3 · 2.4 · 2.8</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En aquesta activitat aprendràs a:</p>
+    <ul>
+      <li>Crear el teu <strong>propi lloc web</strong> i servir-lo (no la pàgina per defecte d'Apache).</li>
+      <li>Configurar un <strong>host virtual</strong> perquè Apache serveixi aquest lloc.</li>
+      <li>Fer que el client hi accedeixi <strong>pel nom</strong> (<code>www.aea2.local</code>) editant <code>/etc/hosts</code>.</li>
+      <li>Protegir el lloc amb <strong>usuari i contrasenya</strong> (autenticació bàsica).</li>
+    </ul>
+
+    <h3>Prerequisit important</h3>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Aquesta activitat <strong>continua l'A1.1</strong>. Has de tenir les tres màquines a la xarxa interna, el servidor accessible per SSH i Apache instal·lat i funcionant. Si no ho tens, fes primer l'A1.1.</p>
+    </div>
+
+    <h3>Branca de treball</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git switch aea2</code></pre>
+    </div>
+    <p>➜ Et situa a la branca <code>aea2</code>, la mateixa de tota l'AEA (ja creada a l'A1.1).</p>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <p>Fins ara el servidor mostrava la pàgina per defecte d'Apache. Ara hi posaràs <strong>el teu lloc</strong>. Per fer-ho fem servir tres eines d'Apache i del sistema:</p>
+
+    <table>
+      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Host virtual</strong></td><td>Configuració que li diu a Apache quin nom té un lloc i en quina carpeta són els seus fitxers (<code>DocumentRoot</code>). Permet tenir diversos llocs al mateix servidor.</td></tr>
+        <tr><td><strong><code>DocumentRoot</code></strong></td><td>La carpeta on hi ha els fitxers del lloc (per exemple <code>/var/www/aea2</code>).</td></tr>
+        <tr><td><strong>Resolució de noms</strong></td><td>Traduir un nom (<code>www.aea2.local</code>) a una IP. Per a proves ho fem al fitxer <code>/etc/hosts</code> del client.</td></tr>
+        <tr><td><strong>Autenticació bàsica</strong></td><td>Demana usuari i contrasenya per entrar. La contrasenya es desa xifrada amb <code>htpasswd</code>. No xifra el trànsit: per això la combinem amb HTTPS.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>El nom acaba en <code>.local</code> perquè és un nom de proves intern; no és un domini real d'Internet. La "traducció" nom → IP la fem manualment a <code>/etc/hosts</code>.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Cada pas ve dins d'una <strong>capsa de color</strong> que indica qui l'ha de fer: <span class="legend"><span><span class="sw" style="background:var(--admin-bg);border-color:var(--admin-border)"></span>Administrador</span><span><span class="sw" style="background:var(--server-bg);border-color:var(--server-border)"></span>Servidor</span><span><span class="sw" style="background:var(--client-bg);border-color:var(--client-border)"></span>Client</span></span>. Els fitxers de configuració no porten capsa.</p>
+    </div>
+
+    <p>Els passos 2.1 a 2.4 i el 2.6 es fan al <strong>servidor</strong> (pots entrar-hi per SSH des de l'administrador, com a l'A1.1). El pas 2.5 es fa al <strong>client</strong>.</p>
+
+    <h3>2.1 · Crea la carpeta i la pàgina del teu lloc</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo mkdir /var/www/aea2</code></pre>
+      </div>
+      <p>➜ Crea la carpeta on hi haurà els fitxers del teu lloc web.</p>
+      <p>Crea una pàgina d'inici senzilla dins d'aquesta carpeta:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>echo <span class="c">"&lt;h1&gt;El meu servidor segur · AEA2&lt;/h1&gt;"</span> | sudo tee /var/www/aea2/index.html</code></pre>
+      </div>
+      <p>➜ Escriu una pàgina d'inici dins la carpeta. La canonada <code>| sudo tee</code> desa el text al fitxer amb permisos d'administrador.</p>
+    </div>
+
+    <h3>2.2 · Crea el host virtual</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>Crea el fitxer de configuració del teu lloc:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo nano /etc/apache2/sites-available/aea2.conf</code></pre>
+      </div>
+      <p>➜ Obre amb <code>nano</code> el fitxer on definirem el nostre lloc (host virtual).</p>
+      <p>Escriu-hi aquest contingut:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">aea2.conf</span></div>
+        <pre><code>&lt;VirtualHost *:80&gt;
+    ServerName www.aea2.local
+    DocumentRoot /var/www/aea2
+&lt;/VirtualHost&gt;</code></pre>
+      </div>
+      <p>➜ Explicació de cada línia:</p>
+      <ul>
+        <li><code>&lt;VirtualHost *:80&gt;</code> → obre la definició d'un lloc web que escolta al port <strong>80</strong> (HTTP).</li>
+        <li><code>ServerName www.aea2.local</code> → el <strong>nom</strong> pel qual s'accedirà al lloc.</li>
+        <li><code>DocumentRoot /var/www/aea2</code> → la <strong>carpeta</strong> on hi ha els fitxers del lloc.</li>
+        <li><code>&lt;/VirtualHost&gt;</code> → tanca la definició del lloc.</li>
+      </ul>
+      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>).</p>
+    </div>
+
+    <h3>2.3 · Activa el lloc</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo a2ensite aea2</code></pre>
+      </div>
+      <p>➜ Activa el lloc <code>aea2</code> a Apache (l'afegeix a <code>sites-enabled</code>).</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo systemctl reload apache2</code></pre>
+      </div>
+      <p>➜ Recarrega Apache perquè apliqui la nova configuració sense aturar el servei.</p>
+    </div>
+
+    <h3>2.4 · Protegeix el lloc amb usuari i contrasenya</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>Crea un usuari (aquí <code>laura</code>); et demanarà la contrasenya dues vegades:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo htpasswd -c /etc/apache2/.htpasswd laura</code></pre>
+      </div>
+      <p>➜ Crea l'usuari <code>laura</code> i desa la seva contrasenya xifrada. <code>-c</code> crea el fitxer de contrasenyes (només s'usa el primer cop; després no).</p>
+      <p>Torna a obrir <code>aea2.conf</code> per afegir-hi el bloc <code>&lt;Directory&gt;</code> dins del <code>&lt;VirtualHost&gt;</code>:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo nano /etc/apache2/sites-available/aea2.conf</code></pre>
+      </div>
+      <p>➜ Torna a obrir el fitxer del host virtual per afegir-hi la protecció amb contrasenya.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">aea2.conf</span></div>
+        <pre><code>&lt;VirtualHost *:80&gt;
+    ServerName www.aea2.local
+    DocumentRoot /var/www/aea2
+
+    &lt;Directory /var/www/aea2&gt;
+        AuthType Basic
+        AuthName "Zona privada"
+        AuthUserFile /etc/apache2/.htpasswd
+        Require user laura
+    &lt;/Directory&gt;
+&lt;/VirtualHost&gt;</code></pre>
+      </div>
+      <p>➜ Explicació de cada línia (les tres primeres i l'última ja les coneixes del pas anterior; les noves són les del bloc <code>&lt;Directory&gt;</code>):</p>
+      <ul>
+        <li><code>&lt;VirtualHost *:80&gt;</code> → obre la definició del lloc al port 80.</li>
+        <li><code>ServerName www.aea2.local</code> → el nom pel qual s'accedeix al lloc.</li>
+        <li><code>DocumentRoot /var/www/aea2</code> → la carpeta amb els fitxers del lloc.</li>
+        <li><code>&lt;Directory /var/www/aea2&gt;</code> → comença un bloc de regles <strong>per a aquesta carpeta</strong>.</li>
+        <li><code>AuthType Basic</code> → tipus d'autenticació: <strong>usuari i contrasenya</strong>.</li>
+        <li><code>AuthName "Zona privada"</code> → text que apareix a la finestra que demana les credencials.</li>
+        <li><code>AuthUserFile /etc/apache2/.htpasswd</code> → fitxer on són desades les contrasenyes (el que has creat amb <code>htpasswd</code>).</li>
+        <li><code>Require user laura</code> → només l'usuari <strong>laura</strong> pot entrar.</li>
+        <li><code>&lt;/Directory&gt;</code> → tanca el bloc de regles de la carpeta.</li>
+        <li><code>&lt;/VirtualHost&gt;</code> → tanca la definició del lloc.</li>
+      </ul>
+      <p>Desa i recarrega Apache:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo systemctl reload apache2</code></pre>
+      </div>
+      <p>➜ Recarrega Apache perquè el lloc quedi protegit amb usuari i contrasenya.</p>
+      <div class="callout warn">
+        <span class="ico">⚠️</span>
+        <p>L'autenticació bàsica <strong>no xifra</strong> el trànsit: la contrasenya viatjaria en clar per HTTP. Per això és important servir el lloc també per <strong>HTTPS</strong> (pas 2.6).</p>
+      </div>
+    </div>
+
+    <h3>2.5 · Fes que el client accedeixi pel nom</h3>
+    <div class="role-box client">
+      <span class="role-label client">Client</span>
+      <p>Ves a la màquina <strong>client</strong> i edita el fitxer <code>/etc/hosts</code>:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — client</span></div>
+        <pre><code>sudo nano /etc/hosts</code></pre>
+      </div>
+      <p>➜ Obre al client el fitxer que associa noms a adreces IP.</p>
+      <p>Afegeix aquesta línia al final (associa el nom a la IP del servidor):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">/etc/hosts — client</span></div>
+        <pre><code>192.168.1.10   www.aea2.local</code></pre>
+      </div>
+      <p>➜ Associa el nom <code>www.aea2.local</code> a la IP del servidor, de manera que el client hi arribi pel nom.</p>
+    <p>Prova-ho al navegador del client: <code>http://www.aea2.local</code>. Ha de demanar usuari i contrasenya i, en encertar-los, mostrar el teu lloc.</p>
+    </div>
+
+    <h3>2.6 · Fes que l'HTTPS mostri el teu lloc</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>Edita la configuració SSL (la de l'A1.1) i canvia el <code>DocumentRoot</code> perquè apunti al teu lloc:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo nano /etc/apache2/sites-available/default-ssl.conf</code></pre>
+      </div>
+      <p>➜ Obre la configuració del lloc HTTPS per canviar-hi el <code>DocumentRoot</code>.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">default-ssl.conf</span></div>
+        <pre><code>DocumentRoot /var/www/aea2</code></pre>
+      </div>
+      <p>➜ Fa que la versió HTTPS del lloc mostri la mateixa carpeta que el teu host virtual (<code>/var/www/aea2</code>).</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo systemctl reload apache2</code></pre>
+      </div>
+      <p>➜ Recarrega Apache perquè l'HTTPS mostri el teu lloc propi.</p>
+      <p>Ara <code>https://192.168.1.10</code> mostrarà el teu lloc, servit de forma segura.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <ul>
+      <li>Al <strong>client</strong>, <code>http://www.aea2.local</code> demana usuari/contrasenya i, en encertar-los, mostra el teu lloc.</li>
+      <li><code>https://192.168.1.10</code> mostra el teu lloc per HTTPS.</li>
+    </ul>
+    <div class="role-box admin">
+      <span class="role-label admin">Administrador</span>
+      <p>Comprovació ràpida des de l'administrador (l'opció <code>-u</code> envia l'usuari):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
+        <pre><code>curl -k -u laura https://192.168.1.10</code></pre>
+      </div>
+      <p>➜ Demana la pàgina per HTTPS identificant-se com <code>laura</code>. <code>-k</code> accepta el certificat autofirmat i <code>-u laura</code> envia l'usuari (et demanarà la contrasenya).</p>
+      <p>Sortida esperada: primer et demana la contrasenya i, si l'encertes, el codi HTML de la pàgina:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>Enter host password for user 'laura':   <span class="c"># escriu la contrasenya i prem Enter</span>
+&lt;h1&gt;El meu servidor segur · AEA2&lt;/h1&gt;</code></pre>
+      </div>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>Si la contrasenya és incorrecta, <code>curl</code> respon <code>401 Unauthorized</code> en lloc del HTML. Si dona un error de connexió, revisa la taula d'Errors freqüents.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA2 · A1.2
+  </footer>
+
+</div>
+</body>
+</html>

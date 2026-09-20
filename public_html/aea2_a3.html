@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA2·A3 — Servidor segur a una EC2 administrada per SSH · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea2.html"><span class="arrow">←</span> Tornar a l'AEA2</a>
+
+  <header>
+    <span class="badge">AEA2 · A3</span>
+    <span class="eyebrow">M0614 · AWS</span>
+    <h1>Servidor segur a una EC2 <span class="code">per SSH</span></h1>
+    <p class="lede">Ara portaràs el mateix servidor al núvol. Llançaràs una màquina virtual (EC2) a AWS Academy, t'hi connectaràs de manera segura per SSH amb una clau i hi publicaràs el web amb HTTPS, accessible des de la seva IP pública.</p>
+    <div class="meta">
+      <span class="pill">Branca <strong>aea2</strong></span>
+      <span class="pill">RA <strong>RA2</strong></span>
+      <span class="pill">CA <strong>2.5 · 2.6 · 2.9</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En aquesta activitat aprendràs a:</p>
+    <ul>
+      <li>Llançar una instància <strong>EC2</strong> al Learner Lab d'AWS Academy.</li>
+      <li>Obrir només els <strong>ports necessaris</strong> amb un <em>security group</em> (22, 80 i 443).</li>
+      <li>Connectar-t'hi de manera segura per <strong>SSH</strong> amb una clau <code>.pem</code>.</li>
+      <li>Instal·lar Apache i publicar el web amb <strong>HTTPS</strong> a la <strong>IP pública</strong>.</li>
+    </ul>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Accés a <strong>AWS Academy · Learner Lab</strong> (AEA0).</li>
+      <li>Un terminal a la teva màquina per fer <code>ssh</code>.</li>
+      <li>El teu repositori <code>m0614</code> amb la branca <code>aea2</code>.</li>
+    </ul>
+
+    <h3>Branca de treball</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>git switch aea2</code></pre>
+    </div>
+
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>El Learner Lab té temps limitat i s'atura sol. Fes les captures a mesura que avances: si la sessió caduca, la instància es pot aturar.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <p>Fins ara el servidor era a l'aula (A1) o en un contenidor local (A2). Ara serà una màquina real al <strong>núvol d'AWS</strong>: una <strong>EC2</strong>. Com que és pública, l'administrarem igualment per <strong>SSH</strong>, però la seguretat de la connexió ve d'una <strong>clau</strong> (fitxer <code>.pem</code>) en lloc d'una contrasenya.</p>
+
+    <table>
+      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
+      <tbody>
+        <tr><td><strong>EC2</strong></td><td>Una màquina virtual llogada a AWS.</td></tr>
+        <tr><td><strong>AMI</strong></td><td>La imatge del sistema operatiu amb què s'engega l'EC2 (farem servir Ubuntu).</td></tr>
+        <tr><td><strong>Key pair (<code>.pem</code>)</strong></td><td>La clau privada per connectar-te per SSH. Substitueix la contrasenya.</td></tr>
+        <tr><td><strong>Security group</strong></td><td>El tallafoc de l'EC2: decideix quins ports són accessibles des de fora.</td></tr>
+        <tr><td><strong>IP pública</strong></td><td>L'adreça per accedir a l'EC2 des d'Internet.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <h3>2.1 · Entrar al Learner Lab i obrir la consola</h3>
+    <ol>
+      <li>Entra a <strong>AWS Academy</strong> i obre el teu <strong>Learner Lab</strong>.</li>
+      <li>Prem <strong>Start Lab</strong> i espera que el punt del costat d'<strong>AWS</strong> es posi verd.</li>
+      <li>Fes clic a <strong>AWS</strong> per obrir la consola d'AWS.</li>
+    </ol>
+
+    <h3>2.2 · Llançar la instància EC2</h3>
+    <ol>
+      <li>A la consola, cerca <strong>EC2</strong> i entra-hi. Prem <strong>Launch instance</strong>.</li>
+      <li>Posa-li de nom <code>servidor-aea2</code>.</li>
+      <li>A <strong>Application and OS Images</strong>, tria <strong>Ubuntu</strong> (Free tier).</li>
+      <li>A <strong>Instance type</strong>, deixa <code>t2.micro</code> (Free tier).</li>
+      <li>A <strong>Key pair</strong>, prem <strong>Create new key pair</strong>, posa-li nom <code>aea2-key</code>, format <strong>.pem</strong>, i descarrega-la. <strong>Guarda-la bé: només es descarrega un cop.</strong></li>
+    </ol>
+
+    <h3>2.3 · Configurar el security group (ports)</h3>
+    <p>A l'apartat <strong>Network settings</strong> de la mateixa pantalla de llançament, marca que s'obrin aquests ports:</p>
+    <table>
+      <thead><tr><th>Port</th><th>Servei</th><th>Per a què</th></tr></thead>
+      <tbody>
+        <tr><td><code>22</code></td><td>SSH</td><td>Administrar l'EC2 des del teu terminal.</td></tr>
+        <tr><td><code>80</code></td><td>HTTP</td><td>Accés web sense xifrar (opcional).</td></tr>
+        <tr><td><code>443</code></td><td>HTTPS</td><td>Accés web segur.</td></tr>
+      </tbody>
+    </table>
+    <p>Marca <em>Allow SSH</em>, <em>Allow HTTP</em> i <em>Allow HTTPS</em>. Després prem <strong>Launch instance</strong>.</p>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Quan la instància estigui <strong>Running</strong>, copia'n la <strong>IP pública</strong> (Public IPv4 address). La faràs servir per connectar-t'hi i per obrir el web.</p>
+    </div>
+
+    <h3>2.4 · Connectar-se per SSH</h3>
+    <p>Obre un terminal a la teva màquina, a la carpeta on has desat la clau. Primer, protegeix la clau (SSH no accepta claus amb permisos oberts):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>chmod 400 aea2-key.pem</code></pre>
+    </div>
+    <p>➜ Dona permisos restrictius a la clau. <code>chmod 400</code> fa que només el propietari la pugui llegir; SSH no accepta claus amb permisos oberts.</p>
+    <p>Connecta't (substitueix <code>IP-PUBLICA</code> per la de la teva EC2). A les AMI d'Ubuntu l'usuari és <code>ubuntu</code>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>ssh -i aea2-key.pem ubuntu@IP-PUBLICA</code></pre>
+    </div>
+    <p>➜ Obre la sessió SSH a l'EC2. <code>-i aea2-key.pem</code> indica quina clau fer servir i <code>ubuntu</code> és l'usuari de les AMI d'Ubuntu.</p>
+    <p>Accepta la <em>fingerprint</em> el primer cop (<code>yes</code>). Quan hi entris, el <em>prompt</em> passarà a ser el de l'EC2: <strong>ja administres el servidor al núvol</strong>.</p>
+
+    <h3>2.5 · Instal·lar Apache i activar HTTPS</h3>
+    <p>Ja dins l'EC2 per SSH, instal·la Apache i activa SSL (igual que a l'A1.1):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — la teva màquina → EC2 (SSH)</span></div>
+      <pre><code>sudo apt update</code></pre>
+    </div>
+    <p>➜ Actualitza la llista de paquets disponibles.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — la teva màquina → EC2 (SSH)</span></div>
+      <pre><code>sudo apt install apache2 -y</code></pre>
+    </div>
+    <p>➜ Instal·la el servidor web Apache. <code>-y</code> accepta automàticament la instal·lació.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — la teva màquina → EC2 (SSH)</span></div>
+      <pre><code>sudo a2enmod ssl</code></pre>
+    </div>
+    <p>➜ Activa el mòdul <code>ssl</code>, que permet a Apache servir pàgines per HTTPS.</p>
+    <p>Genera el certificat autofirmat:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — la teva màquina → EC2 (SSH)</span></div>
+      <pre><code>sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/aea2.key \
+  -out /etc/ssl/certs/aea2.crt</code></pre>
+    </div>
+    <p>➜ Genera el certificat i la clau. És <strong>una sola ordre</strong> (les barres <code>\</code> uneixen les línies): <code>-x509</code> crea un certificat autofirmat, <code>-nodes</code> no posa contrasenya a la clau i <code>-days 365</code> el fa vàlid un any.</p>
+    <p>En executar-la, l'<code>openssl</code> et farà unes quantes preguntes (el <em>subject</em> del certificat). Pots respondre-les així:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">preguntes del certificat</span></div>
+      <pre><code>Country Name (2 letter code):    <span class="c"># país, 2 lletres → ES</span>
+State or Province Name:          <span class="c"># província → Barcelona</span>
+Locality Name (eg, city):        <span class="c"># ciutat → Barcelona</span>
+Organization Name:               <span class="c"># organització → Institut La Merce</span>
+Organizational Unit Name:        <span class="c"># departament (opcional) → DAW</span>
+Common Name:                     <span class="c"># ⚠ EL MÉS IMPORTANT: l'adreça del servidor → IP-PUBLICA</span>
+Email Address:                   <span class="c"># correu (opcional) → pots deixar-ho buit</span></code></pre>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>El camp que de debò importa és el <strong>Common Name (CN)</strong>: ha de coincidir amb l'adreça per la qual accediràs al servidor (aquí la <code>IP-PUBLICA</code> de l'EC2). La resta de camps són informatius i els pots deixar buits prement <code>Enter</code>.</p>
+    </div>
+    <p>Obre la configuració SSL per indicar-hi el certificat:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — la teva màquina → EC2 (SSH)</span></div>
+      <pre><code>sudo nano /etc/apache2/sites-available/default-ssl.conf</code></pre>
+    </div>
+    <p>➜ Obre el fitxer de configuració del lloc HTTPS.</p>
+    <p>Deixa les dues línies del certificat apuntant al teu:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">default-ssl.conf</span></div>
+      <pre><code>SSLCertificateFile      /etc/ssl/certs/aea2.crt
+SSLCertificateKeyFile   /etc/ssl/private/aea2.key</code></pre>
+    </div>
+    <p>Activa el lloc HTTPS i recarrega Apache:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — la teva màquina → EC2 (SSH)</span></div>
+      <pre><code>sudo a2ensite default-ssl</code></pre>
+    </div>
+    <p>➜ Activa el lloc HTTPS (<code>default-ssl</code>) a Apache.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — la teva màquina → EC2 (SSH)</span></div>
+      <pre><code>sudo systemctl reload apache2</code></pre>
+    </div>
+    <p>➜ Recarrega Apache perquè apliqui la nova configuració sense aturar el servei.</p>
+
+    <h3>2.6 · Accedir al web des del navegador</h3>
+    <p>Al navegador de la teva màquina, escriu la IP pública de l'EC2 amb <code>https</code>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>
+      <pre><code>https://IP-PUBLICA</code></pre>
+    </div>
+    <p>Accepta l'avís del certificat autofirmat i veuràs la pàgina d'Apache servida per HTTPS des del núvol.</p>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <p>Des de la teva màquina, connectat per <strong>SSH a l'EC2</strong>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — la teva màquina → EC2 (SSH)</span></div>
+      <pre><code>systemctl status apache2
+sudo ss -tlnp | grep -E <span class="c">':(22|443)'</span></code></pre>
+    </div>
+    <p>Sortida esperada de <code>systemctl status apache2</code> (resumida):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+      <pre><code>● apache2.service - The Apache HTTP Server
+     Loaded: loaded (/lib/systemd/system/apache2.service; enabled; ...)
+     Active: active (running) since ...   <span class="c"># ⚠ EL MÉS IMPORTANT</span>
+   Main PID: 1234 (apache2)
+      Tasks: 55 (limit: ...)
+     CGroup: /system.slice/apache2.service
+             ├─1234 /usr/sbin/apache2 -k start
+             ├─1235 /usr/sbin/apache2 -k start
+             └─1236 /usr/sbin/apache2 -k start</code></pre>
+    </div>
+    <p>Sortida esperada de <code>ss -tlnp</code> (una línia per port):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+      <pre><code>LISTEN 0 128 0.0.0.0:22    0.0.0.0:*  users:(("sshd",pid=...,fd=3))     <span class="c"># port SSH</span>
+LISTEN 0 128 0.0.0.0:443   0.0.0.0:*  users:(("apache2",pid=1234,fd=6)) <span class="c"># port HTTPS</span></code></pre>
+    </div>
+    <p>Des de la teva màquina:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>curl -k https://IP-PUBLICA</code></pre>
+    </div>
+    <p>Sortida esperada (el codi HTML de la pàgina; el contingut exacte depèn del que hi hagis publicat):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+      <pre><code>&lt;html&gt;&lt;body&gt;&lt;h1&gt;It works!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;</code></pre>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>L'opció <code>-k</code> fa que <code>curl</code> accepti el certificat autofirmat sense donar l'error <em>SSL certificate problem</em>. Si l'ordre respon amb HTML (sense error de connexió), la verificació és correcta.</p>
+    </div>
+    <ul>
+      <li>La sessió SSH s'ha establert amb la clau <code>.pem</code>.</li>
+      <li><code>systemctl status apache2</code> mostra <code>active (running)</code>.</li>
+      <li><code>curl -k</code> retorna el codi HTML de la pàgina.</li>
+      <li>El navegador obre <code>https://IP-PUBLICA</code> correctament.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA2 · A3
+  </footer>
+
+</div>
+</body>
+</html>
