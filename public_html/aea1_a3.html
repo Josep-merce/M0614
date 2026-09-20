@@ -84,9 +84,8 @@
     <span class="badge">AEA1 · A3</span>
     <span class="eyebrow">M0614 · RA1 · AWS</span>
     <h1>El mateix servidor <span class="code">a AWS, amb S3</span></h1>
-    <p class="lede">Ja has muntat el servidor a Linux (A1) i amb Docker (A2). Ara el portarem al núvol amb <strong>Amazon S3</strong>, sense crear cap màquina virtual.</p>
+    <p class="lede">Donarem d'alta el compte a AWS Academy, entrarem per primera vegada a la consola des d'un laboratori i, tot seguit, farem el mateix servidor de l'A1 i l'A2 al núvol amb <strong>Amazon S3</strong>, sense crear cap màquina virtual.</p>
     <div class="meta">
-      <span class="pill">Branca <strong>aea1</strong></span>
       <span class="pill">RA <strong>RA1</strong></span>
       <span class="pill">CA <strong>1.5 · 1.6 · 1.7 · 1.9</strong></span>
     </div>
@@ -103,6 +102,9 @@
 
     <p>En aquesta activitat aprendràs a:</p>
     <ul>
+      <li>Acceptar la invitació i fer l'alta a <strong>AWS Academy</strong>.</li>
+      <li>Accedir per primera vegada a la <strong>consola d'AWS</strong> a través d'un laboratori del Learner Lab.</li>
+      <li>Orientar-te per la consola: regió, cercador de serveis i pressupost de crèdits.</li>
       <li>Entrar al <strong>AWS Learner Lab</strong> i crear un <strong>bucket S3</strong>.</li>
       <li>Activar l'<strong>allotjament de lloc web estàtic</strong> d'aquest bucket.</li>
       <li>Pujar-hi el teu fitxer <code>index.html</code> i fer-lo públic.</li>
@@ -111,16 +113,17 @@
     <h3>Prerequisits</h3>
     <ul>
       <li>Haver completat l'<a href="aea1_a1.html">A1</a> (reutilitzaràs el mateix <code>index.html</code>).</li>
-      <li>Tenir accés al <strong>AWS Academy Learner Lab</strong> (fet a l'AEA0).</li>
+      <li>Tenir el correu d'invitació a AWS Academy enviat pel professorat.</li>
+      <li>Navegador web i connexió a Internet.</li>
     </ul>
 
-    <h3>Branca de treball</h3>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-      <pre><code>git switch aea1</code></pre>
-    </div>
-    <p>➜ Entra a la branca <code>aea1</code>, la mateixa que has fet servir a l'A1 i l'A2.</p>
+    <h3>Serveis AWS implicats</h3>
+    <p>Primer accedirem només a la <strong>consola d'AWS</strong> mitjançant el <strong>Learner Lab</strong> per familiaritzar-nos amb l'entorn; després crearem el nostre primer recurs (un bucket S3).</p>
 
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>AWS Academy es fa servir <strong>sense targeta de crèdit</strong>: treballaràs amb crèdits assignats. Vés amb compte d'aturar els recursos quan acabis per no esgotar-los.</p>
+    </div>
     <div class="callout tip">
       <span class="ico">💡</span>
       <p><strong>S3</strong> (Simple Storage Service) és un servei d'AWS pensat per emmagatzemar fitxers. No és un servidor tradicional com Apache, però pot servir fitxers HTML directament per internet.</p>
@@ -134,11 +137,22 @@
       <h2>Context i teoria mínima</h2>
     </div>
 
+    <p><strong>AWS (Amazon Web Services)</strong> és una plataforma de núvol que ofereix serveis sota demanda: servidors, emmagatzematge, bases de dades, xarxes, etc. Durant el mòdul desplegaràs els teus serveis al núvol fent servir AWS.</p>
+
+    <h3>Què és AWS Academy?</h3>
+    <p><strong>AWS Academy</strong> és el programa educatiu d'Amazon per a centres de formació. Permet a l'alumnat accedir a serveis reals d'AWS mitjançant <strong>crèdits</strong>, sense necessitat de targeta de crèdit ni d'obrir un compte personal de pagament.</p>
+
+    <h3>El Learner Lab</h3>
+    <p>L'accés a la consola es fa a través d'un <strong>laboratori (Learner Lab)</strong>. Quan l'inicies, AWS et dona un entorn temporal amb un pressupost limitat. Dins el laboratori trobaràs un botó per obrir la consola d'AWS ja autenticada.</p>
+
     <p>A l'A1 i l'A2 vas instal·lar Apache: un programa que escolta peticions i respon amb fitxers. Amb S3 no instal·les cap programa: simplement <strong>puges els fitxers a un bucket</strong> i AWS els serveix, sense cap "màquina" que hagis de configurar.</p>
 
     <table>
       <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
       <tbody>
+        <tr><td><strong>Consola d'AWS</strong></td><td>La interfície web des d'on gestiones tots els serveis.</td></tr>
+        <tr><td><strong>Regió</strong></td><td>La ubicació geogràfica on s'allotgen els recursos (per exemple, <code>us-east-1</code>).</td></tr>
+        <tr><td><strong>Learner Lab</strong></td><td>Entorn temporal d'AWS Academy amb crèdits per practicar.</td></tr>
         <tr><td><strong>Bucket</strong></td><td>Una "carpeta" a S3. El nom ha de ser únic a tot AWS.</td></tr>
         <tr><td><strong>Allotjament de lloc web estàtic</strong></td><td>Opció del bucket que fa que els HTML es vegin com una pàgina web.</td></tr>
         <tr><td><strong>Accés públic</strong></td><td>Permís que cal activar per a que qualsevol pugui veure els fitxers.</td></tr>
@@ -154,14 +168,55 @@
       <h2>Pas a pas guiat</h2>
     </div>
 
-    <h3>2.1 · Entra al Learner Lab i inicia'l</h3>
+    <h3>2.1 · Acceptar la invitació a AWS Academy</h3>
     <ol>
-      <li>Accedeix a AWS Academy amb el teu usuari de l'institut.</li>
-      <li>Entra al <strong>Learner Lab</strong> i fes clic a <strong>Start Lab</strong>.</li>
-      <li>Espera el punt <strong>verd</strong> i fes clic a <strong>AWS</strong> per obrir la consola.</li>
+      <li>Obre el correu d'invitació que t'ha enviat el professorat (assumpte amb "AWS Academy").</li>
+      <li>Fes clic a l'enllaç <strong>Get Started</strong> / <strong>Accept invitation</strong>.</li>
+      <li>Crea el compte amb les teves dades i una contrasenya, o inicia sessió si ja en tens un.</li>
+      <li>Accepta les condicions del programa per completar l'alta.</li>
+    </ol>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Si l'enllaç de la invitació ha caducat, demana al professorat que te'n reenviï una de nova. Les invitacions tenen data de validesa.</p>
+    </div>
+
+    <h3>2.2 · Entrar al curs i obrir els mòduls</h3>
+    <ol>
+      <li>Un cop dins, ves a <strong>Canvas</strong> (la plataforma d'AWS Academy).</li>
+      <li>Selecciona el curs <strong>AWS Academy Learner Lab</strong> al qual t'han matriculat.</li>
+      <li>Al menú lateral, obre <strong>Modules</strong> i després <strong>Learner Lab</strong>.</li>
     </ol>
 
-    <h3>2.2 · Crea el bucket</h3>
+    <h3>2.3 · Iniciar el laboratori</h3>
+    <ol>
+      <li>Dins el Learner Lab, fes clic a <strong>Start Lab</strong>.</li>
+      <li>Espera que l'indicador del costat de <strong>AWS</strong> es posi <strong>verd</strong> (pot trigar uns segons).</li>
+      <li>Fixa't en el comptador de <strong>crèdits restants</strong> que apareix a la part superior: és el teu pressupost.</li>
+    </ol>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>El cercle al costat de "AWS" indica l'estat del laboratori: vermell = aturat, groc = iniciant-se, verd = a punt. Quan acabis, fes <strong>End Lab</strong> per estalviar crèdits.</p>
+    </div>
+
+    <h3>2.4 · Obrir la consola d'AWS</h3>
+    <ol>
+      <li>Amb l'indicador en verd, fes clic a <strong>AWS</strong> (el text al costat del cercle).</li>
+      <li>S'obrirà una pestanya nova amb la <strong>consola d'AWS</strong> ja autenticada. No cal posar usuari ni contrasenya.</li>
+    </ol>
+
+    <h3>2.5 · Orientar-te per la consola</h3>
+    <p>Fes una exploració bàsica per familiaritzar-te:</p>
+    <ul>
+      <li><strong>Cercador de serveis:</strong> a la barra superior, escriu el nom d'un servei (per exemple, <code>EC2</code> o <code>S3</code>) per accedir-hi.</li>
+      <li><strong>Regió:</strong> a la part superior dreta es mostra la regió activa. A AWS Academy sol ser <code>N. Virginia (us-east-1)</code>. Comprova-la, però <strong>no la canviïs</strong> tret que t'ho indiquin.</li>
+      <li><strong>Menú de serveis:</strong> el botó de quadrícula (a dalt a l'esquerra) llista totes les categories de serveis.</li>
+    </ul>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Treballa sempre a la mateixa regió durant tot el curs. Els recursos creats en una regió no es veuen en una altra.</p>
+    </div>
+
+    <h3>2.6 · Crea el bucket</h3>
     <ol>
       <li>Cerca el servei <strong>S3</strong> i fes clic a <strong>Create bucket</strong>.</li>
       <li>Posa-li un nom <strong>únic</strong>, per exemple <code>aea1-nomcognom-2026</code>.</li>
@@ -169,7 +224,7 @@
       <li>Fes clic a <strong>Create bucket</strong>.</li>
     </ol>
 
-    <h3>2.3 · Activa l'allotjament de lloc web estàtic</h3>
+    <h3>2.7 · Activa l'allotjament de lloc web estàtic</h3>
     <ol>
       <li>Entra al bucket i vés a <strong>Properties</strong>.</li>
       <li>Baixa fins a <strong>Static website hosting</strong> i fes clic a <strong>Edit</strong>.</li>
@@ -177,7 +232,7 @@
       <li>Desa i apunta l'adreça de <strong>Bucket website endpoint</strong>.</li>
     </ol>
 
-    <h3>2.4 · Prepara el teu <code>index.html</code></h3>
+    <h3>2.8 · Prepara el teu <code>index.html</code></h3>
     <p>Pots reutilitzar el de l'A1 canviant el text:</p>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
@@ -194,13 +249,13 @@
 &lt;/html&gt;</code></pre>
     </div>
 
-    <h3>2.5 · Puja el fitxer al bucket</h3>
+    <h3>2.9 · Puja el fitxer al bucket</h3>
     <ol>
       <li>A la pestanya <strong>Objects</strong>, fes clic a <strong>Upload</strong>.</li>
       <li><strong>Add files</strong> → selecciona <code>index.html</code> → <strong>Upload</strong>.</li>
     </ol>
 
-    <h3>2.6 · Fes públic el fitxer</h3>
+    <h3>2.10 · Fes públic el fitxer</h3>
     <ol>
       <li>Vés a <strong>Permissions</strong> del bucket.</li>
       <li>A <strong>Bucket policy</strong>, fes clic a <strong>Edit</strong> i enganxa (canviant <code>NOM-DEL-TEU-BUCKET</code>):</li>
@@ -229,6 +284,11 @@
       <span class="sec-num">3</span>
       <h2>Verificació</h2>
     </div>
+    <ul>
+      <li>Pots iniciar sessió a AWS Academy i veure el curs <strong>Learner Lab</strong>.</li>
+      <li>En fer <strong>Start Lab</strong>, l'indicador d'AWS es posa verd i veus els crèdits restants.</li>
+      <li>El botó <strong>AWS</strong> obre la consola sense demanar credencials.</li>
+    </ul>
     <p>Obre el navegador i visita l'adreça de l'endpoint:</p>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>

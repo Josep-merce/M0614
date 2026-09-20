@@ -84,9 +84,8 @@
     <span class="badge">AEA1 · A2</span>
     <span class="eyebrow">M0614 · RA1 · Docker</span>
     <h1>El mateix servidor <span class="code">amb Docker</span></h1>
-    <p class="lede">A l'A1 vas instal·lar Apache directament sobre Linux. Ara farem exactament el mateix, però dins d'un contenidor Docker.</p>
+    <p class="lede">Instal·larem Docker i Docker Compose sobre Debian i, tot seguit, farem exactament el mateix que a l'A1 (muntar el servidor Apache), però dins d'un contenidor Docker.</p>
     <div class="meta">
-      <span class="pill">Branca <strong>aea1</strong></span>
       <span class="pill">RA <strong>RA1</strong></span>
       <span class="pill">CA <strong>1.5 · 1.6 · 1.7</strong></span>
     </div>
@@ -103,6 +102,8 @@
 
     <p>En aquesta activitat aprendràs a:</p>
     <ul>
+      <li>Instal·lar <strong>Docker Engine</strong> i el plugin <strong>Docker Compose</strong> sobre Debian.</li>
+      <li>Executar Docker sense <code>sudo</code> afegint el teu usuari al grup <code>docker</code>.</li>
       <li>Explicar amb les teves paraules què és un <strong>contenidor</strong> i en què es diferencia d'instal·lar un programa directament.</li>
       <li>Descarregar una imatge d'Apache des de Docker Hub.</li>
       <li>Executar un contenidor i publicar-hi la teva pàgina web.</li>
@@ -111,20 +112,13 @@
     <h3>Prerequisits</h3>
     <ul>
       <li>Haver completat l'<a href="aea1_a1.html">A1</a>.</li>
-      <li>Tenir <strong>Docker</strong> instal·lat (fet a l'AEA0).</li>
+      <li>Connexió a Internet per descarregar Docker i les imatges.</li>
+      <li>Permisos d'administrador (<code>sudo</code>) a la màquina Debian.</li>
     </ul>
-
-    <h3>Branca de treball</h3>
-    <p>Continuem a la mateixa branca <code>aea1</code>:</p>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-      <pre><code>git switch aea1</code></pre>
-    </div>
-    <p>➜ Entra a la branca <code>aea1</code>, la mateixa que vas fer servir a l'A1.</p>
 
     <div class="callout tip">
       <span class="ico">💡</span>
-      <p>Un <strong>contenidor</strong> és com una "caixa" que porta a dins tot el que un programa necessita per funcionar, llesta per executar-se a qualsevol màquina amb Docker instal·lat.</p>
+      <p>Un <strong>contenidor</strong> és com una "caixa" que porta a dins tot el que un programa necessita per funcionar, llesta per executar-se a qualsevol màquina amb Docker instal·lat. Encara no fem servir AWS: Docker ens permetrà, més endavant, empaquetar serveis en contenidors abans de portar-los al núvol.</p>
     </div>
   </section>
 
@@ -148,8 +142,11 @@
 
     <div class="callout tip">
       <span class="ico">💡</span>
-      <p>Farem servir la imatge oficial <code>httpd</code> (el nom del projecte Apache a Docker Hub).</p>
+      <p>Farem servir la imatge oficial <code>httpd</code> (el nom del projecte Apache a Docker Hub). D'una mateixa imatge es poden crear molts contenidors, i les imatges es descarreguen d'un <strong>registre</strong>, normalment <a href="https://hub.docker.com" target="_blank" rel="noopener">Docker Hub</a>.</p>
     </div>
+
+    <h3>Què és Docker Compose?</h3>
+    <p><strong>Docker Compose</strong> permet definir i executar diversos contenidors alhora amb un únic fitxer de configuració (<code>docker-compose.yml</code>). Avui l'instal·larem, però encara farem servir Docker "sol"; el farem servir més endavant per aixecar serveis complets (per exemple, un servidor web i una base de dades junts).</p>
   </section>
 
   <!-- ============ 2 · PAS A PAS GUIAT ============ -->
@@ -159,21 +156,98 @@
       <h2>Pas a pas guiat</h2>
     </div>
 
-    <h3>2.1 · Comprova que Docker funciona</h3>
+    <h3>2.1 · Actualitzar el sistema i instal·lar dependències</h3>
+    <p>Obre la terminal integrada de VS Code (<code>Ctrl + J</code>) i executa:</p>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-      <pre><code>docker --version</code></pre>
+      <pre><code>sudo apt update</code></pre>
     </div>
-    <p>➜ Comprova que Docker està instal·lat, mostrant-ne la versió. (El vas instal·lar a l'AEA0.)</p>
+    <p>➜ Actualitza la llista de programes disponibles a Debian.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt install -y ca-certificates curl gnupg</code></pre>
+    </div>
+    <p>➜ Instal·la programes que Docker necessita per baixar-se de manera segura: <code>ca-certificates</code> (certificats de seguretat), <code>curl</code> (descarrega coses d'internet des de la terminal) i <code>gnupg</code> (comprova que el que descarregues és autèntic).</p>
 
-    <h3>2.2 · Descarrega la imatge d'Apache</h3>
+    <h3>2.2 · Afegir el repositori oficial de Docker</h3>
+    <p>Afegim la clau i el repositori oficials perquè <code>apt</code> instal·li la versió més recent de Docker:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code><span class="c"># Crear el directori per a la clau i descarregar-la</span>
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | \
+    sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+<span class="c"># Afegir el repositori a les fonts d'apt</span>
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/debian $(. /etc/os-release &amp;&amp; echo $VERSION_CODENAME) stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null</code></pre>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Copia cada bloc sencer. Les barres <code>\</code> al final de línia indiquen que l'ordre continua a la línia següent: és una sola ordre tot i ocupar diverses línies.</p>
+    </div>
+
+    <h3>2.3 · Instal·lar Docker i Docker Compose</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt update</code></pre>
+    </div>
+    <p>➜ Torna a actualitzar la llista perquè Debian "vegi" els programes del repositori de Docker que acabes d'afegir.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo apt install -y docker-ce docker-ce-cli containerd.io \
+    docker-buildx-plugin docker-compose-plugin</code></pre>
+    </div>
+    <p>➜ Instal·la Docker i tots els seus components. El paquet <code>docker-compose-plugin</code> instal·la Compose com a subordre de Docker: l'invocaràs amb <code>docker compose</code> (amb espai).</p>
+
+    <h3>2.4 · Executar Docker sense sudo</h3>
+    <p>Per no haver d'escriure <code>sudo</code> a cada ordre, afegeix el teu usuari al grup <code>docker</code>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>sudo usermod -aG docker $USER</code></pre>
+    </div>
+    <p>➜ Afegeix el teu usuari (<code>$USER</code>) al grup <code>docker</code>, que té permís per fer servir Docker sense <code>sudo</code>.</p>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Aquest canvi no té efecte fins que <strong>tanquis i tornis a obrir la sessió</strong> (logout / login). Si no vols tancar sessió ara, pots executar <code>newgrp docker</code> a la terminal per aplicar-ho al terminal actual.</p>
+    </div>
+
+    <h3>2.5 · Comprovar la instal·lació</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker --version
+<span class="o">Docker version 27.x.x, build ...</span></code></pre>
+    </div>
+    <p>➜ Comprova que Docker s'ha instal·lat, mostrant-ne la versió.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker compose version
+<span class="o">Docker Compose version v2.x.x</span></code></pre>
+    </div>
+    <p>➜ Comprova que Docker Compose també ha quedat instal·lat.</p>
+
+    <h3>2.6 · La primera prova: hello-world</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker run hello-world</code></pre>
+    </div>
+    <p>➜ Descarrega la imatge <code>hello-world</code> i en crea un contenidor que escriu un missatge i s'atura. Si tot va bé, veuràs un text que comença per <code>Hello from Docker!</code>: això confirma que Docker pot descarregar imatges i executar contenidors.</p>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Què ha passat? Docker no tenia la imatge localment, l'ha baixat de Docker Hub, n'ha creat un contenidor, l'ha executat (ha imprès el missatge) i el contenidor ha acabat la seva feina.</p>
+    </div>
+
+    <h3>2.7 · Descarrega la imatge d'Apache</h3>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
       <pre><code>docker pull httpd</code></pre>
     </div>
     <p>➜ Descarrega la imatge oficial d'Apache (<code>httpd</code>) des de Docker Hub. Una <strong>imatge</strong> és la "recepta" amb el programa i tot el que necessita.</p>
 
-    <h3>2.3 · Crea una carpeta local amb la teva pàgina</h3>
+    <h3>2.8 · Crea una carpeta local amb la teva pàgina</h3>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
       <pre><code>mkdir -p ~/aea1-docker</code></pre>
@@ -199,7 +273,7 @@
 &lt;/html&gt;</code></pre>
     </div>
 
-    <h3>2.4 · Executa el contenidor amb la teva pàgina dins</h3>
+    <h3>2.9 · Executa el contenidor amb la teva pàgina dins</h3>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
       <pre><code>docker run -d -p 8080:80 --name servidor-aea1 -v ~/aea1-docker:/usr/local/apache2/htdocs/ httpd</code></pre>
@@ -213,7 +287,7 @@
       <li><code>httpd</code> → la imatge que fa servir.</li>
     </ul>
 
-    <h3>2.5 · Comprova que el contenidor s'està executant</h3>
+    <h3>2.10 · Comprova que el contenidor s'està executant</h3>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
       <pre><code>docker ps</code></pre>
