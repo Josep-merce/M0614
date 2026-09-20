@@ -137,6 +137,7 @@
         <tr><td><strong>Imatge</strong></td><td>La "recepta" que conté Apache i tot el que necessita (<code>httpd</code>).</td></tr>
         <tr><td><strong>Contenidor</strong></td><td>Una còpia de la imatge <strong>en execució</strong>.</td></tr>
         <tr><td><strong>Port</strong></td><td>La "porta" per on el navegador es connecta.</td></tr>
+        <tr><td><strong>Volum</strong></td><td>Una carpeta de la teva màquina "connectada" amb una carpeta de dins del contenidor.</td></tr>
       </tbody>
     </table>
 
@@ -144,6 +145,10 @@
       <span class="ico">💡</span>
       <p>Farem servir la imatge oficial <code>httpd</code> (el nom del projecte Apache a Docker Hub). D'una mateixa imatge es poden crear molts contenidors, i les imatges es descarreguen d'un <strong>registre</strong>, normalment <a href="https://hub.docker.com" target="_blank" rel="noopener">Docker Hub</a>.</p>
     </div>
+
+    <h3>Què és un volum?</h3>
+    <p>Per defecte, un contenidor és <strong>efímer</strong>: si hi fas un canvi per dins i el contenidor es reinicia o s'esborra, el canvi es perd. Un <strong>volum</strong> soluciona això: connecta una carpeta del teu ordinador amb una carpeta de dins del contenidor, de manera que totes dues "veuen" els mateixos fitxers en tot moment.</p>
+    <p>A la comanda <code>docker run</code> d'aquesta activitat, l'opció <code>-v ~/aea1-docker:/usr/local/apache2/htdocs/</code> fa exactament això: el que hi hagi a la teva carpeta <code>~/aea1-docker</code> és el mateix que Apache troba a <code>/usr/local/apache2/htdocs/</code> dins del contenidor. Com que el contingut viu realment <strong>fora</strong> del contenidor, sobreviu encara que el reiniciïs.</p>
 
     <h3>Què és Docker Compose?</h3>
     <p><strong>Docker Compose</strong> permet definir i executar diversos contenidors alhora amb un únic fitxer de configuració (<code>docker-compose.yml</code>). Avui l'instal·larem, però encara farem servir Docker "sol"; el farem servir més endavant per aixecar serveis complets (per exemple, un servidor web i una base de dades junts).</p>
@@ -293,6 +298,34 @@ echo \
       <pre><code>docker ps</code></pre>
     </div>
     <p>➜ Mostra els contenidors en marxa. Hi ha d'aparèixer <code>servidor-aea1</code> amb estat <code>Up</code>.</p>
+
+    <h3>2.11 · Demostració: què passa amb un restart</h3>
+    <p>Abans de continuar, val la pena entendre què fa exactament el volum (<code>-v</code>) que hem muntat. Fem una prova senzilla amb el mateix contenidor que ja tenim en marxa.</p>
+
+    <p><strong>Pas 1 — Reinicia el contenidor sense tocar res:</strong></p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker restart servidor-aea1</code></pre>
+    </div>
+    <p>➜ Reinicia el contenidor des de zero. Torna a obrir <code>http://localhost:8080</code>: la pàgina es veu exactament igual que abans.</p>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Encara que el contenidor s'hagi reiniciat completament, la pàgina no ha canviat. Això és perquè el contingut no viu "dins" del contenidor: viu a la carpeta <code>~/aea1-docker</code> de la teva màquina, i el contenidor només hi "mira a través" del volum.</p>
+    </div>
+
+    <p><strong>Pas 2 — Edita el fitxer sense reiniciar res:</strong></p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>nano ~/aea1-docker/index.html</code></pre>
+    </div>
+    <p>➜ Canvia una línia del text (per exemple, afegeix la data d'avui) i desa.</p>
+
+    <p><strong>Pas 3 — Refresca el navegador (sense fer <code>docker restart</code>):</strong></p>
+    <p>El canvi apareix <strong>a l'instant</strong>, sense haver tocat el contenidor per res.</p>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Aquí està la clau: el volum connecta en temps real la teva carpeta amb el contenidor. Pots editar, i el contenidor "veu" el canvi immediatament — no cal ni reiniciar-lo ni tornar a crear-lo.</p>
+    </div>
   </section>
 
   <!-- ============ 3 · VERIFICACIÓ ============ -->
@@ -315,6 +348,10 @@ echo \
       <span class="ico">💡</span>
       <p>Ara la pàgina viu al port <strong>8080</strong>, no al 80 com a l'A1: hem dit a Docker que redirigís la porta 8080 de la nostra màquina cap a la porta 80 del contenidor.</p>
     </div>
+    <ul>
+      <li>Després d'un <code>docker restart servidor-aea1</code>, la pàgina es manté igual (el volum conserva el contingut).</li>
+      <li>En editar <code>~/aea1-docker/index.html</code> i refrescar el navegador, el canvi apareix sense reiniciar res.</li>
+    </ul>
   </section>
 
 
