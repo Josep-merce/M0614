@@ -239,7 +239,7 @@
     <h3>2.4 · Crear la pàgina inicial</h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
-      <p>Dins d'aquesta carpeta, crea un fitxer <code>index.html</code> amb aquest contingut:</p>
+      <p>A l'explorador de fitxers de VS Code (a l'esquerra), crea un fitxer nou anomenat <code>index.html</code> amb aquest contingut:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
         <pre><code>&lt;!DOCTYPE html&gt;
@@ -298,7 +298,7 @@
     <h3>2.7 · Clonar el repositori com a Col·laborador</h3>
     <div class="role-box collab">
       <span class="role-label collab">Col·laborador</span>
-      <p>Un cop acceptada la invitació, fas exactament el mateix que ha fet el Propietari al pas 2.3:</p>
+      <p>Un cop acceptada la invitació, fas exactament el mateix que ha fet el Propietari al pas 2.3: obre <strong>VS Code</strong> i la seva <strong>terminal integrada</strong> (<code>Ctrl + J</code>), dins la carpeta <code>m0614</code> que ja vas crear a l'A0:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>cd ~/m0614</code></pre>
@@ -312,18 +312,13 @@
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>cd aea6-usuari1-usuari2</code></pre>
       </div>
-      <p>Comprova que ja tens l'<code>index.html</code> que ha creat el Propietari:</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>cat index.html</code></pre>
-      </div>
-      <p>➜ <code>cat</code> mostra el contingut d'un fitxer per pantalla. Si veus el mateix HTML que ha escrit el Propietari, tot ha anat bé.</p>
+      <p>Finalment, obre aquesta carpeta a VS Code (<strong>File → Open Folder…</strong> → <code>aea6-usuari1-usuari2</code>) perquè l'explorador de fitxers i la terminal apuntin al mateix lloc. A l'explorador de l'esquerra ja hi hauria de sortir l'<code>index.html</code> que ha creat el Propietari; obre'l per comprovar que hi tens el mateix contingut.</p>
     </div>
 
     <h3>2.8 · Comprovar que tots dos teniu la mateixa còpia</h3>
     <div class="role-box both">
       <span class="role-label both">Ambdós</span>
-      <p>Cadascú al seu terminal, dins de la carpeta del projecte:</p>
+      <p>Cadascú a la seva terminal integrada de VS Code, dins de la carpeta del projecte:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>git log --oneline</code></pre>
@@ -382,8 +377,8 @@
       <tbody>
         <tr>
           <td><code>git push</code> demana usuari i contrasenya i la rebutja</td>
-          <td>GitHub ja no accepta contrasenyes normals per Git; cal un token d'accés personal.</td>
-          <td>Genera'n un a GitHub → <strong>Settings → Developer settings → Personal access tokens</strong> i fes-lo servir com a contrasenya.</td>
+          <td>GitHub ja no accepta contrasenyes normals per Git, i encara no t'has autenticat amb <code>gh</code>.</td>
+          <td>Executa <code>gh auth login</code> (pas 2.6 de l'A0) i torna-ho a provar.</td>
         </tr>
         <tr>
           <td>El Col·laborador no veu la invitació al repositori</td>
