@@ -325,6 +325,46 @@
       </div>
       <p>➜ <code>git log</code> mostra l'historial de commits. <code>--oneline</code> el mostra en una sola línia per commit, en lloc de tot el detall. Els dos heu de veure exactament el mateix identificador de commit ("Primera versió de la pàgina").</p>
     </div>
+
+    <h3>2.9 · El Col·laborador omple el README i el puja</h3>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <p>A l'explorador de fitxers de VS Code, crea un fitxer nou anomenat <code>README.md</code> amb aquest contingut:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">README.md</span></div>
+        <pre><code># aea6-usuari1-usuari2
+
+Projecte de pràctiques de Git i GitHub en parella, de l'AEA6 del mòdul M0614.</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git add README.md</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git commit -m "Afegeix el README"</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git push</code></pre>
+      </div>
+      <p>➜ Aquest cop és el Col·laborador qui puja un commit. Fixa't que no cal indicar <code>origin main</code> com feia el Propietari al pas 2.5: un cop fet el primer <code>push</code> del repositori, Git ja recorda a on s'ha de pujar per defecte.</p>
+    </div>
+
+    <h3>2.10 · El Propietari fa pull i el rep</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p>A la teva terminal integrada de VS Code, dins la carpeta del projecte:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git pull</code></pre>
+      </div>
+      <p>➜ <code>git pull</code> baixa els commits que hi ha a GitHub però encara no tens al teu ordinador. A l'explorador de fitxers de VS Code hauria d'aparèixer el <code>README.md</code> que acaba de crear el Col·laborador.</p>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>Ara ja heu fet els dos sentits: el Col·laborador s'ha baixat la feina del Propietari (clonant, al pas 2.7), i el Propietari s'ha baixat la feina del Col·laborador (fent <code>pull</code>, ara mateix). Aquest anar i venir és el dia a dia de treballar amb Git en equip.</p>
+      </div>
+    </div>
   </section>
 
   <!-- ============ 3 · VERIFICACIÓ ============ -->
@@ -337,7 +377,8 @@
       <li><code>git --version</code> funciona correctament als dos ordinadors.</li>
       <li>El repositori <code>aea6-usuari1-usuari2</code> existeix a GitHub amb l'<code>index.html</code> pujat pel Propietari.</li>
       <li>El Col·laborador apareix com a col·laborador acceptat del repositori.</li>
-      <li><code>git log --oneline</code> mostra el mateix commit als dos ordinadors.</li>
+      <li>El <code>README.md</code>, pujat pel Col·laborador, és visible al repositori i a l'ordinador del Propietari (després del <code>pull</code>).</li>
+      <li><code>git log --oneline</code> mostra els dos commits ("Primera versió de la pàgina" i "Afegeix el README") als dos ordinadors.</li>
     </ul>
   </section>
 
@@ -353,7 +394,7 @@
 
       <p style="margin-top:1.1rem">El professor demanarà l'enllaç del repositori i hi comprovarà:</p>
       <ul>
-        <li>Que existeix i té l'<code>index.html</code> inicial.</li>
+        <li>Que existeix i té l'<code>index.html</code> inicial i el <code>README.md</code>.</li>
         <li>Que apareixen els dos com a col·laboradors (<strong>Settings → Collaborators</strong>).</li>
         <li>L'historial de commits (<code>git log --oneline</code> o la pestanya <strong>Commits</strong> a GitHub), que mostra l'autor de cada canvi.</li>
       </ul>
