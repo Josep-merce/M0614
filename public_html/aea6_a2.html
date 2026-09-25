@@ -117,7 +117,7 @@
       <h2>Objectius i prerequisits</h2>
     </div>
 
-    <p>Seguiu treballant amb els mateixos rols i el mateix repositori de l'A1 (<code>aea6-usuari1-usuari2</code>). En aquesta activitat, cadascú afegirà una part diferent a la pàgina <code>index.html</code>, sense trepitjar-se, i aprendreu a protegir una mica el repositori.</p>
+    <p>Seguiu treballant amb els mateixos rols i el mateix repositori de l'A1 (<code>aea6-usuari1-usuari2</code>). En aquesta activitat, cadascú afegirà una part diferent a la pàgina <code>index.html</code>, sense trepitjar-se, i configurareu un token d'accés per autenticar-vos des del terminal.</p>
 
     <h3>Prerequisits</h3>
     <ul>
@@ -133,7 +133,7 @@
     </div>
 
     <h3>Què farem en aquesta activitat</h3>
-    <p>Cadascú treballarà a la seva pròpia branca del repositori: el Propietari afegirà una capçalera a la pàgina i el Col·laborador un formulari. Els dos canvis es fusionaran a la branca principal amb un <em>Pull Request</em>. També aplicareu dues mesures de seguretat: un token d'accés personal i la protecció de la branca principal.</p>
+    <p>Cadascú treballarà a la seva pròpia branca del repositori: el Propietari afegirà una capçalera a la pàgina i el Col·laborador un peu de pàgina. Els dos canvis es fusionaran a la branca principal amb un <em>Pull Request</em>. També crearàs un token d'accés personal, una mesura de seguretat per autenticar-te des del terminal.</p>
 
     <p><strong>Termes nous que apareixeran:</strong></p>
     <ul>
@@ -141,7 +141,6 @@
       <li><strong>Pull Request</strong> (PR): una proposta que fas des de GitHub: "vull incorporar els canvis de la meva branca a <code>main</code>". L'altra persona pot revisar-lo abans d'acceptar-lo.</li>
       <li><strong>Merge</strong>: fusionar els canvis d'una branca dins d'una altra. Quan acceptes un Pull Request, GitHub fa un merge.</li>
       <li><strong>Token d'accés personal</strong>: una contrasenya especial que fem servir per identificar-nos davant de GitHub des del terminal, en lloc de la contrasenya del compte.</li>
-      <li><strong>Protecció de branca</strong>: una regla a GitHub que impedeix pujar canvis directament a <code>main</code>: obliga a fer-ho sempre a través d'un Pull Request.</li>
     </ul>
 
     <svg viewBox="0 0 640 180" style="width:100%;max-width:640px;margin:.8rem 0;display:block" role="img" aria-label="Dues branques que es fusionen a main sense conflicte">
@@ -167,12 +166,8 @@
       <circle cx="490" cy="90" r="5" fill="#0F6E56"/>
     </svg>
 
-    <h3>Per què cal aplicar seguretat</h3>
-    <p>Als passos 2.10 i 2.11 configurareu les dues mesures de seguretat que hem esmentat als termes nous:</p>
-
-    <p><strong>Per què cal un token?</strong> Perquè GitHub, per motius de seguretat, ja no accepta la contrasenya del compte des del terminal. Fem servir un token: si algú te'l roba, el pots revocar sense haver de canviar la contrasenya del compte.</p>
-
-    <p><strong>Per què protegir <code>main</code>?</strong> Perquè un push directe amb un error trenca el codi que tots compartiu. La protecció obliga a passar per un Pull Request perquè l'altra persona pugui revisar els canvis primer.</p>
+    <h3>Per què cal un token d'accés</h3>
+    <p>Al pas 2.9 configurareu la mesura de seguretat que hem esmentat als termes nous: perquè GitHub, per motius de seguretat, ja no accepta la contrasenya del compte des del terminal. Fem servir un token: si algú te'l roba, el pots revocar sense haver de canviar la contrasenya del compte.</p>
   </section>
 
   <!-- ============ 2 · PAS A PAS GUIAT ============ -->
@@ -252,62 +247,23 @@
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
         <pre><code>&lt;footer&gt;
-  &lt;input type="text" id="nomContacte" placeholder="El teu nom"&gt;
-  &lt;button onclick="validarContacte()"&gt;Enviar&lt;/button&gt;
-&lt;/footer&gt;
-&lt;script src="js/main.js"&gt;&lt;/script&gt;</code></pre>
+  &lt;p&gt;Contacte: aea6@lamerce.cat&lt;/p&gt;
+&lt;/footer&gt;</code></pre>
       </div>
-      <p>➜ Un <code>&lt;footer&gt;</code> amb un camp de text, un botó, i una etiqueta <code>&lt;script&gt;</code> que carregarà un fitxer JavaScript que encara hem de crear.</p>
+      <p>➜ Un <code>&lt;footer&gt;</code> amb un paràgraf de contacte, igual de senzill que la capçalera del Propietari.</p>
     </div>
 
-    <h3>2.5 · Col·laborador: crear el fitxer JavaScript</h3>
+    <h3>2.5 · Col·laborador: pujar el canvi</h3>
     <div class="role-box collab">
       <span class="role-label collab">Col·laborador</span>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>mkdir js</code></pre>
+        <pre><code>git add index.html</code></pre>
       </div>
-      <p>➜ <code>mkdir</code> (<em>make directory</em>) crea una carpeta nova anomenada <code>js</code>.</p>
+      <p>➜ Marca l'<code>index.html</code> modificat com "a punt per guardar".</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>nano js/main.js</code></pre>
-      </div>
-      <p>➜ Obre l'editor de text <code>nano</code> per crear i escriure el fitxer <code>main.js</code> dins d'aquesta carpeta.</p>
-      <p>Escriu-hi aquest contingut:</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">js/main.js</span></div>
-        <pre><code>/**
- * Comprova si un camp de text no està buit.
- * @param {string} valor - El text introduït al camp.
- * @returns {boolean} true si el camp té contingut, false si està buit.
- */
-function campOmplert(valor) {
-  return valor.trim().length > 0;
-}</code></pre>
-      </div>
-      <p>➜ Una funció que rep un text i retorna <code>true</code> o <code>false</code> segons si té contingut o no.</p>
-      <p>Afegeix-hi a continuació aquesta segona funció:</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">js/main.js</span></div>
-        <pre><code>function validarContacte() {
-  const valor = document.getElementById('nomContacte').value;
-  alert(campOmplert(valor) ? "Gràcies!" : "Omple el camp abans d'enviar.");
-}</code></pre>
-      </div>
-      <p>➜ Aquesta funció s'executa quan es clica el botó "Enviar": llegeix el que hi ha escrit al camp de text, crida <code>campOmplert()</code> per comprovar-lo, i mostra un missatge diferent segons el resultat.</p>
-    </div>
-
-    <h3>2.6 · Col·laborador: pujar els canvis</h3>
-    <div class="role-box collab">
-      <span class="role-label collab">Col·laborador</span>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>git add index.html js/main.js</code></pre>
-      </div>
-      <p>➜ Marca els dos fitxers modificats/nous com "a punt per guardar".</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>git commit -m "Afegeix formulari de contacte i validació"</code></pre>
+        <pre><code>git commit -m "Afegeix peu de pàgina"</code></pre>
       </div>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
@@ -316,7 +272,7 @@ function campOmplert(valor) {
       <p>➜ Igual que al pas 2.3, però pujant a la teva branca <code>feature/footer</code>.</p>
     </div>
 
-    <h3>2.7 · Obrir el Pull Request</h3>
+    <h3>2.6 · Obrir el Pull Request</h3>
     <div class="role-box both">
       <span class="role-label both">Ambdós</span>
       <ol>
@@ -328,7 +284,7 @@ function campOmplert(valor) {
       <p>➜ Cadascú fa aquests 4 clics amb la seva pròpia branca: el Propietari amb <code>feature/header</code>, el Col·laborador amb <code>feature/footer</code>.</p>
     </div>
 
-    <h3>2.8 · Revisar-vos mútuament i fer el merge</h3>
+    <h3>2.7 · Revisar-vos mútuament i fer el merge</h3>
     <div class="role-box both">
       <span class="role-label both">Ambdós</span>
       <ol>
@@ -340,7 +296,7 @@ function campOmplert(valor) {
       <p>➜ Repetiu-ho amb els dos Pull Requests (l'ordre no importa, ja que toqueu parts diferents del fitxer i no hi haurà conflicte).</p>
     </div>
 
-    <h3>2.9 · Actualitzar la vostra còpia local</h3>
+    <h3>2.8 · Actualitzar la vostra còpia local</h3>
     <div class="role-box both">
       <span class="role-label both">Ambdós</span>
       <div class="term">
@@ -355,7 +311,7 @@ function campOmplert(valor) {
       <p>➜ Baixes aquests canvis al teu ordinador. Obre <code>index.html</code>: ara hi han d'aparèixer tant el <code>&lt;header&gt;</code> com el <code>&lt;footer&gt;</code>, encara que cadascú només hagi editat una part.</p>
     </div>
 
-    <h3>2.10 · Seguretat: crear un token d'accés personal</h3>
+    <h3>2.9 · Seguretat: crear un token d'accés personal</h3>
     <div class="callout tip">
       <span class="ico">💡</span>
       <p>Aquest pas el fan <strong>tots dos</strong>, cadascú al seu propi compte de GitHub. Cadascú tindrà el seu token.</p>
@@ -390,35 +346,6 @@ function campOmplert(valor) {
       <p>La propera vegada que Git et demani <code>Password for 'https://...'</code>, en lloc de la contrasenya de GitHub, <strong>enganxa aquest token</strong>. El nom d'usuari sí que és el de GitHub.</p>
     </div>
 
-    <h3>2.11 · Seguretat: protegir la branca <code>main</code></h3>
-    <div class="role-box prop">
-      <span class="role-label prop">Propietari</span>
-      <p>Aquesta configuració la fa només el Propietari, perquè és qui té permisos d'administració sobre el repositori.</p>
-      <ol>
-        <li>Ves al <strong>repositori</strong> a GitHub (no al teu compte).</li>
-        <li>A dalt de tot fes clic a la pestanya <strong>Settings</strong>.</li>
-        <li>Al menú de l'esquerra, dins del grup "Code and automation", fes clic a <strong>Branches</strong>.</li>
-        <li>Fes clic al botó <strong>Add branch ruleset</strong> (o <strong>Add rule</strong>, depenent de la versió de la interfície).</li>
-        <li>Al camp <strong>Ruleset Name</strong> (o <strong>Branch name pattern</strong>), escriu: <code>main</code>.</li>
-        <li>A <strong>Enforcement status</strong>, tria <strong>Active</strong> (si apareix aquesta opció).</li>
-        <li>A la secció <strong>Target branches</strong>, fes clic a <strong>Add target</strong> i tria <strong>Include default branch</strong>. Això aplicarà la regla a <code>main</code>.</li>
-        <li>Baixa fins a la secció <strong>Rules</strong> i marca la casella <strong>Require a pull request before merging</strong>.</li>
-        <li>Baixa fins al final i fes clic a <strong>Create</strong> (o <strong>Save changes</strong>).</li>
-      </ol>
-      <p>➜ A partir d'ara, ningú (ni tu mateix) podrà fer <code>git push</code> directe a <code>main</code>: tot haurà de passar per un Pull Request, com heu fet als passos 2.7-2.8.</p>
-    </div>
-
-    <div class="role-box collab">
-      <span class="role-label collab">Col·laborador</span>
-      <p>Per comprovar que la protecció funciona, prova d'esborrar temporalment la branca <code>main</code> del teu ordinador i tornar a fer un push amb un canvi qualsevol. Git t'hauria de retornar un error semblant a aquest:</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>remote: error: GH006: Protected branch update failed for refs/heads/main.
-remote: error: Cannot push to a protected branch, use a pull request instead.</code></pre>
-      </div>
-      <p>➜ Si veus aquest missatge, la protecció està activa. Si el push passa igualment, torna al pas 2.11 i comprova que has desat la regla correctament.</p>
-    </div>
-
   </section>
 
   <!-- ============ 3 · VERIFICACIÓ ============ -->
@@ -430,7 +357,6 @@ remote: error: Cannot push to a protected branch, use a pull request instead.</c
     <ul>
       <li><code>index.html</code> a <code>main</code> conté tant el <code>&lt;header&gt;</code> com el <code>&lt;footer&gt;</code>.</li>
       <li>A GitHub, la pestanya <strong>Pull requests</strong> mostra els <strong>dos</strong> PR com a fusionats (<em>Merged</em>): <code>feature/header</code> i <code>feature/footer</code>.</li>
-      <li>A <strong>Settings → Branches</strong>, la branca <code>main</code> té una regla de protecció activa.</li>
     </ul>
   </section>
 
@@ -445,7 +371,6 @@ remote: error: Cannot push to a protected branch, use a pull request instead.</c
       <p>Igual que a l'A1: no cal copiar res enlloc. El mateix repositori públic <code>aea6-usuari1-usuari2</code> és l'entrega. El professor demanarà l'enllaç i hi comprovarà:</p>
       <ul>
         <li>Els dos Pull Requests fusionats (<code>feature/header</code>, <code>feature/footer</code>), amb commits d'autors diferents.</li>
-        <li>La regla de protecció de la branca <code>main</code>.</li>
       </ul>
     </div>
   </section>
@@ -462,23 +387,13 @@ remote: error: Cannot push to a protected branch, use a pull request instead.</c
       <tbody>
         <tr>
           <td>El botó "Merge pull request" no apareix, o surt en gris</td>
-          <td>Encara no s'ha activat la regla de protecció, o el PR té conflictes.</td>
+          <td>El PR té conflictes, perquè els dos heu editat la mateixa zona del fitxer.</td>
           <td>Comprova que els dos heu editat zones diferents del fitxer; si hi ha conflicte, reviseu-lo junts abans de fer merge.</td>
         </tr>
         <tr>
           <td>Després del merge, <code>git pull</code> no baixa els canvis de l'altre</td>
           <td>Estàs situat a la teva branca <code>feature/...</code> en lloc de <code>main</code>.</td>
           <td>Fes <code>git checkout main</code> abans de <code>git pull origin main</code>.</td>
-        </tr>
-        <tr>
-          <td>GitHub rebutja el <code>git push</code> a <code>main</code></td>
-          <td>És exactament el comportament esperat: la protecció de branca ho impedeix.</td>
-          <td>Fes els canvis a una branca <code>feature/...</code> i obre un Pull Request, com als passos 2.1–2.3.</td>
-        </tr>
-        <tr>
-          <td>El formulari no mostra cap missatge en clicar "Enviar"</td>
-          <td><code>js/main.js</code> no s'ha enllaçat correctament, o hi ha un error d'escriptura en el nom de la funció.</td>
-          <td>Comprova a la consola del navegador (F12) si hi ha errors, i que l'etiqueta <code>&lt;script&gt;</code> apunta a <code>js/main.js</code>.</td>
         </tr>
       </tbody>
     </table>

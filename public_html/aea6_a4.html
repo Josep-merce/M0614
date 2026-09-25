@@ -96,7 +96,7 @@
     <span class="badge">AEA6 · A4</span>
     <span class="eyebrow">M0614 · Linux</span>
     <h1>Eines de documentació <span class="code">automàtica</span></h1>
-    <p class="lede">Generareu la documentació de la funció <code>campOmplert()</code> que ja teniu al projecte, fent servir JSDoc. Anirem molt a poc a poc, explicant cada comanda.</p>
+    <p class="lede">Crearem un petit fitxer JavaScript i en generarem la documentació automàticament amb JSDoc. Anirem molt a poc a poc, explicant cada comanda.</p>
     <div class="meta">
       <span class="pill">Repositori <strong>compartit</strong></span>
       <span class="pill">RA <strong>RA6</strong></span>
@@ -114,17 +114,16 @@
       <h2>Objectius i prerequisits</h2>
     </div>
 
-    <p>Continueu al mateix repositori compartit (<code>aea6-usuari1-usuari2</code>). A l'A2 i l'A3 vau crear <code>js/main.js</code> amb la funció <code>campOmplert()</code>; ara la documentarem de veritat, no amb un exemple inventat.</p>
+    <p>Continueu al mateix repositori compartit (<code>aea6-usuari1-usuari2</code>). Aquesta activitat és autònoma: crearem el codi que documentarem des de zero, no cal cap fitxer d'activitats anteriors.</p>
 
     <h3>Prerequisits</h3>
     <ul>
-      <li>Haver completat l'A1, l'A2 i l'A3: <code>index.html</code> amb header i footer, <code>js/main.js</code> amb <code>campOmplert()</code>, la branca <code>main</code> protegida, i el <code>README.md</code> documentat en Markdown.</li>
-      <li>Node.js i npm instal·lats (des de l'AEA0).</li>
+      <li>Haver completat l'A1: <code>index.html</code> amb header i footer.</li>
     </ul>
 
     <div class="callout tip">
       <span class="ico">💡</span>
-      <p>Com que <code>main</code> segueix protegida, tots els canvis d'aquesta activitat es faran a una branca nova, <code>docs/jsdoc</code>, i es fusionaran amb un Pull Request al final, igual que vau fer amb <code>docs/readme</code> a l'A3.</p>
+      <p>Seguint el mateix hàbit de l'A2 i l'A3, tots els canvis d'aquesta activitat es faran a una branca nova, <code>docs/jsdoc</code>, i es fusionaran amb un Pull Request al final.</p>
     </div>
   </section>
 
@@ -136,7 +135,9 @@
     </div>
 
     <h3>Què farem en aquesta activitat</h3>
-    <p>Fareu servir <strong>JSDoc</strong>, una eina que llegeix els comentaris que ja teniu a <code>js/main.js</code> i genera automàticament una web de documentació. Instal·lareu JSDoc amb <strong>npm</strong>, el gestor de paquets que fan servir els projectes reals de JavaScript.</p>
+    <p>Un fitxer <code>.js</code> conté codi JavaScript: instruccions que fan que la pàgina reaccioni i faci coses (comprovar un text, calcular alguna cosa, mostrar un missatge), a diferència de l'HTML (que defineix el contingut) i el CSS (que defineix l'aparença). Crearem un fitxer <code>js/main.js</code> amb un parell de funcions petites.</p>
+
+    <p>Un cop escrites, les <strong>documentarem</strong>: al costat de cada funció hi escriurem una petita fitxa que expliqui què fa, què li has de donar i què retorna — així qualsevol altra persona (o tu mateix d'aquí unes setmanes) ho pot entendre sense haver de llegir tot el codi. Farem servir <strong>JSDoc</strong>, una eina que llegeix aquesta fitxa i genera sola una pàgina web amb tota la documentació, sense que l'hàgim d'escriure a mà. Instal·lareu JSDoc amb <strong>npm</strong>, el gestor de paquets que fan servir els projectes reals de JavaScript.</p>
 
     <p><strong>Termes nous que apareixeran:</strong></p>
     <ul>
@@ -209,13 +210,74 @@
       <p>➜ <code>checkout -b docs/jsdoc</code> crea una branca nova anomenada <code>docs/jsdoc</code> i et hi situa. Tot el que facis a partir d'ara no afectarà <code>main</code> fins que no ho fusioneu amb un Pull Request.</p>
     </div>
 
-    <h3>2.2 · Què és npm i per què l'hem de fer servir</h3>
-    <div class="callout tip">
-      <span class="ico">💡</span>
-      <p><strong>npm</strong> és un gestor de paquets: un programa que descarrega i instal·la eines de programació (com JSDoc) de forma automàtica, en lloc d'haver-les de baixar a mà.</p>
+    <h3>2.2 · Crear el fitxer JavaScript a documentar</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p>A l'explorador de fitxers de VS Code (a l'esquerra), fes clic dret sobre el nom de la carpeta del projecte i tria <strong>New File…</strong>. Escriu com a nom <code>js/main.js</code> (amb la barra inclosa): VS Code crearà la carpeta <code>js</code> i el fitxer <code>main.js</code> a dins, tots dos alhora.</p>
+      <p>Escriu-hi aquest contingut:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">js/main.js</span></div>
+        <pre><code>/**
+ * Comprova si un camp de text no està buit.
+ * @param {string} valor - El text a comprovar.
+ * @returns {boolean} true si té contingut, false si està buit.
+ */
+function campOmplert(valor) {
+  return valor.trim().length > 0;
+}
+
+/**
+ * Mostra un missatge diferent segons si un text té contingut o no.
+ * @param {string} valor - El text a comprovar.
+ */
+function mostrarMissatge(valor) {
+  alert(campOmplert(valor) ? "Gràcies!" : "Cal omplir el camp.");
+}</code></pre>
+      </div>
+      <p>➜ Dues funcions: la primera comprova si un text té contingut; la segona la fa servir per mostrar un missatge diferent segons el resultat. Són el que documentarem als pròxims passos.</p>
+      <p>Desa el fitxer (<code>Ctrl + S</code>) i puja'l:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git add js/main.js</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git commit -m "Afegeix funcions de JavaScript"</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git push origin docs/jsdoc</code></pre>
+      </div>
+      <p>➜ Igual que sempre: <code>add</code> prepara, <code>commit</code> desa una fotografia, <code>push</code> la puja a la teva branca <code>docs/jsdoc</code>.</p>
     </div>
 
-    <h3>2.3 · Inicialitzar el projecte amb npm</h3>
+    <h3>2.3 · Què és npm, i instal·lar-lo</h3>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><strong>npm</strong> és un gestor de paquets: un programa que descarrega i instal·la eines de programació (com JSDoc) de forma automàtica, en lloc d'haver-les de baixar a mà. Ve inclòs amb <strong>Node.js</strong>, l'entorn que permet executar JavaScript fora del navegador.</p>
+    </div>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p>Comprova primer si ja el tens:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>node --version
+npm --version</code></pre>
+      </div>
+      <p>➜ Si totes dues comandes retornen un número de versió, ja els tens i pots saltar al pas 2.4. Si no, instal·la'ls:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>sudo apt update</code></pre>
+      </div>
+      <p>➜ Actualitza la llista de programes disponibles.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>sudo apt install nodejs npm -y</code></pre>
+      </div>
+      <p>➜ Instal·la Node.js i npm junts. Torna a executar <code>node --version</code> i <code>npm --version</code> per confirmar-ho.</p>
+    </div>
+
+    <h3>2.4 · Inicialitzar el projecte amb npm</h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
       <p>Assegura't d'estar a la carpeta del projecte (on hi ha l'<code>index.html</code>) i executa:</p>
@@ -226,7 +288,7 @@
       <p>➜ <code>npm init</code> crea un fitxer nou anomenat <code>package.json</code>, que és com el "DNI" del projecte: hi diu el nom, la versió, i (més endavant) quines eines necessita per funcionar. El <code>-y</code> respon "sí" a totes les preguntes automàticament, perquè no calen personalitzar-les ara.</p>
     </div>
 
-    <h3>2.4 · Instal·lar JSDoc com a eina del projecte</h3>
+    <h3>2.5 · Instal·lar JSDoc com a eina del projecte</h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
       <div class="term">
@@ -242,10 +304,10 @@
       <p>Un cop acabi, veuràs que ha aparegut una carpeta nova: <code>node_modules/</code>. A dins hi ha JSDoc i tot el que necessita per funcionar. Aquesta carpeta pot arribar a pesar molts megabytes.</p>
     </div>
 
-    <h3>2.5 · Dir-li a Git que ignori <code>node_modules/</code></h3>
+    <h3>2.6 · Dir-li a Git que ignori <code>node_modules/</code></h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
-      <p><code>node_modules/</code> <strong>mai</strong> s'ha de pujar a GitHub: pesa massa, i qualsevol altra persona la pot regenerar sola amb <code>npm install</code> (com faràs al pas 2.7). Obre (o crea) el fitxer <code>.gitignore</code> i afegeix-hi aquesta línia:</p>
+      <p><code>node_modules/</code> <strong>mai</strong> s'ha de pujar a GitHub: pesa massa, i qualsevol altra persona la pot regenerar sola amb <code>npm install</code> (com faràs al pas 2.8). Obre (o crea) el fitxer <code>.gitignore</code> i afegeix-hi aquesta línia:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">.gitignore</span></div>
         <pre><code>node_modules/</code></pre>
@@ -253,7 +315,7 @@
       <p>➜ Amb això, Git deixarà d'avisar-te sobre aquesta carpeta i mai la inclourà en un commit.</p>
     </div>
 
-    <h3>2.6 · Pujar la configuració inicial</h3>
+    <h3>2.7 · Pujar la configuració inicial</h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
       <p>Fes commit dels 3 fitxers nous (mai de <code>node_modules/</code>):</p>
@@ -274,7 +336,7 @@
       <p>➜ <code>git push</code> envia aquesta fotografia a GitHub, a la branca <code>docs/jsdoc</code> (encara no a <code>main</code>).</p>
     </div>
 
-    <h3>2.7 · El Col·laborador es posa al dia</h3>
+    <h3>2.8 · El Col·laborador es posa al dia</h3>
     <div class="role-box collab">
       <span class="role-label collab">Col·laborador</span>
       <div class="term">
@@ -294,7 +356,7 @@
       <p>➜ <code>npm install</code> <strong>sense cap nom darrere</strong> llegeix el <code>package.json</code> que ha pujat el Propietari i instal·la exactament les mateixes eines (JSDoc) al teu propi <code>node_modules/</code> local. Per això no calia pujar-lo a GitHub.</p>
     </div>
 
-    <h3>2.8 · Generar la documentació</h3>
+    <h3>2.9 · Generar la documentació</h3>
     <div class="role-box collab">
       <span class="role-label collab">Col·laborador</span>
       <div class="term">
@@ -307,7 +369,7 @@
         <li><code>js/main.js</code> — el fitxer que volem llegir i documentar.</li>
         <li><code>-d docs</code> — <em>destination</em> (destí): la carpeta on volem que es guardi la web generada, en aquest cas <code>docs/</code>.</li>
       </ul>
-      <p>Obre <code>docs/index.html</code> amb el navegador: hi apareixen <code>campOmplert</code> i <code>validarContacte</code> documentades.</p>
+      <p>Obre <code>docs/index.html</code> amb el navegador: hi apareixen <code>campOmplert</code> i <code>mostrarMissatge</code> documentades.</p>
     </div>
 
     <div style="border:1px solid #E3E8EF;border-radius:12px;overflow:hidden;margin:1rem 0;max-width:560px;background:#fff">
@@ -321,7 +383,7 @@
         <div style="width:120px;flex-shrink:0;background:#FAFBFC;border-right:1px solid #E3E8EF;padding:.9rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#5A6677">
           <p style="margin:0 0 .5rem;font-weight:600;color:#1A2230">Globals</p>
           <p style="margin:.25rem 0;color:#A85610">campOmplert</p>
-          <p style="margin:.25rem 0;color:#A85610">validarContacte</p>
+          <p style="margin:.25rem 0;color:#A85610">mostrarMissatge</p>
         </div>
         <div style="flex:1;padding:1rem 1.2rem">
           <p style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.92rem;color:#1A2230;margin:0">campOmplert(valor) <span style="font-weight:400;color:#5A6677">→ boolean</span></p>
@@ -330,7 +392,7 @@
       </div>
     </div>
 
-    <h3>2.9 · Pujar els canvis i fusionar-los</h3>
+    <h3>2.10 · Pujar els canvis i fusionar-los</h3>
     <div class="role-box collab">
       <span class="role-label collab">Col·laborador</span>
       <div class="term">
@@ -361,7 +423,7 @@
     <ul>
       <li><code>package.json</code> existeix i té <code>jsdoc</code> com a <code>devDependency</code>.</li>
       <li><code>node_modules/</code> apareix al <code>.gitignore</code> i no s'ha pujat mai a GitHub.</li>
-      <li><code>docs/index.html</code> mostra <code>campOmplert</code> i <code>validarContacte</code> documentades.</li>
+      <li><code>docs/index.html</code> mostra <code>campOmplert</code> i <code>mostrarMissatge</code> documentades.</li>
       <li>El Pull Request <code>docs/jsdoc</code> apareix fusionat, amb commits dels dos membres.</li>
     </ul>
   </section>

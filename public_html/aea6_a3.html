@@ -126,12 +126,12 @@
 
     <h3>Prerequisits</h3>
     <ul>
-      <li>Haver completat l'A1 i l'A2: repositori creat, header i footer fusionats, branca <code>main</code> protegida.</li>
+      <li>Haver completat l'A1 i l'A2: repositori creat, header i footer fusionats, token d'accés configurat.</li>
     </ul>
 
     <div class="callout tip">
       <span class="ico">💡</span>
-      <p>Com sempre, <code>main</code> està protegida: els canvis d'aquesta activitat es faran a una branca nova, <code>docs/readme</code>, i es fusionaran amb un Pull Request al final.</p>
+      <p>Seguint el mateix hàbit de l'A2, els canvis d'aquesta activitat es faran a una branca nova, <code>docs/readme</code>, i es fusionaran amb un Pull Request al final.</p>
     </div>
   </section>
 
@@ -375,9 +375,37 @@ lloc de contrasenya.
     </div>
 
     <h3>2.4 · Fusionar la documentació</h3>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Aquí feu un únic Pull Request entre els dos, no un per persona com a l'A2. Com que tots dos heu pujat commits a la <strong>mateixa</strong> branca <code>docs/readme</code> (en lloc de tenir cadascú la seva pròpia branca), els dos commits ja hi són junts: només cal un Pull Request per portar-los tots dos a <code>main</code>.</p>
+    </div>
     <div class="role-box both">
       <span class="role-label both">Ambdós</span>
-      <p>A GitHub, obriu un únic Pull Request des de <code>docs/readme</code> cap a <code>main</code> (ara conté els dos commits, un de cadascú). Reviseu-lo junts i fes-ne el merge. Després, cadascú fa <code>git checkout main</code> i <code>git pull origin main</code>.</p>
+      <p><strong>Obrir el Pull Request</strong> (ho fa qui vulgui dels dos, no cal repetir-ho):</p>
+      <ol>
+        <li>Ves al repositori a GitHub. Hi apareixerà un avís groc amb la branca <code>docs/readme</code> acabada de pujar.</li>
+        <li>Fes clic a <strong>Compare & pull request</strong>.</li>
+        <li>Revisa el resum de canvis: hi hauria d'aparèixer <strong>2 commits</strong>, un amb el teu nom i un altre amb el del teu company/a.</li>
+        <li>Fes clic a <strong>Create pull request</strong>.</li>
+      </ol>
+      <p><strong>Revisar-lo i fer el merge</strong> (ara sí, cadascú fa la seva part):</p>
+      <ol>
+        <li>Ves a la pestanya <strong>Files changed</strong> del Pull Request i mira que hi surtin les dues seccions del README, la teva i la del teu company/a.</li>
+        <li>Deixa un comentari curt (per exemple, "Tot correcte").</li>
+        <li>Fes clic a <strong>Merge pull request</strong>.</li>
+      </ol>
+      <p>➜ A diferència de l'A2, aquí no cal que cadascú revisi el Pull Request de l'altre per separat: com que és un de sol, entre tots dos ja n'hi ha prou.</p>
+      <p><strong>Actualitzar la còpia local</strong> (cadascú al seu ordinador):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git checkout main</code></pre>
+      </div>
+      <p>➜ Et mou de la branca <code>docs/readme</code> a <code>main</code>, al teu ordinador.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git pull origin main</code></pre>
+      </div>
+      <p>➜ Baixa a <code>main</code> el resultat del merge (el README complet, amb les dues seccions), que acaba de fer GitHub.</p>
     </div>
   </section>
 
