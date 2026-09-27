@@ -91,7 +91,7 @@
       <div class="step-body">
         <h3>Primers passos amb Git i GitHub</h3>
         <p>Individual, abans de començar a treballar en parella. Cadascú instal·la VS Code, Git i la GitHub CLI (<code>gh</code>) al seu ordinador, crea el seu compte de GitHub, configura el seu nom i correu (<code>git config</code>), i s'autentica amb <code>gh auth login</code>. Amb un repositori d'usar i llençar (<code>practica-git</code>), practica els 4 comandaments bàsics: crea un fitxer, en fa <code>commit</code> i <code>push</code>, i simula el canvi d'un company editant el fitxer directament des de GitHub i fent <code>pull</code> per baixar-lo. Al final, esborra aquest repositori de pràctiques.</p>
-        <span class="step-crit">Criteri: 6.5</span>
+
       </div>
     </div>
 
@@ -100,7 +100,7 @@
       <div class="step-body">
         <h3>Primeres passes amb Git/GitHub</h3>
         <p>Ja en parella, amb el repositori de veritat. El Propietari crea <code>aea6-usuari1-usuari2</code> a GitHub (amb un README inicial), hi puja un <code>index.html</code> senzill, i afegeix el Col·laborador com a col·laborador del repositori. El Col·laborador clona el repositori i comprova que veu exactament el mateix contingut. Per tancar l'activitat, el Col·laborador omple el README (que fins ara només tenia el títol) i el puja; el Propietari fa <code>pull</code> i el rep — practicant el flux en tots dos sentits.</p>
-        <span class="step-crit">Criteri: 6.5</span>
+
       </div>
     </div>
 
@@ -109,7 +109,6 @@
       <div class="step-body">
         <h3>Treball en parella amb branques</h3>
         <p>Cadascú crea la seva pròpia branca: el Propietari <code>feature/header</code> (hi afegeix una capçalera a <code>index.html</code>), el Col·laborador <code>feature/footer</code> (hi afegeix un peu de pàgina). Cada branca es puja i s'obre com a Pull Request separat. La revisió és <strong>creuada</strong>: cadascú revisa i fusiona el Pull Request de l'altre, mai el propi. Com que els dos han editat parts diferents del fitxer, els dos merges es fan sense conflicte. Finalment, cadascú crea un token d'accés personal a GitHub per autenticar-se des del terminal sense fer servir la contrasenya del compte.</p>
-        <span class="step-crit">Criteris: 6.5, 6.6</span>
       </div>
     </div>
 
@@ -118,7 +117,6 @@
       <div class="step-body">
         <h3>Documentació amb Markdown</h3>
         <p>S'aprèn la sintaxi bàsica de Markdown (títols, negreta, llistes, blocs de codi, taules). Tots dos treballen a la <strong>mateixa</strong> branca <code>docs/readme</code>: el Propietari hi escriu la secció d'instal·lació de Git al <code>README.md</code>, el Col·laborador hi afegeix la de configuració i ús. Com que és una sola branca compartida, només cal <strong>un</strong> Pull Request (a diferència de l'A2) per portar-ho tot a <code>main</code>.</p>
-        <span class="step-crit">Criteris: 6.3, 6.7</span>
       </div>
     </div>
 
@@ -127,7 +125,6 @@
       <div class="step-body">
         <h3>Eines de documentació automàtica</h3>
         <p>Activitat autònoma: no depèn de cap fitxer d'activitats anteriors. Cadascú instal·la Node.js i npm si encara no els tenia. El Propietari crea <code>js/main.js</code> amb dues funcions petites (<code>campOmplert</code> i <code>mostrarMissatge</code>), cadascuna documentada amb un comentari JSDoc (<code>/** ... */</code>). S'inicialitza el projecte amb <code>npm init</code>, s'instal·la JSDoc com a dependència de desenvolupament, es genera automàticament una web de documentació (<code>docs/</code>) amb <code>npx jsdoc</code>, i es puja tot (incloent <code>package.json</code> i <code>docs/</code>) en un sol Pull Request compartit, igual que a l'A3.</p>
-        <span class="step-crit">Criteris: 6.1, 6.2</span>
       </div>
     </div>
 
@@ -136,7 +133,6 @@
       <div class="step-body">
         <h3>Disseny visual i documentació col·laborativa</h3>
         <p>El Propietari crea <code>style.css</code> (tipografia, colors, marges) i l'enllaça a <code>index.html</code>. El Col·laborador es posa al dia amb <code>git fetch</code> + <code>checkout</code> de la mateixa branca <code>design/wiki</code>, fa una captura de pantalla de la pàgina ja amb estil, i documenta el resultat a la <strong>Wiki de GitHub</strong> (pàgina "Home"): primer el Propietari hi escriu la presentació del projecte, després el Col·laborador hi afegeix la captura i un fragment del CSS. És una segona manera de documentar, diferent de la generació automàtica de l'A4.</p>
-        <span class="step-crit">Criteris: 6.3, 6.4</span>
       </div>
     </div>
 
@@ -145,41 +141,16 @@
       <div class="step-body">
         <h3>Integració contínua</h3>
         <p>El Propietari crea <code>.github/workflows/ci.yml</code> línia a línia, un workflow de GitHub Actions que, a cada <code>push</code>, comprova que <code>index.html</code> existeix i que <code>js/main.js</code> no té errors de sintaxi. A diferència de la resta d'activitats, el Pull Request s'obre <strong>abans</strong> (no al final): es queda obert mentre el Col·laborador hi afegeix un comentari inofensiu (veu la CI en verd), després <strong>provoca un error de sintaxi a propòsit</strong> (veu la CI fallar en vermell, amb l'error real de <code>node --check</code>), i finalment el corregeix (torna a verd). Només llavors es fusiona el Pull Request, tancant tota l'AEA6.</p>
-        <span class="step-crit">Criteri: 6.8</span>
+
       </div>
     </div>
 
   </section>
 
-  <!-- ============ 2 · COBERTURA DE CRITERIS ============ -->
+  <!-- ============ 2 · ESTAT FINAL DEL REPOSITORI ============ -->
   <section>
     <div class="sec-head">
       <span class="sec-num">2</span>
-      <h2>Cobertura de criteris d'avaluació (RA6)</h2>
-    </div>
-    <table>
-      <thead><tr><th>Criteri</th><th>Descripció</th><th>Activitat</th></tr></thead>
-      <tbody>
-        <tr><td class="center">6.1</td><td>Identifica diferents eines de generació de documentació.</td><td class="center">A4</td></tr>
-        <tr><td class="center">6.2</td><td>Documenta components de programari amb generadors específics.</td><td class="center">A4</td></tr>
-        <tr><td class="center">6.3</td><td>Utilitza diferents formats per a la documentació.</td><td class="center">A3, A5</td></tr>
-        <tr><td class="center">6.4</td><td>Utilitza eines col·laboratives per a l'elaboració i el manteniment de la documentació.</td><td class="center">A5</td></tr>
-        <tr><td class="center">6.5</td><td>Instal·la, configura i utilitza un sistema de control de versions.</td><td class="center">A0, A1, A2</td></tr>
-        <tr><td class="center">6.6</td><td>Garanteix l'accessibilitat i la seguretat del codi al control de versions.</td><td class="center">A2</td></tr>
-        <tr><td class="center">6.7</td><td>Documenta la instal·lació, la configuració i l'ús del control de versions.</td><td class="center">A3</td></tr>
-        <tr><td class="center">6.8</td><td>Utilitza eines per a la integració contínua del codi.</td><td class="center">A6</td></tr>
-      </tbody>
-    </table>
-    <div class="callout tip">
-      <span class="ico">💡</span>
-      <p>Els 8 criteris queden coberts entre les 7 activitats, sense duplicats innecessaris ni buits.</p>
-    </div>
-  </section>
-
-  <!-- ============ 3 · ESTAT FINAL DEL REPOSITORI ============ -->
-  <section>
-    <div class="sec-head">
-      <span class="sec-num">3</span>
       <h2>Estat final del repositori</h2>
     </div>
     <p>Així queda <code>aea6-usuari1-usuari2</code> un cop acabades les 7 activitats:</p>
