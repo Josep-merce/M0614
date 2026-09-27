@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA6 — Resum · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:920px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:66ch;margin-top:1.1rem}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  p{margin:.7rem 0;max-width:72ch}
+  ul{margin:.6rem 0 .6rem 1.3rem}
+  li{margin:.35rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .step{display:flex;gap:1.1rem;margin-bottom:1.8rem}
+  .step-num{font-family:var(--mono);font-weight:700;font-size:.82rem;color:#fff;background:var(--ink);border-radius:8px;padding:.35rem .6rem;flex-shrink:0;height:fit-content;min-width:2.6rem;text-align:center}
+  .step-body{flex:1;padding-bottom:.2rem}
+  .step-body h3{font-family:var(--display);font-weight:600;font-size:1.15rem;margin:0 0 .5rem;letter-spacing:-.01em}
+  .step-body p{margin:.5rem 0}
+  .step-crit{font-family:var(--mono);font-size:.72rem;color:var(--accent);margin-top:.5rem;display:inline-block}
+
+  table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+  td.center{text-align:center;font-family:var(--mono);font-size:.8rem}
+
+  .tree{background:#1A2230;border-radius:12px;padding:1.1rem 1.3rem;margin:1rem 0;overflow-x:auto}
+  .tree code{background:none;color:#E6ECF5;font-family:var(--mono);font-size:.86rem;line-height:1.85;white-space:pre;padding:0}
+  .tree .dim{color:#7c8aa0}
+  .tree .hl{color:#F0A868}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}.step{gap:.7rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea6.html"><span class="arrow">←</span> Tornar a l'AEA6</a>
+
+  <header>
+    <span class="eyebrow">M0614 · RA6</span>
+    <h1>Resum <span class="code">de</span> l'AEA6</h1>
+    <p class="lede">Documentació, control de versions i integració contínua. Aquest és el fil sencer de les 7 activitats, en ordre, sobre el mateix repositori compartit <code>aea6-usuari1-usuari2</code>.</p>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 1 · EL FIL DE LES 7 ACTIVITATS ============ -->
+  <section>
+
+    <div class="step">
+      <span class="step-num">A0</span>
+      <div class="step-body">
+        <h3>Primers passos amb Git i GitHub</h3>
+        <p>Individual, abans de començar a treballar en parella. Cadascú instal·la VS Code, Git i la GitHub CLI (<code>gh</code>) al seu ordinador, crea el seu compte de GitHub, configura el seu nom i correu (<code>git config</code>), i s'autentica amb <code>gh auth login</code>. Amb un repositori d'usar i llençar (<code>practica-git</code>), practica els 4 comandaments bàsics: crea un fitxer, en fa <code>commit</code> i <code>push</code>, i simula el canvi d'un company editant el fitxer directament des de GitHub i fent <code>pull</code> per baixar-lo. Al final, esborra aquest repositori de pràctiques.</p>
+        <span class="step-crit">Criteri: 6.5</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">A1</span>
+      <div class="step-body">
+        <h3>Primeres passes amb Git/GitHub</h3>
+        <p>Ja en parella, amb el repositori de veritat. El Propietari crea <code>aea6-usuari1-usuari2</code> a GitHub (amb un README inicial), hi puja un <code>index.html</code> senzill, i afegeix el Col·laborador com a col·laborador del repositori. El Col·laborador clona el repositori i comprova que veu exactament el mateix contingut. Per tancar l'activitat, el Col·laborador omple el README (que fins ara només tenia el títol) i el puja; el Propietari fa <code>pull</code> i el rep — practicant el flux en tots dos sentits.</p>
+        <span class="step-crit">Criteri: 6.5</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">A2</span>
+      <div class="step-body">
+        <h3>Treball en parella amb branques</h3>
+        <p>Cadascú crea la seva pròpia branca: el Propietari <code>feature/header</code> (hi afegeix una capçalera a <code>index.html</code>), el Col·laborador <code>feature/footer</code> (hi afegeix un peu de pàgina). Cada branca es puja i s'obre com a Pull Request separat. La revisió és <strong>creuada</strong>: cadascú revisa i fusiona el Pull Request de l'altre, mai el propi. Com que els dos han editat parts diferents del fitxer, els dos merges es fan sense conflicte. Finalment, cadascú crea un token d'accés personal a GitHub per autenticar-se des del terminal sense fer servir la contrasenya del compte.</p>
+        <span class="step-crit">Criteris: 6.5, 6.6</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">A3</span>
+      <div class="step-body">
+        <h3>Documentació amb Markdown</h3>
+        <p>S'aprèn la sintaxi bàsica de Markdown (títols, negreta, llistes, blocs de codi, taules). Tots dos treballen a la <strong>mateixa</strong> branca <code>docs/readme</code>: el Propietari hi escriu la secció d'instal·lació de Git al <code>README.md</code>, el Col·laborador hi afegeix la de configuració i ús. Com que és una sola branca compartida, només cal <strong>un</strong> Pull Request (a diferència de l'A2) per portar-ho tot a <code>main</code>.</p>
+        <span class="step-crit">Criteris: 6.3, 6.7</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">A4</span>
+      <div class="step-body">
+        <h3>Eines de documentació automàtica</h3>
+        <p>Activitat autònoma: no depèn de cap fitxer d'activitats anteriors. Cadascú instal·la Node.js i npm si encara no els tenia. El Propietari crea <code>js/main.js</code> amb dues funcions petites (<code>campOmplert</code> i <code>mostrarMissatge</code>), cadascuna documentada amb un comentari JSDoc (<code>/** ... */</code>). S'inicialitza el projecte amb <code>npm init</code>, s'instal·la JSDoc com a dependència de desenvolupament, es genera automàticament una web de documentació (<code>docs/</code>) amb <code>npx jsdoc</code>, i es puja tot (incloent <code>package.json</code> i <code>docs/</code>) en un sol Pull Request compartit, igual que a l'A3.</p>
+        <span class="step-crit">Criteris: 6.1, 6.2</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">A5</span>
+      <div class="step-body">
+        <h3>Disseny visual i documentació col·laborativa</h3>
+        <p>El Propietari crea <code>style.css</code> (tipografia, colors, marges) i l'enllaça a <code>index.html</code>. El Col·laborador es posa al dia amb <code>git fetch</code> + <code>checkout</code> de la mateixa branca <code>design/wiki</code>, fa una captura de pantalla de la pàgina ja amb estil, i documenta el resultat a la <strong>Wiki de GitHub</strong> (pàgina "Home"): primer el Propietari hi escriu la presentació del projecte, després el Col·laborador hi afegeix la captura i un fragment del CSS. És una segona manera de documentar, diferent de la generació automàtica de l'A4.</p>
+        <span class="step-crit">Criteris: 6.3, 6.4</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">A6</span>
+      <div class="step-body">
+        <h3>Integració contínua</h3>
+        <p>El Propietari crea <code>.github/workflows/ci.yml</code> línia a línia, un workflow de GitHub Actions que, a cada <code>push</code>, comprova que <code>index.html</code> existeix i que <code>js/main.js</code> no té errors de sintaxi. A diferència de la resta d'activitats, el Pull Request s'obre <strong>abans</strong> (no al final): es queda obert mentre el Col·laborador hi afegeix un comentari inofensiu (veu la CI en verd), després <strong>provoca un error de sintaxi a propòsit</strong> (veu la CI fallar en vermell, amb l'error real de <code>node --check</code>), i finalment el corregeix (torna a verd). Només llavors es fusiona el Pull Request, tancant tota l'AEA6.</p>
+        <span class="step-crit">Criteri: 6.8</span>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============ 2 · COBERTURA DE CRITERIS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Cobertura de criteris d'avaluació (RA6)</h2>
+    </div>
+    <table>
+      <thead><tr><th>Criteri</th><th>Descripció</th><th>Activitat</th></tr></thead>
+      <tbody>
+        <tr><td class="center">6.1</td><td>Identifica diferents eines de generació de documentació.</td><td class="center">A4</td></tr>
+        <tr><td class="center">6.2</td><td>Documenta components de programari amb generadors específics.</td><td class="center">A4</td></tr>
+        <tr><td class="center">6.3</td><td>Utilitza diferents formats per a la documentació.</td><td class="center">A3, A5</td></tr>
+        <tr><td class="center">6.4</td><td>Utilitza eines col·laboratives per a l'elaboració i el manteniment de la documentació.</td><td class="center">A5</td></tr>
+        <tr><td class="center">6.5</td><td>Instal·la, configura i utilitza un sistema de control de versions.</td><td class="center">A0, A1, A2</td></tr>
+        <tr><td class="center">6.6</td><td>Garanteix l'accessibilitat i la seguretat del codi al control de versions.</td><td class="center">A2</td></tr>
+        <tr><td class="center">6.7</td><td>Documenta la instal·lació, la configuració i l'ús del control de versions.</td><td class="center">A3</td></tr>
+        <tr><td class="center">6.8</td><td>Utilitza eines per a la integració contínua del codi.</td><td class="center">A6</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Els 8 criteris queden coberts entre les 7 activitats, sense duplicats innecessaris ni buits.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3 · ESTAT FINAL DEL REPOSITORI ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Estat final del repositori</h2>
+    </div>
+    <p>Així queda <code>aea6-usuari1-usuari2</code> un cop acabades les 7 activitats:</p>
+    <div class="tree">
+      <code>aea6-usuari1-usuari2/
+├── <span class="hl">index.html</span>          <span class="dim"># A1: bàsic · A2: +header +footer · A5: +link a style.css</span>
+├── <span class="hl">README.md</span>           <span class="dim"># A1: omplert · A3: instal·lació/configuració/ús de Git</span>
+├── <span class="hl">style.css</span>           <span class="dim"># A5: colors, tipografia, marges</span>
+├── <span class="hl">.gitignore</span>          <span class="dim"># A4: exclou node_modules/</span>
+├── <span class="hl">package.json</span>        <span class="dim"># A4: dependència jsdoc</span>
+├── <span class="hl">package-lock.json</span>
+├── js/
+│   └── <span class="hl">main.js</span>        <span class="dim"># A4: campOmplert() + mostrarMissatge(), documentades amb JSDoc</span>
+├── docs/                <span class="dim"># A4: web de documentació generada per JSDoc</span>
+│   └── ...
+└── .github/
+    └── workflows/
+        └── <span class="hl">ci.yml</span>      <span class="dim"># A6: comprova index.html i la sintaxi de main.js a cada push</span>
+
+Wiki (fora del repositori de fitxers):
+└── Home                  <span class="dim"># A5: presentació + secció "Disseny visual" (captura + CSS)</span></code>
+    </div>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA6 · Resum
+  </footer>
+
+</div>
+</body>
+</html>
