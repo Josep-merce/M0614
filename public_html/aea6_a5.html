@@ -174,11 +174,7 @@
     <h3>2.2 · Crear el full d'estil (CSS)</h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
-      <p>Crea un fitxer nou anomenat <code>style.css</code> a l'arrel del projecte (al mateix nivell que <code>index.html</code>):</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>nano style.css</code></pre>
-      </div>
+      <p>A l'explorador de fitxers de VS Code (a l'esquerra), fes clic dret sobre el nom de la carpeta del projecte i tria <strong>New File…</strong>. Escriu com a nom <code>style.css</code> (al mateix nivell que <code>index.html</code>).</p>
       <p>Escriu-hi aquest contingut:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">style.css</span></div>
@@ -208,9 +204,11 @@
   margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid #ddd;
+  color: #E07B1E;
 }</code></pre>
       </div>
-      <p>➜ Aquest bloc separa visualment el peu de pàgina (<code>footer</code>) amb una línia i una mica d'espai per sobre.</p>
+      <p>➜ Aquest bloc separa visualment el peu de pàgina (<code>footer</code>) amb una línia i una mica d'espai per sobre, i li dona el mateix color taronja que els enllaços de la capçalera, per fer joc.</p>
+      <p>Desa el fitxer (<code>Ctrl + S</code>).</p>
     </div>
 
     <h3>2.3 · Enllaçar el CSS des de l'index.html</h3>
@@ -254,7 +252,14 @@
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>git checkout design/wiki</code></pre>
       </div>
-      <p>Obre <code>index.html</code> al navegador i fes una captura de pantalla de la finestra sencera. Desa-la al teu ordinador (per exemple, a l'Escriptori, amb el nom <code>disseny.png</code>).</p>
+      <p>Obre <code>index.html</code> al navegador. Ara fes la captura de pantalla:</p>
+      <ol>
+        <li>Prem <strong>Maj + PrintScr</strong> (o <strong>Maj + ImprPant</strong>): el cursor es converteix en una creueta.</li>
+        <li>Amb el ratolí, arrossega un requadre al voltant de la finestra del navegador per seleccionar-la.</li>
+        <li>GNOME desa la captura automàticament a la carpeta <code>~/Pictures/Screenshots/</code>, amb un nom llarg que inclou la data.</li>
+        <li>Obre aquesta carpeta, <strong>retalla (Ctrl+X)</strong> la imatge, i <strong>enganxa-la (Ctrl+V) a l'Escriptori</strong>.</li>
+        <li><strong>Renombra-la</strong> a <code>disseny.png</code> (clic dret → Rename, o prem F2).</li>
+      </ol>
     </div>
 
     <h3>2.6 · Crear la pàgina de la Wiki</h3>
@@ -320,9 +325,14 @@ body {
     </div>
 
     <h3>2.9 · Fusionar els canvis del CSS</h3>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><strong>Per què només un Pull Request:</strong> igual que a l'A3 (el README), aquí tots dos treballeu sobre la mateixa branca <code>design/wiki</code>: el Propietari hi puja el CSS (pas 2.4) i el Col·laborador fa <code>git fetch</code> + <code>git checkout design/wiki</code> (pas 2.5) — la mateixa branca, no una de nova. Com que és una única branca compartida amb els commits de tots dos junts, només cal un Pull Request per portar-la sencera a <code>main</code>. És diferent del que vau fer a l'A2 (<code>feature/header</code> i <code>feature/footer</code>, dues branques → dos PR).</p>
+      <p><strong>Qui el fa:</strong> qualsevol dels dos — el text diu "Ambdós" perquè el resultat final (comprovar-lo, fusionar-lo, actualitzar la còpia local després) és cosa de tots dos, però clicar "Create pull request" físicament el pot fer un sol dels dos (no cal que el repetiu).</p>
+    </div>
     <div class="role-box both">
       <span class="role-label both">Ambdós</span>
-      <p>A GitHub, obriu el Pull Request des de <code>design/wiki</code> cap a <code>main</code>, reviseu-lo i fusioneu-lo. Després, cadascú fa <code>git checkout main</code> i <code>git pull origin main</code> per actualitzar la seva còpia local.</p>
+      <p>A GitHub, obriu el Pull Request des de <code>design/wiki</code> cap a <code>main</code>, reviseu-lo i fusioneu-lo. Un cop fusionat, fes clic al botó <strong>Delete branch</strong> que apareix sota el missatge de confirmació: la branca <code>design/wiki</code> ja no fa falta, i esborrar-la evita que et torni a sortir en futurs <code>git fetch</code>. Després, cadascú fa <code>git checkout main</code> i <code>git pull origin main</code> per actualitzar la seva còpia local.</p>
     </div>
   </section>
 

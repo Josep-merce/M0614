@@ -196,29 +196,21 @@
       <p>➜ Les tres comandes de sempre: et poses al dia amb <code>main</code> i crees una branca nova, <code>ci/actions</code>.</p>
     </div>
 
-    <h3>2.2 · Crear la carpeta del workflow</h3>
+    <h3>2.2 · Crear el fitxer de configuració</h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>mkdir -p .github/workflows</code></pre>
+      <p>A l'explorador de fitxers de VS Code (a l'esquerra), fes clic dret sobre el nom de la carpeta del projecte i tria <strong>New File…</strong>. Escriu com a nom <code>.github/workflows/ci.yml</code> (amb les barres incloses): VS Code crearà les dues carpetes (<code>.github</code> i <code>workflows</code>) i el fitxer <code>ci.yml</code>, tot alhora. GitHub Actions només busca fitxers de configuració exactament en aquesta ruta.</p>
+      <p>➜ El nom del fitxer el pots triar tu; l'important és que estigui dins de <code>.github/workflows/</code> i acabi en <code>.yml</code>.</p>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>Just després de crear el fitxer, és possible que VS Code mostri un avís preguntant si vols instal·lar l'extensió recomanada <strong>"GitHub Actions"</strong>. Pots instal·lar-la (t'ajuda a escriure el YAML sense errors) o ignorar l'avís (tancant-lo amb la <strong>X</strong>): cap de les dues opcions afecta la resta de l'activitat.</p>
       </div>
-      <p>➜ <code>mkdir -p</code> crea la carpeta <code>.github</code> i, a dins, la carpeta <code>workflows</code>, totes dues d'un cop. GitHub Actions només busca fitxers de configuració exactament en aquesta ruta.</p>
     </div>
 
-    <h3>2.3 · Crear el fitxer de configuració</h3>
+    <h3>2.3 · Escriure el workflow, línia a línia</h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>nano .github/workflows/ci.yml</code></pre>
-      </div>
-      <p>➜ Obre l'editor per crear el fitxer <code>ci.yml</code>. El nom del fitxer el pots triar tu; l'important és que estigui dins de <code>.github/workflows/</code> i acabi en <code>.yml</code>.</p>
-    </div>
-
-    <h3>2.4 · Escriure el workflow, línia a línia</h3>
-    <div class="role-box prop">
-      <span class="role-label prop">Propietari</span>
+      <p>Tot el que ve a continuació ho escrius dins del fitxer <code>ci.yml</code> que acabes de crear, afegint cada bloc seguit de l'anterior.</p>
       <p>Comença amb el nom del workflow:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">ci.yml</span></div>
@@ -232,6 +224,10 @@
         <pre><code>on: push</code></pre>
       </div>
       <p>➜ <code>on: push</code> vol dir "executa't cada vegada que algú faci <code>git push</code>", a qualsevol branca.</p>
+      <div class="callout warn">
+        <span class="ico">⚠️</span>
+        <p>Aquesta línia ha de quedar sencera, amb <code>push</code> just al costat d'<code>on:</code>. Si sense voler prems Enter enmig i <code>push</code> acaba en una línia nova sense indentació, GitHub donarà l'error <strong>"No event triggers defined in `on`"</strong>. Si et passa, esborra tota la línia i torna-la a escriure de cop.</p>
+      </div>
 
       <p>Defineix un "job" (una feina):</p>
       <div class="term">
@@ -273,7 +269,7 @@
       <p>➜ <code>node --check</code> llegeix un fitxer JavaScript i comprova que estigui ben escrit (claus tancades, punts i comes, etc.), sense arribar a executar-lo. Si hi ha un error d'escriptura, aquest pas falla.</p>
     </div>
 
-    <h3>2.5 · Veure el fitxer complet</h3>
+    <h3>2.4 · Veure el fitxer complet</h3>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">.github/workflows/ci.yml</span></div>
       <pre><code>name: Comprovacions de qualitat
@@ -294,8 +290,9 @@ jobs:
       <span class="ico">⚠️</span>
       <p>La indentació (els espais al principi de cada línia) és <strong>obligatòria</strong> en YAML: si una línia no comença amb el mateix nombre d'espais que les del seu grup, el fitxer no és vàlid. Copia-la exactament com es mostra.</p>
     </div>
+    <p>Desa el fitxer (<code>Ctrl + S</code>).</p>
 
-    <h3>2.6 · Pujar el workflow</h3>
+    <h3>2.5 · Pujar el workflow</h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
       <div class="term">
@@ -312,7 +309,7 @@ jobs:
       </div>
     </div>
 
-    <h3>2.7 · Veure el resultat a la pestanya Actions</h3>
+    <h3>2.6 · Veure el resultat a la pestanya Actions</h3>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
       <ol>
@@ -323,7 +320,22 @@ jobs:
       </ol>
     </div>
 
+    <h3>2.7 · Obrir el Pull Request</h3>
+    <div class="role-box prop">
+      <span class="role-label prop">Propietari</span>
+      <p>Torna a la pàgina principal del repositori (pestanya <strong>Code</strong>). Hi veuràs un avís de color groc que diu que la branca <code>ci/actions</code> ha rebut canvis fa poc, amb un botó <strong>Compare & pull request</strong>.</p>
+      <ol>
+        <li>Fes clic a <strong>Compare & pull request</strong>.</li>
+        <li>Fes clic a <strong>Create pull request</strong>.</li>
+      </ol>
+      <p>➜ Aquest avís groc és el mateix que ja heu vist a activitats anteriors (A2, A3...): apareix sempre que acabes de pujar una branca que encara no té cap Pull Request obert. No cal fer-hi res fins que no vulguis obrir-lo — pots seguir treballant i tornar-hi més tard.</p>
+    </div>
+
     <h3>2.8 · Col·laborador: comprovar que també s'executa al seu Pull Request</h3>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Als passos 2.8, 2.9 i 2.10, tots dos treballeu sobre la <strong>mateixa branca</strong> <code>ci/actions</code>, un darrere l'altre. <strong>Coordineu-vos per no fer-los alhora</strong>: si tots dos pugeu canvis a la vegada, GitHub rebutjarà el segon <code>push</code> ("non-fast-forward" o "fetch first"), i caldrà fer un <code>git pull</code> per fusionar-ho abans de poder tornar a pujar. No és cap error greu, però és més senzill si aneu per torns: primer un fa els tres passos sencers, i després l'altre.</p>
+    </div>
     <div class="role-box collab">
       <span class="role-label collab">Col·laborador</span>
       <div class="term">
@@ -354,10 +366,53 @@ jobs:
       <p>➜ En pujar aquest commit a la mateixa branca, el workflow es torna a executar automàticament. Ves a la pestanya <strong>Actions</strong> i comprova que hi apareix aquesta segona execució, també en verd.</p>
     </div>
 
-    <h3>2.9 · Fusionar els canvis</h3>
+    <h3>2.9 · Provocar un error a propòsit</h3>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Fins ara la CI sempre ha sortit en verd. Per veure que de veritat detecta errors, ara en provocarem un a propòsit.</p>
+    </div>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <p>Obre <code>js/main.js</code> i esborra l'última clau de tancament <code>}</code> del fitxer (la que tanca la funció <code>mostrarMissatge</code>). Desa (<code>Ctrl+S</code>).</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git add js/main.js</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git commit -m "Introdueix un error de prova"</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git push origin ci/actions</code></pre>
+      </div>
+      <p>Ves a la pestanya <strong>Actions</strong>: aquesta execució hauria de sortir en <strong>vermell ❌</strong>. Fes clic a sobre i obre el pas "Comprova la sintaxi del JavaScript": hi veuràs l'error exacte que dona <code>node --check</code> (alguna cosa com <code>SyntaxError: Unexpected end of input</code>).</p>
+      <p>➜ Això és exactament el que serveix la integració contínua: detectar un error abans que arribi a <code>main</code>, sense que ningú l'hagi de trobar a mà.</p>
+    </div>
+
+    <h3>2.10 · Corregir l'error</h3>
+    <div class="role-box collab">
+      <span class="role-label collab">Col·laborador</span>
+      <p>Torna a obrir <code>js/main.js</code> i afegeix de nou la clau <code>}</code> que faltava. Desa (<code>Ctrl+S</code>).</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git add js/main.js</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git commit -m "Corregeix l'error de sintaxi"</code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>git push origin ci/actions</code></pre>
+      </div>
+      <p>➜ Ves altra vegada a la pestanya <strong>Actions</strong>: aquesta quarta execució hauria de tornar a sortir en <strong>verd ✅</strong>.</p>
+    </div>
+
+    <h3>2.11 · Fusionar els canvis</h3>
     <div class="role-box both">
       <span class="role-label both">Ambdós</span>
-      <p>A GitHub, obriu el Pull Request des de <code>ci/actions</code> cap a <code>main</code> (amb els commits dels dos). Fixeu-vos que, dins del mateix Pull Request, GitHub mostra si la comprovació de CI ha passat o no abans de deixar-vos fer el merge. Reviseu-lo i fusioneu-lo. Després, cadascú fa <code>git checkout main</code> i <code>git pull origin main</code>.</p>
+      <p>A GitHub, obriu el Pull Request des de <code>ci/actions</code> cap a <code>main</code> (amb els commits dels dos). Fixeu-vos que, dins del mateix Pull Request, GitHub mostra si la comprovació de CI ha passat o no abans de deixar-vos fer el merge. Reviseu-lo i fusioneu-lo. Un cop fusionat, fes clic al botó <strong>Delete branch</strong> que apareix sota el missatge de confirmació: la branca <code>ci/actions</code> ja no fa falta, i esborrar-la evita que et torni a sortir en futurs <code>git fetch</code>. Després, cadascú fa <code>git checkout main</code> i <code>git pull origin main</code>.</p>
     </div>
   </section>
 
@@ -369,7 +424,7 @@ jobs:
     </div>
     <ul>
       <li>El fitxer <code>.github/workflows/ci.yml</code> existeix, amb la indentació correcta.</li>
-      <li>La pestanya <strong>Actions</strong> mostra com a mínim 2 execucions, totes en verd.</li>
+      <li>La pestanya <strong>Actions</strong> mostra com a mínim 4 execucions: verd, verd, <strong>vermell</strong> (l'error provocat a propòsit) i verd altra vegada.</li>
       <li>El Pull Request <code>ci/actions</code> apareix fusionat, amb commits dels dos membres.</li>
     </ul>
   </section>
@@ -385,7 +440,7 @@ jobs:
       <p>Igual que a la resta d'AEA6: el mateix repositori públic <code>aea6-usuari1-usuari2</code> és l'entrega, i és també el tancament de tota l'AEA6. El professor demanarà l'enllaç i hi comprovarà:</p>
       <ul>
         <li>El fitxer <code>.github/workflows/ci.yml</code>.</li>
-        <li>L'historial d'execucions a la pestanya <strong>Actions</strong>, amb els resultats en verd.</li>
+        <li>L'historial d'execucions a la pestanya <strong>Actions</strong>, incloent l'error provocat a propòsit i la correcció posterior.</li>
         <li>El Pull Request <code>ci/actions</code> fusionat.</li>
       </ul>
     </div>
@@ -409,7 +464,12 @@ jobs:
         <tr>
           <td>L'execució surt en vermell ❌ des del primer pas</td>
           <td>Un error d'indentació al fitxer YAML.</td>
-          <td>Revisa que cada nivell (<code>jobs:</code>, <code>comprovar:</code>, <code>steps:</code>...) tingui exactament els espais indicats a l'exemple del pas 2.5.</td>
+          <td>Revisa que cada nivell (<code>jobs:</code>, <code>comprovar:</code>, <code>steps:</code>...) tingui exactament els espais indicats a l'exemple del pas 2.4.</td>
+        </tr>
+        <tr>
+          <td>Error "No event triggers defined in <code>on</code>"</td>
+          <td><code>push</code> ha quedat separat d'<code>on:</code> (per exemple, en una línia nova sense indentació).</td>
+          <td>Esborra la línia <code>on: push</code> sencera i torna-la a escriure de cop, sense prémer Enter enmig.</td>
         </tr>
         <tr>
           <td>Falla el pas "Comprova la sintaxi del JavaScript"</td>
@@ -420,6 +480,26 @@ jobs:
           <td>El Pull Request no deixa fer merge</td>
           <td>El workflow encara s'està executant, o ha fallat.</td>
           <td>Espera que acabi (punt groc → verd), o soluciona l'error que indica en vermell.</td>
+        </tr>
+        <tr>
+          <td><code>git push</code> diu "rejected... fetch first"</td>
+          <td>El teu company/a ha pujat un canvi a <code>ci/actions</code> abans que tu, i el remot ja no coincideix amb el que tens tu.</td>
+          <td>Fes <code>git pull origin ci/actions</code> abans de tornar a fer <code>push</code>.</td>
+        </tr>
+        <tr>
+          <td><code>git pull</code> diu "cal especificar com reconciliar les branques divergents"</td>
+          <td>És la primera vegada que fas un <code>pull</code> amb canvis divergents en aquest ordinador; Git et demana triar un mètode.</td>
+          <td>Executa <code>git config --global pull.rebase false</code> (una sola vegada, val per sempre) i torna a fer <code>git pull</code>.</td>
+        </tr>
+        <tr>
+          <td>Després d'un <code>git pull</code>, s'obre una pantalla plena de text que no reconeixes</td>
+          <td>És l'editor <strong>Vim</strong>, que Git obre per demanar el missatge de la fusió.</td>
+          <td>Prem <code>Esc</code>, escriu <code>:wq</code> i prem Enter. Això desa el missatge per defecte i tanca l'editor.</td>
+        </tr>
+        <tr>
+          <td><code>git pull</code> diu "no heu conclòs la vostra fusió (MERGE_HEAD existeix)"</td>
+          <td>Una fusió anterior s'ha quedat a mitges (per exemple, vas tancar l'editor de Vim d'una manera inesperada).</td>
+          <td>Executa <code>git status</code> per comprovar-ho; si diu "tots els conflictes estan arreglats", fes <code>git commit</code> (sense <code>-m</code>) per acabar-la.</td>
         </tr>
       </tbody>
     </table>
