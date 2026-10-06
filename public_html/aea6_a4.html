@@ -278,6 +278,10 @@ npm --version</code></pre>
     </div>
 
     <h3>2.4 · Inicialitzar el projecte amb npm</h3>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><strong>Important:</strong> assegura't que estàs a la branca <code>docs/jsdoc</code> abans de continuar. Comprova-ho amb <code>git branch</code> (la branca activa porta un asterisc <code>*</code> al davant). Si fas <code>npm init</code> a la branca equivocada (per exemple <code>main</code>), es crearan <code>package.json</code> i <code>package-lock.json</code> allà, i després no podràs canviar de branca sense moure'ls o esborrar-los primer.</p>
+    </div>
     <div class="role-box prop">
       <span class="role-label prop">Propietari</span>
       <p>Assegura't d'estar a la carpeta del projecte (on hi ha l'<code>index.html</code>) i executa:</p>
@@ -337,6 +341,10 @@ npm --version</code></pre>
     </div>
 
     <h3>2.8 · El Col·laborador es posa al dia</h3>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Aquest és el primer pas en què el Col·laborador fa alguna cosa a <strong>aquesta</strong> branca, però no el primer de l'activitat: el pas 2.3 (instal·lar Node.js i npm) era "Ambdós", així que el Col·laborador ja l'hauria d'haver fet, al seu propi ordinador, molt abans d'arribar aquí. Si encara no ho has fet, torna al 2.3 abans de continuar.</p>
+    </div>
     <div class="role-box collab">
       <span class="role-label collab">Col·laborador</span>
       <div class="term">
@@ -468,6 +476,11 @@ npm --version</code></pre>
           <td>El Col·laborador no té les mateixes dependències que el Propietari</td>
           <td>No ha fet <code>npm install</code> després de baixar la branca <code>docs/jsdoc</code>.</td>
           <td>Executa <code>git checkout docs/jsdoc</code> seguit de <code>npm install</code> abans de generar la documentació.</td>
+        </tr>
+        <tr>
+          <td>"Els següents fitxers no seguits... es sobreescriurien en fer <code>git checkout</code>"</td>
+          <td>Tens fitxers nous (per exemple <code>package.json</code>) que encara no has afegit amb <code>git add</code>, i la branca de destí ja en té amb el mateix nom.</td>
+          <td>Si no els necessites: <code>rm package.json package-lock.json</code> i torna a fer el <code>checkout</code>. Si no n'estàs segur: <code>git stash -u</code>, fes el <code>checkout</code>, i després <code>git stash pop</code> per recuperar-los.</td>
         </tr>
       </tbody>
     </table>
