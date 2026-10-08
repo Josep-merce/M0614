@@ -129,7 +129,7 @@
       <li>Crear el teu <strong>propi lloc web</strong> i servir-lo (no la pàgina per defecte d'Apache).</li>
       <li>Configurar un <strong>host virtual</strong> perquè Apache serveixi aquest lloc.</li>
       <li>Fer que el client hi accedeixi <strong>pel nom</strong> (<code>www.aea2.local</code>) editant <code>/etc/hosts</code>.</li>
-      <li>Protegir el lloc amb <strong>usuari i contrasenya</strong> (autenticació bàsica).</li>
+      <li>Protegir el lloc amb <strong>usuari i contrasenya</strong> (autenticació bàsica), tant per HTTP com per HTTPS.</li>
     </ul>
 
     <h3>Prerequisit important</h3>
@@ -315,26 +315,37 @@
     <p>Prova-ho al navegador del client: <code>http://www.aea2.local</code>. Ha de demanar usuari i contrasenya i, en encertar-los, mostrar el teu lloc.</p>
     </div>
 
-    <h3>2.6 · Fes que l'HTTPS mostri el teu lloc</h3>
+    <h3>2.6 · Fes que l'HTTPS mostri el teu lloc (també protegit)</h3>
     <div class="role-box server">
       <span class="role-label server">Administrador → Servidor · per SSH</span>
-      <p>Edita la configuració SSL (la de l'A1.1) i canvia el <code>DocumentRoot</code> perquè apunti al teu lloc:</p>
+      <p>Edita la configuració SSL (la de l'A1.1): canvia el <code>DocumentRoot</code> perquè apunti al teu lloc i, just a sota, afegeix-hi el mateix bloc <code>&lt;Directory&gt;</code> del pas 2.4:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
         <pre><code>sudo nano /etc/apache2/sites-available/default-ssl.conf</code></pre>
       </div>
-      <p>➜ Obre la configuració del lloc HTTPS per canviar-hi el <code>DocumentRoot</code>.</p>
+      <p>➜ Obre la configuració del lloc HTTPS.</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">default-ssl.conf</span></div>
-        <pre><code>DocumentRoot /var/www/aea2</code></pre>
+        <pre><code>DocumentRoot /var/www/aea2
+
+    &lt;Directory /var/www/aea2&gt;
+        AuthType Basic
+        AuthName "Zona privada"
+        AuthUserFile /etc/apache2/.htpasswd
+        Require user laura
+    &lt;/Directory&gt;</code></pre>
       </div>
-      <p>➜ Fa que la versió HTTPS del lloc mostri la mateixa carpeta que el teu host virtual (<code>/var/www/aea2</code>).</p>
+      <p>➜ <code>DocumentRoot</code> fa que la versió HTTPS mostri la mateixa carpeta que el teu host virtual (<code>/var/www/aea2</code>). El bloc <code>&lt;Directory&gt;</code> hi demana usuari i contrasenya.</p>
+      <div class="callout warn">
+        <span class="ico">⚠️</span>
+        <p>Un bloc <code>&lt;Directory&gt;</code> només s'aplica dins del host virtual on està escrit. El del pas 2.4 protegeix l'HTTP (port 80); aquest protegeix l'HTTPS (port 443). Sense ell, <code>https://192.168.1.10</code> mostraria el lloc <strong>sense demanar contrasenya</strong>.</p>
+      </div>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
         <pre><code>sudo systemctl reload apache2</code></pre>
       </div>
       <p>➜ Recarrega Apache perquè l'HTTPS mostri el teu lloc propi.</p>
-      <p>Ara <code>https://192.168.1.10</code> mostrarà el teu lloc, servit de forma segura.</p>
+      <p>Ara <code>https://192.168.1.10</code> mostrarà el teu lloc, servit de forma segura i demanant usuari i contrasenya.</p>
     </div>
   </section>
 
@@ -346,11 +357,17 @@
     </div>
     <ul>
       <li>Al <strong>client</strong>, <code>http://www.aea2.local</code> demana usuari/contrasenya i, en encertar-los, mostra el teu lloc.</li>
-      <li><code>https://192.168.1.10</code> mostra el teu lloc per HTTPS.</li>
+      <li><code>https://192.168.1.10</code> demana usuari/contrasenya i mostra el teu lloc per HTTPS.</li>
     </ul>
     <div class="role-box admin">
       <span class="role-label admin">Administrador</span>
-      <p>Comprovació ràpida des de l'administrador (l'opció <code>-u</code> envia l'usuari):</p>
+      <p>Primer comprova que, sense identificar-te, el lloc està protegit:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
+        <pre><code>curl -k https://192.168.1.10</code></pre>
+      </div>
+      <p>➜ Demana la pàgina per HTTPS sense usuari. Ha de respondre amb un error <code>401 Unauthorized</code>: si en canvi retorna el HTML, l'HTTPS no està protegit (revisa el pas 2.6).</p>
+      <p>Després identifica't (l'opció <code>-u</code> envia l'usuari):</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
         <pre><code>curl -k -u laura https://192.168.1.10</code></pre>
@@ -367,6 +384,25 @@
         <p>Si la contrasenya és incorrecta, <code>curl</code> respon <code>401 Unauthorized</code> en lloc del HTML. Si dona un error de connexió, revisa la taula d'Errors freqüents.</p>
       </div>
     </div>
+  </section>
+
+  <!-- ============ 4 · ERRORS FREQÜENTS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">4</span>
+      <h2>Errors freqüents</h2>
+    </div>
+
+    <table>
+      <thead><tr><th>Problema</th><th>Causa</th><th>Solució</th></tr></thead>
+      <tbody>
+        <tr><td><code>www.aea2.local</code> no s'obre al client</td><td>Falta la línia a <code>/etc/hosts</code> del client, o té una IP incorrecta.</td><td>Afegeix <code>192.168.1.10 www.aea2.local</code> a <code>/etc/hosts</code> del client.</td></tr>
+        <tr><td>No demana usuari ni contrasenya per HTTP</td><td>Falta el bloc <code>&lt;Directory&gt;</code>, no s'ha recarregat Apache o el lloc no està activat.</td><td>Revisa el bloc a <code>aea2.conf</code>, fes <code>sudo a2ensite aea2</code> i <code>sudo systemctl reload apache2</code>.</td></tr>
+        <tr><td>Per HTTPS no demana contrasenya (per HTTP sí)</td><td>El bloc <code>&lt;Directory&gt;</code> només és a <code>aea2.conf</code> (port 80) i no a <code>default-ssl.conf</code> (port 443).</td><td>Afegeix el mateix bloc <code>&lt;Directory&gt;</code> a <code>default-ssl.conf</code> (pas 2.6) i recarrega Apache.</td></tr>
+        <tr><td>Contrasenya sempre incorrecta</td><td>L'usuari no s'ha creat bé o el fitxer no és el mateix de la config.</td><td>Torna a crear-lo amb <code>sudo htpasswd /etc/apache2/.htpasswd laura</code> (sense <code>-c</code> per no esborrar-lo) i comprova <code>AuthUserFile</code>.</td></tr>
+        <tr><td>Es mostra la pàgina d'Apache i no la meva</td><td>El lloc no està activat o el <code>DocumentRoot</code> no apunta a <code>/var/www/aea2</code>.</td><td>Comprova <code>a2ensite aea2</code> i el <code>DocumentRoot</code> a <code>aea2.conf</code> (i a <code>default-ssl.conf</code> per a l'HTTPS).</td></tr>
+      </tbody>
+    </table>
   </section>
 
   <footer>
