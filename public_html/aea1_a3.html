@@ -219,8 +219,8 @@
     <h3>2.6 · Crea el bucket</h3>
     <ol>
       <li>Cerca el servei <strong>S3</strong> i fes clic a <strong>Create bucket</strong>.</li>
-      <li>Posa-li un nom <strong>únic</strong>, per exemple <code>aea1-nomcognom-2026</code>.</li>
-      <li>Desmarca <strong>Block all public access</strong> i confirma.</li>
+      <li>Posa-li un nom <strong>únic</strong>, per exemple <code>aea1-nomcognom-2026</code>. El nom només pot tenir minúscules, números i guions: sense majúscules, espais, accents, ñ ni ç (per exemple, Núria Muñoz → <code>aea1-nuriamunoz-2026</code>).</li>
+      <li>Desmarca <strong>Block all public access</strong> i marca la casella de confirmació que apareix a sota.</li>
       <li>Fes clic a <strong>Create bucket</strong>.</li>
     </ol>
 
@@ -229,11 +229,12 @@
       <li>Entra al bucket i vés a <strong>Properties</strong>.</li>
       <li>Baixa fins a <strong>Static website hosting</strong> i fes clic a <strong>Edit</strong>.</li>
       <li>Activa <strong>Enable</strong> i escriu <code>index.html</code> a <strong>Index document</strong>.</li>
+      <li>Deixa el camp <strong>Error document</strong> buit de moment.</li>
       <li>Desa i apunta l'adreça de <strong>Bucket website endpoint</strong>.</li>
     </ol>
 
     <h3>2.8 · Prepara el teu <code>index.html</code></h3>
-    <p>Pots reutilitzar el de l'A1 canviant el text:</p>
+    <p>Crea el fitxer amb VS Code (o qualsevol editor de text) a l'ordinador des d'on obres la consola d'AWS, i desa'l amb el nom exacte <code>index.html</code>. Pots partir del de l'A1 canviant-ne el text:</p>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
       <pre><code>&lt;!DOCTYPE html&gt;
@@ -295,6 +296,10 @@
       <pre><code>http://NOM-DEL-TEU-BUCKET.s3-website-us-east-1.amazonaws.com</code></pre>
     </div>
     <p>➜ És l'adreça web que et dona S3 (l'endpoint que vas apuntar). Substitueix <code>NOM-DEL-TEU-BUCKET</code> pel nom real del teu bucket. Hauries de veure la teva pàgina.</p>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>L'endpoint de S3 només funciona amb <code>http://</code>. Si el navegador canvia l'adreça a <code>https://</code> i la pàgina no carrega, torna-la a escriure sencera començant per <code>http://</code>.</p>
+    </div>
     <div class="callout warn">
       <span class="ico">⚠️</span>
       <p>Quan acabis, torna al Learner Lab i fes clic a <strong>End Lab</strong>.</p>
