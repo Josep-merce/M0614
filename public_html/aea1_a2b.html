@@ -289,10 +289,10 @@ docker rm dockerfile_nginx</code></pre>
       <h2>Fase 3 · Mètode "YAML" (orquestració amb <code>compose.yaml</code>)</h2>
     </div>
 
-    <p>Aquest és el mètode professional. Definim <strong>tot</strong> el projecte (com construir-lo i com executar-lo) en un sol fitxer YAML.</p>
+    <p>Aquest és el mètode professional. Definim <strong>tot</strong> el projecte (imatge, port, fitxers i comportament) en un sol fitxer YAML, sense haver d'escriure cap comanda llarga.</p>
 
     <h3>5.1 · Crea el fitxer compose.yaml</h3>
-    <p>Continua a la carpeta <code>projecte_final</code>, on ja tens l'<code>index.html</code> i el <code>Dockerfile</code>:</p>
+    <p>Continua a la carpeta <code>projecte_final</code>, on ja tens l'<code>index.html</code>:</p>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
       <pre><code>nano compose.yaml</code></pre>
@@ -302,17 +302,20 @@ docker rm dockerfile_nginx</code></pre>
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">compose.yaml</span></div>
       <pre><code>services:
   web:
-    build: .
+    image: nginx:latest
     container_name: compose_nginx
     ports:
       - "8082:80"
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html
     restart: unless-stopped</code></pre>
     </div>
     <ul>
       <li><code>services:</code> → la llista de serveis (contenidors) del projecte. Aquí només n'hi ha un, <code>web</code>.</li>
-      <li><code>build: .</code> → construeix la imatge amb el <code>Dockerfile</code> de la carpeta actual (el mateix de la fase 2).</li>
-      <li><code>container_name</code> → el nom del contenidor.</li>
+      <li><code>image: nginx:latest</code> → la imatge que fem servir, com a la fase 1. No cal cap <code>Dockerfile</code>.</li>
+      <li><code>container_name</code> → el nom del contenidor (l'equivalent de <code>--name</code>).</li>
       <li><code>ports</code> → l'equivalent de <code>-p 8082:80</code>.</li>
+      <li><code>volumes</code> → l'equivalent de <code>-v</code>: munta el nostre <code>index.html</code> a sobre del de dins del contenidor.</li>
       <li><code>restart: unless-stopped</code> → si el contenidor s'atura per un error o es reinicia l'ordinador, Docker el torna a engegar (llevat que l'hagis aturat tu).</li>
     </ul>
     <div class="callout warn">
@@ -323,9 +326,9 @@ docker rm dockerfile_nginx</code></pre>
     <h3>5.2 · Arrenca el servei</h3>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-      <pre><code>docker compose up -d --build</code></pre>
+      <pre><code>docker compose up -d</code></pre>
     </div>
-    <p>➜ Construeix la imatge i engega el contenidor en segon pla, tot amb una sola comanda. L'opció <code>--build</code> obliga a tornar a construir la imatge si has canviat l'<code>index.html</code> o el <code>Dockerfile</code>.</p>
+    <p>➜ Descarrega la imatge si no la tens i engega el contenidor en segon pla, tot amb una sola comanda.</p>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
       <pre><code>docker compose ps</code></pre>
@@ -348,7 +351,7 @@ docker rm dockerfile_nginx</code></pre>
     <p>➜ Atura i esborra tots els contenidors (i la xarxa) que havia creat <code>docker compose up</code>.</p>
     <div class="callout tip">
       <span class="ico">💡</span>
-      <p><strong>Conclusió:</strong> aquest és el mètode superior. És declaratiu, reproduïble i gestiona alhora la construcció i l'execució.</p>
+      <p><strong>Conclusió:</strong> aquest és el mètode superior. És declaratiu i reproduïble: la mateixa configuració de la fase 1, però escrita en un fitxer que es pot guardar i compartir.</p>
     </div>
   </section>
 
@@ -361,7 +364,7 @@ docker rm dockerfile_nginx</code></pre>
     <ol>
       <li><strong>Comparació:</strong> quina de les tres comandes d'execució et sembla més fàcil de llegir i compartir? La de la fase 1 (<code>docker run -v ...</code>), la de la fase 2 (<code>docker run ... la-meva-web-custom</code>) o la de la fase 3 (<code>docker compose up -d</code>)?</li>
       <li><strong>Propòsits:</strong> en aquesta activitat, per a què ha servit el <code>Dockerfile</code> i per a què ha servit el <code>compose.yaml</code>?</li>
-      <li><strong>YAML:</strong> què volia dir la instrucció <code>build: .</code> dins del fitxer YAML? Quina alternativa podríem haver posat si ja haguéssim construït la imatge a la fase 2? (Pista: <code>image: ...</code>).</li>
+      <li><strong>YAML:</strong> a quina opció del <code>docker run</code> de la fase 1 correspon cada línia del <code>compose.yaml</code> (<code>image</code>, <code>container_name</code>, <code>ports</code>, <code>volumes</code>)?</li>
       <li><strong>Projecte real:</strong> si haguessis d'enviar aquest projecte a un company perquè l'executi, quins fitxers li hauries d'enviar en el cas de la fase 3? Per què és això millor que donar-li la comanda de la fase 1?</li>
     </ol>
   </section>
