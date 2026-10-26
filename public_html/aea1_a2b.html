@@ -185,37 +185,52 @@ cd projecte_final</code></pre>
       <h2>Fase 1 · Mètode "terminal imperatiu" (<code>docker run</code> llarg)</h2>
     </div>
 
-    <p>Fem servir <code>docker run</code> i li passem tota la configuració (ports, nom i el fitxer web) directament a la comanda, amb un volum (<code>-v</code>).</p>
+    <p>Fem servir <code>docker run</code> i li passem tota la configuració (ports, nom i volum) directament a la comanda. La web la guardarem en un <strong>volum de Docker</strong> i hi posarem el nostre <code>index.html</code>.</p>
 
-    <h3>3.1 · Executa la comanda</h3>
+    <h3>3.1 · Crea el volum</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker volume create web_dades</code></pre>
+    </div>
+    <p>➜ Crea un volum anomenat <code>web_dades</code>: un espai de dades gestionat per Docker que es conserva encara que s'esborri el contenidor.</p>
+
+    <h3>3.2 · Executa la comanda</h3>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
       <pre><code>docker run -d --name terminal_nginx -p 8080:80 \
-    -v "$(pwd)/index.html":/usr/share/nginx/html/index.html nginx:latest</code></pre>
+    -v web_dades:/usr/share/nginx/html nginx:latest</code></pre>
     </div>
     <p>➜ Què fa cada opció:</p>
     <ul>
       <li><code>-d</code> → mode "detached" (segon pla).</li>
       <li><code>--name terminal_nginx</code> → nom del contenidor.</li>
       <li><code>-p 8080:80</code> → connecta el port 8080 del teu ordinador amb el port 80 del contenidor.</li>
-      <li><code>-v ...</code> → <strong>la clau</strong>. Munta el nostre <code>index.html</code> local (<code>$(pwd)/index.html</code>) a sobre de l'<code>index.html</code> per defecte de dins del contenidor.</li>
+      <li><code>-v web_dades:/usr/share/nginx/html</code> → <strong>la clau</strong>. Munta el volum <code>web_dades</code> a la carpeta web del contenidor. Com que el volum és nou i buit, Docker hi copia la pàgina per defecte d'Nginx.</li>
       <li><code>nginx:latest</code> → la imatge que fem servir.</li>
     </ul>
 
-    <h3>3.2 · Comprovació</h3>
+    <h3>3.3 · Posa el teu index.html dins del volum</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker cp index.html terminal_nginx:/usr/share/nginx/html/index.html</code></pre>
+    </div>
+    <p>➜ Copia el nostre <code>index.html</code> a la carpeta web del contenidor. Com que aquesta carpeta és el volum, el fitxer queda guardat dins de <code>web_dades</code> i substitueix la pàgina per defecte.</p>
+
+    <h3>3.4 · Comprovació</h3>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>
       <pre><code>http://localhost:8080</code></pre>
     </div>
     <p>➜ Hauries de veure "Benvingut a la meva web personalitzada!".</p>
 
-    <h3>3.3 · Neteja de la fase 1</h3>
+    <h3>3.5 · Neteja de la fase 1</h3>
     <p>Atura i esborra el contenidor abans de passar a la fase següent:</p>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
       <pre><code>docker stop terminal_nginx
 docker rm terminal_nginx</code></pre>
     </div>
+    <p>➜ Esborrem el contenidor, però <strong>no</strong> el volum: <code>web_dades</code> continua existint amb el nostre <code>index.html</code> a dins. El farem servir a la fase 3.</p>
     <div class="callout tip">
       <span class="ico">💡</span>
       <p><strong>Conclusió:</strong> ha funcionat, però la comanda és llarga, complexa i difícil de compartir.</p>
@@ -292,7 +307,7 @@ docker rm dockerfile_nginx</code></pre>
     <p>Aquest és el mètode professional. Definim <strong>tot</strong> el projecte (imatge, port, fitxers i comportament) en un sol fitxer YAML, sense haver d'escriure cap comanda llarga.</p>
 
     <h3>5.1 · Crea el fitxer compose.yaml</h3>
-    <p>Continua a la carpeta <code>projecte_final</code>, on ja tens l'<code>index.html</code>:</p>
+    <p>Continua a la carpeta <code>projecte_final</code>. Farem servir el volum <code>web_dades</code> de la fase 1, que ja té el nostre <code>index.html</code> a dins:</p>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
       <pre><code>nano compose.yaml</code></pre>
@@ -307,16 +322,21 @@ docker rm dockerfile_nginx</code></pre>
     ports:
       - "8082:80"
     volumes:
-      - ./index.html:/usr/share/nginx/html/index.html
-    restart: unless-stopped</code></pre>
+      - web_dades:/usr/share/nginx/html
+    restart: unless-stopped
+
+volumes:
+  web_dades:
+    external: true</code></pre>
     </div>
     <ul>
       <li><code>services:</code> → la llista de serveis (contenidors) del projecte. Aquí només n'hi ha un, <code>web</code>.</li>
       <li><code>image: nginx:latest</code> → la imatge que fem servir, com a la fase 1. No cal cap <code>Dockerfile</code>.</li>
       <li><code>container_name</code> → el nom del contenidor (l'equivalent de <code>--name</code>).</li>
       <li><code>ports</code> → l'equivalent de <code>-p 8082:80</code>.</li>
-      <li><code>volumes</code> → l'equivalent de <code>-v</code>: munta el nostre <code>index.html</code> a sobre del de dins del contenidor.</li>
+      <li><code>volumes</code> (dins de <code>web</code>) → l'equivalent de <code>-v web_dades:/usr/share/nginx/html</code>: munta el volum a la carpeta web del contenidor.</li>
       <li><code>restart: unless-stopped</code> → si el contenidor s'atura per un error o es reinicia l'ordinador, Docker el torna a engegar (llevat que l'hagis aturat tu).</li>
+      <li><code>volumes:</code> (al final, sense indentar) → la llista de volums del projecte. <code>external: true</code> indica que <code>web_dades</code> ja existeix (el vam crear a la fase 1): Compose no l'ha de crear ni esborrar.</li>
     </ul>
     <div class="callout warn">
       <span class="ico">⚠️</span>
@@ -334,13 +354,17 @@ docker rm dockerfile_nginx</code></pre>
       <pre><code>docker compose ps</code></pre>
     </div>
     <p>➜ Mostra els serveis del projecte. Hi ha d'aparèixer <code>compose_nginx</code> amb estat <code>Up</code> (en marxa).</p>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Si surt l'error «external volume "web_dades" not found», és que has esborrat el volum. Torna'l a crear (pas 3.1), executa de nou <code>docker compose up -d</code> i copia-hi l'<code>index.html</code> amb <code>docker cp index.html compose_nginx:/usr/share/nginx/html/index.html</code>.</p>
+    </div>
 
     <h3>5.3 · Comprovació</h3>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>
       <pre><code>http://localhost:8082</code></pre>
     </div>
-    <p>➜ Hauries de veure "Benvingut a la meva web personalitzada!".</p>
+    <p>➜ Hauries de veure "Benvingut a la meva web personalitzada!". És el mateix <code>index.html</code> que vas copiar a la fase 1: el volum l'ha conservat encara que el contenidor d'aquella fase ja no existeix.</p>
 
     <h3>5.4 · Neteja final</h3>
     <p>La neteja també és més fàcil:</p>
@@ -348,7 +372,12 @@ docker rm dockerfile_nginx</code></pre>
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
       <pre><code>docker compose down</code></pre>
     </div>
-    <p>➜ Atura i esborra tots els contenidors (i la xarxa) que havia creat <code>docker compose up</code>.</p>
+    <p>➜ Atura i esborra tots els contenidors (i la xarxa) que havia creat <code>docker compose up</code>. El volum <code>web_dades</code> no s'esborra, perquè és extern.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker volume rm web_dades</code></pre>
+    </div>
+    <p>➜ Esborra el volum i, amb ell, l'<code>index.html</code> que hi havia a dins.</p>
     <div class="callout tip">
       <span class="ico">💡</span>
       <p><strong>Conclusió:</strong> aquest és el mètode superior. És declaratiu i reproduïble: la mateixa configuració de la fase 1, però escrita en un fitxer que es pot guardar i compartir.</p>
