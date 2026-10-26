@@ -209,21 +209,28 @@ cd projecte_final</code></pre>
       <li><code>nginx:latest</code> → la imatge que fem servir.</li>
     </ul>
 
-    <h3>3.3 · Posa el teu index.html dins del volum</h3>
+    <h3>3.3 · Comprova la pàgina per defecte</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>
+      <pre><code>http://localhost:8080</code></pre>
+    </div>
+    <p>➜ Hauries de veure la pàgina per defecte d'Nginx («Welcome to nginx!»). És la que Docker ha copiat dins del volum en muntar-lo.</p>
+
+    <h3>3.4 · Posa el teu index.html dins del volum</h3>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
       <pre><code>docker cp index.html terminal_nginx:/usr/share/nginx/html/index.html</code></pre>
     </div>
     <p>➜ Copia el nostre <code>index.html</code> a la carpeta web del contenidor. Com que aquesta carpeta és el volum, el fitxer queda guardat dins de <code>web_dades</code> i substitueix la pàgina per defecte.</p>
 
-    <h3>3.4 · Comprovació</h3>
+    <h3>3.5 · Comprovació</h3>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>
       <pre><code>http://localhost:8080</code></pre>
     </div>
     <p>➜ Hauries de veure "Benvingut a la meva web personalitzada!".</p>
 
-    <h3>3.5 · Neteja de la fase 1</h3>
+    <h3>3.6 · Neteja de la fase 1</h3>
     <p>Atura i esborra el contenidor abans de passar a la fase següent:</p>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
