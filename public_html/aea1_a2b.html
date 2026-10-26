@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA1·A2b — Les tres maneres de Docker · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+  .callout.shot{background:var(--slate-soft);border-color:#D6DEE8}
+  h2 code{font-size:.8em}
+
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea1.html"><span class="arrow">←</span> Tornar a l'AEA1</a>
+
+  <header>
+    <span class="badge">AEA1 · A2b</span>
+    <span class="eyebrow">M0614 · RA1 · Docker</span>
+    <h1>Les tres maneres de Docker: <span class="code">terminal, Dockerfile i YAML</span></h1>
+    <p class="lede">Aconseguirem el mateix objectiu (engegar un servidor web Nginx amb una pàgina personalitzada) de tres maneres diferents, de la més manual a la més automàtica. Així entendrem per a què serveix cada eina.</p>
+    <div class="meta">
+      <span class="pill">RA <strong>RA1</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En acabar aquesta pràctica, seràs capaç de:</p>
+    <ul>
+      <li>Entendre la diferència fonamental entre <code>docker run</code>, <code>Dockerfile</code> i <code>compose.yaml</code>.</li>
+      <li>Executar un contenidor amb una configuració complexa (ports, volums) des del terminal.</li>
+      <li>"Enfornar" (<em>bake in</em>) el codi de la teva aplicació dins d'una imatge personalitzada amb un <code>Dockerfile</code>.</li>
+      <li>Definir i executar un servei de forma declarativa i reproduïble amb un fitxer <code>compose.yaml</code>.</li>
+      <li>Comprendre la diferència entre el llenguatge de "recepta" d'un Dockerfile i el llenguatge de "configuració" YAML.</li>
+    </ul>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Haver completat l'<a href="aea1_a2a.html">A2a</a>: Docker i Docker Compose instal·lats i funcionant sense <code>sudo</code>.</li>
+    </ul>
+
+    <h3>Opcional: començar amb el Docker net</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker system prune -a --volumes -f</code></pre>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Aquesta ordre esborra <strong>tots</strong> els contenidors aturats, les imatges i els volums que no estiguin en ús, sense demanar confirmació (<code>-f</code>). Fes-la servir només si no tens res a Docker que vulguis conservar.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONCEPTES CLAU ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Conceptes clau</h2>
+    </div>
+
+    <p>Abans de començar, hem de tenir clara la diferència entre <code>Dockerfile</code> i <code>compose.yaml</code>.</p>
+
+    <table>
+      <thead><tr><th>Característica</th><th>Dockerfile</th><th>compose.yaml</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Propòsit principal</strong></td><td><strong>CONSTRUIR</strong> 1 imatge</td><td><strong>EXECUTAR</strong> 1 o més serveis</td></tr>
+        <tr><td><strong>Què és?</strong></td><td>Una "recepta"</td><td>Un "pla d'execució"</td></tr>
+        <tr><td><strong>Comanda</strong></td><td><code>docker build</code></td><td><code>docker compose up</code></td></tr>
+        <tr><td><strong>Resultat</strong></td><td>Una imatge (ex: <code>la-meva-web-custom</code>)</td><td>Contenidors funcionant</td></tr>
+        <tr><td><strong>Llenguatge</strong></td><td>Format propi (<code>FROM</code>, <code>COPY</code>...)</td><td><strong>YAML</strong> (<code>services:</code> ...)</td></tr>
+        <tr><td><strong>Analogia</strong></td><td>La recepta per fer el pa.</td><td>La comanda al restaurant: "Porti'm un entrepà fet amb aquest pa i un refresc".</td></tr>
+      </tbody>
+    </table>
+
+    <ul>
+      <li><strong>Mètode terminal (<code>docker run</code>):</strong> és <strong>imperatiu</strong>. Dones ordres directes. És ràpid per a proves, però difícil de recordar, compartir i reproduir.</li>
+      <li><strong>Mètode Dockerfile (<code>docker build</code>):</strong> és una <strong>recepta</strong>. Defineix els ingredients de la teva aplicació. El resultat és una imatge (el "pa") que pots executar fàcilment.</li>
+      <li><strong>Mètode YAML (<code>docker compose</code>):</strong> és <strong>declaratiu</strong>. Descrius l'estat final que vols ("vull un servei web al port 8082"). És la forma estàndard de gestionar aplicacions, perquè és fàcil de llegir, compartir i gestionar.</li>
+    </ul>
+  </section>
+
+  <!-- ============ 2 · PREPARACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Preparació inicial (comuna per a les 3 fases)</h2>
+    </div>
+
+    <p>Crearem un projecte amb un fitxer web senzill.</p>
+
+    <h3>2.1 · Crea una carpeta de projecte</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>mkdir projecte_final
+cd projecte_final</code></pre>
+    </div>
+    <p>➜ Totes les fases d'aquesta activitat es fan des de dins de la carpeta <code>projecte_final</code>.</p>
+
+    <h3>2.2 · Crea la teva pàgina web personalitzada</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>echo '&lt;h1&gt;Benvingut a la meva web personalitzada!&lt;/h1&gt;' &gt; index.html</code></pre>
+    </div>
+    <p>➜ Aquest <code>index.html</code> és el que volem que mostri el nostre Nginx.</p>
+  </section>
+
+  <!-- ============ 3 · FASE 1 ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Fase 1 · Mètode "terminal imperatiu" (<code>docker run</code> llarg)</h2>
+    </div>
+
+    <p>Fem servir <code>docker run</code> i li passem tota la configuració (ports, nom i el fitxer web) directament a la comanda, amb un volum (<code>-v</code>).</p>
+
+    <h3>3.1 · Executa la comanda</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker run -d --name terminal_nginx -p 8080:80 \
+    -v "$(pwd)/index.html":/usr/share/nginx/html/index.html nginx:latest</code></pre>
+    </div>
+    <p>➜ Què fa cada opció:</p>
+    <ul>
+      <li><code>-d</code> → mode "detached" (segon pla).</li>
+      <li><code>--name terminal_nginx</code> → nom del contenidor.</li>
+      <li><code>-p 8080:80</code> → connecta el port 8080 del teu ordinador amb el port 80 del contenidor.</li>
+      <li><code>-v ...</code> → <strong>la clau</strong>. Munta el nostre <code>index.html</code> local (<code>$(pwd)/index.html</code>) a sobre de l'<code>index.html</code> per defecte de dins del contenidor.</li>
+      <li><code>nginx:latest</code> → la imatge que fem servir.</li>
+    </ul>
+
+    <h3>3.2 · Comprovació</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>
+      <pre><code>http://localhost:8080</code></pre>
+    </div>
+    <p>➜ Hauries de veure "Benvingut a la meva web personalitzada!".</p>
+
+    <div class="callout shot">
+      <span class="ico">📸</span>
+      <p><strong>Captura d'evidència 1.</strong> Fes una captura del navegador mostrant la teva web personalitzada funcionant a <code>http://localhost:8080</code>.</p>
+    </div>
+
+    <h3>3.3 · Neteja de la fase 1</h3>
+    <p>Atura i esborra el contenidor abans de passar a la fase següent:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker stop terminal_nginx
+docker rm terminal_nginx</code></pre>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><strong>Conclusió:</strong> ha funcionat, però la comanda és llarga, complexa i difícil de compartir.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4 · FASE 2 ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">4</span>
+      <h2>Fase 2 · Mètode "Dockerfile" (construir i executar)</h2>
+    </div>
+
+    <p>Ara, en lloc de "muntar" el fitxer des de fora, el "courem" (<em>bake in</em>) dins de la nostra pròpia imatge.</p>
+
+    <h3>4.1 · Crea el Dockerfile</h3>
+    <p>Assegura't que ets a la carpeta <code>projecte_final</code>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>nano Dockerfile</code></pre>
+    </div>
+    <p>Contingut del fitxer:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">Dockerfile</span></div>
+      <pre><code><span class="c"># 1. Comença des de la plantilla base d'Nginx</span>
+FROM nginx:latest
+
+<span class="c"># 2. Copia el nostre fitxer local 'index.html' cap al directori web del contenidor</span>
+COPY index.html /usr/share/nginx/html/index.html</code></pre>
+    </div>
+    <p>➜ Desa i tanca (<code>Ctrl+O</code>, <code>Enter</code>, <code>Ctrl+X</code>).</p>
+
+    <h3>4.2 · Construeix la imatge</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker build -t la-meva-web-custom .</code></pre>
+    </div>
+    <p>➜ <code>build</code> llegeix el <code>Dockerfile</code> de la carpeta actual (<code>.</code>) i crea una <strong>nova imatge</strong> al teu sistema anomenada (<code>-t</code>) <code>la-meva-web-custom</code>.</p>
+
+    <div class="callout shot">
+      <span class="ico">📸</span>
+      <p><strong>Captura d'evidència 2.</strong> Fes una captura del terminal amb el resultat de <code>docker build</code>. Hi has de veure els passos <code>[1/2] FROM</code> i <code>[2/2] COPY</code> i la línia final <code>naming to docker.io/library/la-meva-web-custom</code>.</p>
+    </div>
+
+    <h3>4.3 · Executa la NOSTRA imatge</h3>
+    <p>Ara la comanda <code>docker run</code> és molt més senzilla. Fem servir el port 8081 per no tenir conflictes:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker run -d --name dockerfile_nginx -p 8081:80 la-meva-web-custom</code></pre>
+    </div>
+    <p>➜ Engega un contenidor des de la <strong>nostra</strong> imatge. Ja no necessitem <code>-v</code> perquè l'<code>index.html</code> ja és a dins.</p>
+
+    <h3>4.4 · Comprovació</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>
+      <pre><code>http://localhost:8081</code></pre>
+    </div>
+    <p>➜ Hauries de veure "Benvingut a la meva web personalitzada!".</p>
+
+    <h3>4.5 · Neteja de la fase 2</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker stop dockerfile_nginx
+docker rm dockerfile_nginx</code></pre>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><strong>Conclusió:</strong> molt millor! Ara qualsevol pot executar la nostra web amb una comanda simple. Però encara hem d'executar <code>docker build</code> i després <code>docker run</code> a mà.</p>
+    </div>
+  </section>
+
+  <!-- ============ 5 · FASE 3 ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">5</span>
+      <h2>Fase 3 · Mètode "YAML" (orquestració amb <code>compose.yaml</code>)</h2>
+    </div>
+
+    <p>Aquest és el mètode professional. Definim <strong>tot</strong> el projecte (com construir-lo i com executar-lo) en un sol fitxer YAML.</p>
+
+    <h3>5.1 · Crea el fitxer compose.yaml</h3>
+    <p>Continua a la carpeta <code>projecte_final</code>, on ja tens l'<code>index.html</code> i el <code>Dockerfile</code>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>nano compose.yaml</code></pre>
+    </div>
+    <p>Contingut del fitxer:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">compose.yaml</span></div>
+      <pre><code>services:
+  web:
+    build: .
+    container_name: compose_nginx
+    ports:
+      - "8082:80"
+    restart: unless-stopped</code></pre>
+    </div>
+    <ul>
+      <li><code>services:</code> → la llista de serveis (contenidors) del projecte. Aquí només n'hi ha un, <code>web</code>.</li>
+      <li><code>build: .</code> → construeix la imatge amb el <code>Dockerfile</code> de la carpeta actual (el mateix de la fase 2).</li>
+      <li><code>container_name</code> → el nom del contenidor.</li>
+      <li><code>ports</code> → l'equivalent de <code>-p 8082:80</code>.</li>
+      <li><code>restart: unless-stopped</code> → si el contenidor s'atura per un error o es reinicia l'ordinador, Docker el torna a engegar (llevat que l'hagis aturat tu).</li>
+    </ul>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>En YAML la <strong>indentació</strong> (els espais a l'inici de línia) forma part de la sintaxi. Fes servir sempre espais, mai tabuladors.</p>
+    </div>
+
+    <h3>5.2 · Arrenca el servei</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker compose up -d --build</code></pre>
+    </div>
+    <p>➜ Construeix la imatge i engega el contenidor en segon pla, tot amb una sola comanda. L'opció <code>--build</code> obliga a tornar a construir la imatge si has canviat l'<code>index.html</code> o el <code>Dockerfile</code>.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker compose ps</code></pre>
+    </div>
+    <p>➜ Mostra els serveis del projecte. Hi ha d'aparèixer <code>compose_nginx</code> amb estat <code>Up</code> (en marxa).</p>
+
+    <h3>5.3 · Comprovació</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>
+      <pre><code>http://localhost:8082</code></pre>
+    </div>
+    <p>➜ Hauries de veure "Benvingut a la meva web personalitzada!".</p>
+
+    <div class="callout shot">
+      <span class="ico">📸</span>
+      <p><strong>Captura d'evidència 3.</strong> Fes una captura del resultat de <code>docker compose up -d --build</code>. A continuació, executa <code>docker compose ps</code> i inclou-ne també la sortida a la captura, per demostrar que el contenidor està en marxa.</p>
+    </div>
+
+    <h3>5.4 · Neteja final</h3>
+    <p>La neteja també és més fàcil:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>docker compose down</code></pre>
+    </div>
+    <p>➜ Atura i esborra tots els contenidors (i la xarxa) que havia creat <code>docker compose up</code>.</p>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><strong>Conclusió:</strong> aquest és el mètode superior. És declaratiu, reproduïble i gestiona alhora la construcció i l'execució.</p>
+    </div>
+  </section>
+
+  <!-- ============ 6 · PREGUNTES DE REPÀS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">6</span>
+      <h2>Preguntes de repàs</h2>
+    </div>
+    <ol>
+      <li><strong>Comparació:</strong> quina de les tres comandes d'execució et sembla més fàcil de llegir i compartir? La de la fase 1 (<code>docker run -v ...</code>), la de la fase 2 (<code>docker run ... la-meva-web-custom</code>) o la de la fase 3 (<code>docker compose up -d</code>)?</li>
+      <li><strong>Propòsits:</strong> en aquesta activitat, per a què ha servit el <code>Dockerfile</code> i per a què ha servit el <code>compose.yaml</code>?</li>
+      <li><strong>YAML:</strong> què volia dir la instrucció <code>build: .</code> dins del fitxer YAML? Quina alternativa podríem haver posat si ja haguéssim construït la imatge a la fase 2? (Pista: <code>image: ...</code>).</li>
+      <li><strong>Projecte real:</strong> si haguessis d'enviar aquest projecte a un company perquè l'executi, quins fitxers li hauries d'enviar en el cas de la fase 3? Per què és això millor que donar-li la comanda de la fase 1?</li>
+    </ol>
+  </section>
+
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA1 · A2b
+  </footer>
+
+</div>
+</body>
+</html>
