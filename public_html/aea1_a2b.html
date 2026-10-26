@@ -68,7 +68,6 @@
   .callout p{margin:0}
   .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
   .callout.warn{background:#FDECEC;border-color:#F4C7C7}
-  .callout.shot{background:var(--slate-soft);border-color:#D6DEE8}
   h2 code{font-size:.8em}
 
 
@@ -210,11 +209,6 @@ cd projecte_final</code></pre>
     </div>
     <p>➜ Hauries de veure "Benvingut a la meva web personalitzada!".</p>
 
-    <div class="callout shot">
-      <span class="ico">📸</span>
-      <p><strong>Captura d'evidència 1.</strong> Fes una captura del navegador mostrant la teva web personalitzada funcionant a <code>http://localhost:8080</code>.</p>
-    </div>
-
     <h3>3.3 · Neteja de la fase 1</h3>
     <p>Atura i esborra el contenidor abans de passar a la fase següent:</p>
     <div class="term">
@@ -260,11 +254,6 @@ COPY index.html /usr/share/nginx/html/index.html</code></pre>
       <pre><code>docker build -t la-meva-web-custom .</code></pre>
     </div>
     <p>➜ <code>build</code> llegeix el <code>Dockerfile</code> de la carpeta actual (<code>.</code>) i crea una <strong>nova imatge</strong> al teu sistema anomenada (<code>-t</code>) <code>la-meva-web-custom</code>.</p>
-
-    <div class="callout shot">
-      <span class="ico">📸</span>
-      <p><strong>Captura d'evidència 2.</strong> Fes una captura del terminal amb el resultat de <code>docker build</code>. Hi has de veure els passos <code>[1/2] FROM</code> i <code>[2/2] COPY</code> i la línia final <code>naming to docker.io/library/la-meva-web-custom</code>.</p>
-    </div>
 
     <h3>4.3 · Executa la NOSTRA imatge</h3>
     <p>Ara la comanda <code>docker run</code> és molt més senzilla. Fem servir el port 8081 per no tenir conflictes:</p>
@@ -349,11 +338,6 @@ docker rm dockerfile_nginx</code></pre>
       <pre><code>http://localhost:8082</code></pre>
     </div>
     <p>➜ Hauries de veure "Benvingut a la meva web personalitzada!".</p>
-
-    <div class="callout shot">
-      <span class="ico">📸</span>
-      <p><strong>Captura d'evidència 3.</strong> Fes una captura del resultat de <code>docker compose up -d --build</code>. A continuació, executa <code>docker compose ps</code> i inclou-ne també la sortida a la captura, per demostrar que el contenidor està en marxa.</p>
-    </div>
 
     <h3>5.4 · Neteja final</h3>
     <p>La neteja també és més fàcil:</p>
