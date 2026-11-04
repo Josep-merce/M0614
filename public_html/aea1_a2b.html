@@ -334,7 +334,7 @@ docker rm dockerfile_nginx</code></pre>
 
 volumes:
   web_dades:
-    external: true</code></pre>
+    name: web_dades</code></pre>
     </div>
     <ul>
       <li><code>services:</code> → la llista de serveis (contenidors) del projecte. Aquí només n'hi ha un, <code>web</code>.</li>
@@ -343,7 +343,7 @@ volumes:
       <li><code>ports</code> → l'equivalent de <code>-p 8082:80</code>.</li>
       <li><code>volumes</code> (dins de <code>web</code>) → l'equivalent de <code>-v web_dades:/usr/share/nginx/html</code>: munta el volum a la carpeta web del contenidor.</li>
       <li><code>restart: unless-stopped</code> → si el contenidor s'atura per un error o es reinicia l'ordinador, Docker el torna a engegar (llevat que l'hagis aturat tu).</li>
-      <li><code>volumes:</code> (al final, sense indentar) → la llista de volums del projecte. <code>external: true</code> indica que <code>web_dades</code> ja existeix (el vam crear a la fase 1): Compose no l'ha de crear ni esborrar.</li>
+      <li><code>volumes:</code> (al final, sense indentar) → la llista de volums del projecte. <code>name: web_dades</code> fa que Compose faci servir el volum <code>web_dades</code> de la fase 1 tal com es diu. Sense aquesta línia, Compose crearia un volum nou i buit anomenat <code>projecte_final_web_dades</code> (posa davant el nom de la carpeta). Si el volum no existeix, Compose el crea automàticament.</li>
     </ul>
     <div class="callout warn">
       <span class="ico">⚠️</span>
@@ -363,7 +363,11 @@ volumes:
     <p>➜ Mostra els serveis del projecte. Hi ha d'aparèixer <code>compose_nginx</code> amb estat <code>Up</code> (en marxa).</p>
     <div class="callout tip">
       <span class="ico">💡</span>
-      <p>Si surt l'error «external volume "web_dades" not found», és que has esborrat el volum. Torna'l a crear (pas 3.1), executa de nou <code>docker compose up -d</code> i copia-hi l'<code>index.html</code> amb <code>docker cp index.html compose_nginx:/usr/share/nginx/html/index.html</code>.</p>
+      <p>És normal que surti l'avís «volume "web_dades" already exists but was not created by Docker Compose»: només vol dir que el volum el vas crear tu a la fase 1. No és cap error, el contenidor arrenca igualment.</p>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Si a la 5.3 veus la pàgina per defecte d'Nginx en lloc de la teva, és que havies esborrat el volum i Compose n'ha creat un de nou. Torna-hi a copiar l'<code>index.html</code> amb <code>docker cp index.html compose_nginx:/usr/share/nginx/html/index.html</code>.</p>
     </div>
 
     <h3>5.3 · Comprovació</h3>
@@ -379,7 +383,7 @@ volumes:
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
       <pre><code>docker compose down</code></pre>
     </div>
-    <p>➜ Atura i esborra tots els contenidors (i la xarxa) que havia creat <code>docker compose up</code>. El volum <code>web_dades</code> no s'esborra, perquè és extern.</p>
+    <p>➜ Atura i esborra tots els contenidors (i la xarxa) que havia creat <code>docker compose up</code>. El volum <code>web_dades</code> no s'esborra: <code>docker compose down</code> mai esborra els volums si no hi afegeixes l'opció <code>-v</code>.</p>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
       <pre><code>docker volume rm web_dades</code></pre>
