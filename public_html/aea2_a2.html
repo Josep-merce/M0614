@@ -11,6 +11,9 @@
   :root{
     --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
     --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --admin-bg:#FBEFE0;--admin-border:#F1D7B4;--admin-ink:#A85610;
+    --server-bg:#E1F5EE;--server-border:#9FE1CB;--server-ink:#0F6E56;
+    --client-bg:#E8EFFC;--client-border:#BBD3F0;--client-ink:#1D4E89;
     --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
     --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
     --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -68,11 +71,42 @@
   .callout p{margin:0}
   .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
   .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+  .callout.switch{background:#EAF1FB;border-color:#BBD3F0}
+  .callout.switch strong{color:#1D4E89}
+
+  /* Capses de màquina: qui fa cada pas */
+  .role-box{border-radius:12px;padding:1.1rem 1.3rem;margin:1.1rem 0;border:1px solid}
+  .role-box.admin{background:var(--admin-bg);border-color:var(--admin-border)}
+  .role-box.server{background:var(--server-bg);border-color:var(--server-border)}
+  .role-box.client{background:var(--client-bg);border-color:var(--client-border)}
+  .role-box.all{background:var(--slate-soft);border-color:var(--hairline)}
+  .role-box > *:first-child{margin-top:0}
+  .role-box > *:last-child{margin-bottom:0}
+  .role-label{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+  .role-label.admin{color:var(--admin-ink)}
+  .role-label.server{color:var(--server-ink)}
+  .role-label.client{color:var(--client-ink)}
+  .role-label.all{color:var(--slate-ink)}
+
+  .legend{display:inline;font-size:.86rem;color:var(--slate-ink)}
+  .legend > span{display:inline-block;margin-right:1rem;white-space:nowrap}
+  .legend .sw{display:inline-block;width:.85rem;height:.85rem;border-radius:4px;margin-right:.4rem;vertical-align:-2px;border:1px solid rgba(0,0,0,.12)}
 
 
   footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
   @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
   @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+
+  /* Figura de xarxa (SVG) */
+  .netfig{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;padding:1.2rem 1rem .8rem;margin:1.2rem 0}
+  .netfig svg{width:100%;height:auto;display:block}
+  .netfig figcaption{font-family:var(--mono);font-size:.74rem;color:var(--muted);text-align:center;margin-top:.4rem}
+
+  /* Comprova-ho al navegador */
+  .check{background:#EAF1FB;border:1px solid #BBD3F0;border-left:5px solid #1D4E89;border-radius:12px;padding:.9rem 1.1rem;margin:1.1rem 0;font-size:.93rem}
+  .check .check-title{font-family:var(--display);font-weight:600;color:#1D4E89;display:block;margin-bottom:.35rem}
+  .check .url{font-family:var(--mono);font-size:.86rem;background:#fff;border:1px solid #BBD3F0;color:#1D4E89;padding:.2rem .5rem;border-radius:6px;display:inline-block;margin:.15rem 0 .45rem}
+  .check p{margin:.3rem 0}
 </style>
 </head>
 <body>
@@ -84,10 +118,10 @@
     <span class="badge">AEA2 · A2</span>
     <span class="eyebrow">M0614 · Docker</span>
     <h1>El mateix servidor segur <span class="code">amb Docker</span></h1>
-    <p class="lede">Ara muntaràs el mateix servidor web amb HTTPS, però dins d'un contenidor Docker a partir de la imatge oficial d'Apache. Aquí només tenim el servidor: tot passa en una sola màquina, sense la xarxa de tres equips.</p>
+    <p class="lede">Muntaràs el mateix lloc de l'A1.2, www.segur.local, servit només per HTTPS amb un certificat autofirmat i amb redirecció automàtica de l'HTTP cap a l'HTTPS. Aquesta vegada Apache s'executa dins d'un contenidor amb la imatge oficial, sense modificar-la: la configuració, el certificat i la pàgina li arriben des de la teva carpeta amb volums, i ho engegues tot amb Docker Compose.</p>
     <div class="meta">
       <span class="pill">RA <strong>RA2</strong></span>
-      <span class="pill">CA <strong>2.5 · 2.6 · 2.9</strong></span>
+      <span class="pill">CA <strong>2.1 · 2.2 · 2.5 · 2.6 · 2.9</strong></span>
     </div>
   </header>
 
@@ -102,20 +136,21 @@
 
     <p>En aquesta activitat aprendràs a:</p>
     <ul>
-      <li>Fer servir la <strong>imatge oficial d'Apache</strong> (<code>httpd</code>) de Docker.</li>
-      <li>Construir una imatge pròpia amb <strong>HTTPS</strong> activat i el teu certificat.</li>
-      <li>Executar el servidor en un <strong>contenidor</strong> i publicar-lo a un port de la teva màquina.</li>
+      <li>Trobar i fer servir la <strong>imatge oficial d'Apache</strong> (<code>httpd</code>) des del terminal.</li>
+      <li>Escriure un <strong><code>httpd.conf</code> mínim</strong> que activa el mòdul <code>ssl</code>, entenent cada línia.</li>
+      <li>Crear el <strong>host virtual al port 443</strong> per a <code>www.segur.local</code>, igual que a l'A1.2.</li>
+      <li>Passar els teus fitxers al contenidor amb <strong>volums</strong> i engegar-lo amb <strong>Docker Compose</strong>.</li>
+      <li>Configurar la <strong>redirecció HTTP → HTTPS</strong> i aplicar el canvi reiniciant el contenidor.</li>
     </ul>
 
     <h3>Prerequisits</h3>
     <ul>
-      <li><strong>Docker</strong> instal·lat i funcionant (AEA0).</li>
-      <li>Saber la diferència entre <strong>imatge</strong> i <strong>contenidor</strong> (AEA0).</li>
+      <li>Docker i Docker Compose instal·lats i funcionant, i saber la diferència entre <strong>imatge</strong> i <strong>contenidor</strong> (AEA0).</li>
+      <li>Haver fet l'<a href="aea2_a1_2.html">A1.2</a>: aquí no es torna a explicar què és HTTPS, un certificat o una redirecció 301.</li>
     </ul>
-
     <div class="callout tip">
       <span class="ico">💡</span>
-      <p>Aquí no fem la xarxa de tres màquines. Docker ens permet tenir el servidor aïllat en un contenidor a la nostra pròpia màquina, i el provem des del navegador local.</p>
+      <p>Aquí <strong>no</strong> fem servir la xarxa de tres màquines. El servidor és un contenidor a la teva pròpia màquina i el proves amb el navegador de la mateixa màquina.</p>
     </div>
   </section>
 
@@ -126,22 +161,62 @@
       <h2>Context i teoria mínima</h2>
     </div>
 
-    <p>A l'A1 vas instal·lar Apache "a mà" en una màquina. Amb <strong>Docker</strong> aconseguim el mateix servidor, però empaquetat en una <strong>imatge</strong>: una plantilla que ja porta Apache i la nostra configuració. Cada cop que l'executem, en surt un <strong>contenidor</strong> idèntic, sense haver de reinstal·lar res.</p>
+    <h3>El mateix, però en un contenidor</h3>
+    <p>A l'A1.2 vas configurar Apache "a mà" dins d'un servidor Debian. Ara farem servir la <strong>imatge oficial</strong> <code>httpd:2.4</code> tal com ve de Docker Hub: ja porta Apache instal·lat, els seus mòduls i una pàgina de prova, <em>It works!</em>.</p>
+    <p>La imatge oficial no és un Debian amb Apache: no té <code>a2enmod</code>, <code>a2ensite</code> ni <code>systemctl</code>. Tota la configuració és en un fitxer, <code>/usr/local/apache2/conf/httpd.conf</code>. En lloc de canviar la imatge, escriurem <strong>el nostre propi <code>httpd.conf</code></strong> i li direm al contenidor que faci servir el nostre.</p>
 
+    <h3>Volums: els fitxers es queden a la teva carpeta</h3>
+    <p>Un <strong>volum</strong> connecta un fitxer o una carpeta de la teva màquina amb una ruta de dins del contenidor. El contenidor no en té una còpia: llegeix <strong>directament</strong> el teu fitxer. Per això, si edites el <code>segur.conf</code> de la teva carpeta, n'hi ha prou amb reiniciar el contenidor perquè Apache el torni a llegir, igual que fèiem amb <code>systemctl reload</code>.</p>
+    <p>Per no haver d'escriure una ordre <code>docker run</code> llarguíssima amb tots els ports i volums, ho escrivim un sol cop en un fitxer, el <code>compose.yaml</code>, i engeguem amb <code>docker compose up</code>.</p>
+
+    <h3>Equivalències A1.2 ↔ A2</h3>
     <table>
-      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
+      <thead><tr><th>A1.2 (Linux)</th><th>A2 (Docker)</th></tr></thead>
       <tbody>
-        <tr><td><strong>Imatge oficial <code>httpd</code></strong></td><td>La imatge d'Apache mantinguda a Docker Hub. La fem servir de base.</td></tr>
-        <tr><td><strong>Dockerfile</strong></td><td>Un fitxer de text amb les instruccions per construir la nostra imatge a partir de la base.</td></tr>
-        <tr><td><strong>Construir (<code>build</code>)</strong></td><td>Crear la nostra imatge a partir del Dockerfile.</td></tr>
-        <tr><td><strong>Mapatge de ports (<code>-p</code>)</strong></td><td>Connectar un port de la nostra màquina amb el del contenidor. Ex.: <code>8443:443</code>.</td></tr>
+        <tr><td><code>sudo apt install apache2</code></td><td><code>docker pull httpd:2.4</code></td></tr>
+        <tr><td><code>sudo a2enmod ssl</code></td><td>Les línies <code>LoadModule ssl_module</code> i <code>LoadModule socache_shmcb_module</code> del nostre <code>httpd.conf</code></td></tr>
+        <tr><td><code>/etc/apache2/sites-available/segur.conf</code></td><td><code>extra/segur.conf</code>, muntat a <code>/usr/local/apache2/conf/extra/</code></td></tr>
+        <tr><td><code>sudo a2ensite segur</code></td><td><code>Include conf/extra/segur.conf</code> al nostre <code>httpd.conf</code></td></tr>
+        <tr><td><code>/var/www/segur/</code></td><td><code>web/</code>, muntada a <code>/usr/local/apache2/htdocs/segur/</code></td></tr>
+        <tr><td><code>/etc/ssl/certs</code> i <code>/etc/ssl/private</code></td><td><code>certs/</code>, muntada a <code>/usr/local/apache2/conf/certs/</code></td></tr>
+        <tr><td><code>sudo apache2ctl configtest</code></td><td><code>docker compose exec web httpd -t</code></td></tr>
+        <tr><td><code>sudo systemctl reload apache2</code></td><td><code>docker compose restart</code></td></tr>
+        <tr><td>Ports <code>80</code> i <code>443</code> del servidor</td><td>Ports <code>8080</code> i <code>8443</code> de la teva màquina → <code>80</code> i <code>443</code> del contenidor</td></tr>
+        <tr><td><code>192.168.1.10 www.segur.local</code> a <code>/etc/hosts</code> del client</td><td><code>127.0.0.1 www.segur.local</code> a <code>/etc/hosts</code> de la teva màquina</td></tr>
       </tbody>
     </table>
 
+    <h3>Conceptes clau</h3>
+    <table>
+      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Imatge oficial <code>httpd</code></strong></td><td>La imatge d'Apache mantinguda a Docker Hub. La fem servir tal com ve, sense modificar-la.</td></tr>
+        <tr><td><strong>Volum</strong></td><td>Connexió entre un fitxer o carpeta de la teva màquina i una ruta del contenidor. Amb <code>:ro</code> (<em>read only</em>) el contenidor el pot llegir però no modificar.</td></tr>
+        <tr><td><strong><code>compose.yaml</code></strong></td><td>Fitxer on descrivim el contenidor: quina imatge, quin nom, quins ports i quins volums. S'engega amb <code>docker compose up</code>.</td></tr>
+        <tr><td><strong>Servei</strong></td><td>Cada contenidor descrit al <code>compose.yaml</code>. El nostre es diu <code>web</code>; és el nom que fem servir a les ordres <code>docker compose</code>.</td></tr>
+        <tr><td><strong>Mapatge de ports</strong></td><td>Connecta un port de la teva màquina amb un del contenidor. Ex.: <code>8443:443</code>.</td></tr>
+        <tr><td><strong><code>127.0.0.1</code></strong></td><td>L'adreça de la pròpia màquina (<em>localhost</em>). Hi apuntem <code>www.segur.local</code> perquè el contenidor és a la mateixa màquina.</td></tr>
+      </tbody>
+    </table>
     <div class="callout tip">
       <span class="ico">💡</span>
-      <p>Publicarem el 443 del contenidor al <strong>8443</strong> de la màquina per no xocar amb altres serveis. Hi accedirem amb <code>https://localhost:8443</code>.</p>
+      <p>Publiquem el 80 del contenidor al <strong>8080</strong> i el 443 al <strong>8443</strong> per no xocar amb cap altre servidor web de la màquina. Per això les adreces porten port: <code>http://www.segur.local:8080</code> i <code>https://www.segur.local:8443</code>.</p>
     </div>
+
+    <p>Quan acabis, la carpeta del projecte quedarà així:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">estructura de segur-docker/</span></div>
+        <pre><code>segur-docker/               <span class="c"># carpeta del projecte</span>
+├── compose.yaml            <span class="c"># com s'engega el contenidor (pas 2.7)</span>
+├── httpd.conf              <span class="c"># configuració general d'Apache (pas 2.5)</span>
+├── extra/
+│   └── segur.conf          <span class="c"># host virtual: 443 i, a la part 2, 80 (pas 2.6)</span>
+├── certs/
+│   ├── segur.crt           <span class="c"># certificat (pas 2.4)</span>
+│   └── segur.key           <span class="c"># clau privada (pas 2.4)</span>
+└── web/
+    └── index.html          <span class="c"># pàgina del lloc segur (pas 2.3)</span></code></pre>
+      </div>
   </section>
 
   <!-- ============ 2 · PAS A PAS GUIAT ============ -->
@@ -151,122 +226,379 @@
       <h2>Pas a pas guiat</h2>
     </div>
 
-    <h3>2.1 · Comprovar que Docker funciona</h3>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-      <pre><code>docker --version</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Tots els passos es fan a la mateixa màquina, la que té Docker: <span class="legend"><span><span class="sw" style="background:var(--slate-soft);border-color:var(--hairline)"></span>Màquina Docker</span></span>. Els fitxers de configuració no porten capsa.</p>
     </div>
-    <p>➜ Mostra la versió de Docker instal·lada; així comproves que funciona.</p>
 
-    <h3>2.2 · Crear l'estructura de carpetes</h3>
-    <p>Crea una carpeta per a aquesta activitat amb dues subcarpetes (una per a la web, una per als certificats):</p>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-      <pre><code>mkdir -p aea2-docker/web aea2-docker/certs</code></pre>
+    <h2 style="margin-top:2rem">Part 1 · El lloc per HTTPS</h2>
+
+    <h3>2.1 · Comprova Docker i busca la imatge d'Apache</h3>
+    <div class="role-box all">
+      <span class="role-label all">Màquina Docker</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>docker --version</code></pre>
+      </div>
+      <p>➜ Mostra la versió de Docker instal·lada; així comproves que funciona.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>docker compose version</code></pre>
+      </div>
+      <p>➜ Mostra la versió de Docker Compose. Fixa't que s'escriu <code>docker compose</code>, amb espai.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>docker search httpd --limit 5</code></pre>
+      </div>
+      <p>➜ Busca a Docker Hub les imatges que es diuen <code>httpd</code>. La bona és la que té <code>[OK]</code> a la columna <code>OFFICIAL</code>: és la imatge oficial d'Apache.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>docker pull httpd:2.4</code></pre>
+      </div>
+      <p>➜ Descarrega la imatge oficial d'Apache, versió 2.4. És el nostre <code>apt install apache2</code>.</p>
     </div>
-    <p>➜ Crea la carpeta del projecte amb dues subcarpetes. <code>-p</code> crea també les carpetes pare si no existeixen.</p>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-      <pre><code>cd aea2-docker</code></pre>
+
+    <h3>2.2 · Crea la carpeta del projecte</h3>
+    <div class="role-box all">
+      <span class="role-label all">Màquina Docker</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>mkdir -p segur-docker/web segur-docker/certs segur-docker/extra</code></pre>
+      </div>
+      <p>➜ Crea la carpeta del projecte amb tres subcarpetes: <code>web/</code> per a la pàgina, <code>certs/</code> per al certificat i <code>extra/</code> per al host virtual. <code>-p</code> crea també la carpeta pare.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>cd segur-docker</code></pre>
+      </div>
+      <p>➜ Entra dins la carpeta del projecte. <strong>Tots els passos següents es fan des d'aquí.</strong></p>
     </div>
-    <p>➜ Entra dins la carpeta del projecte. <code>cd</code> vol dir "canvia de directori".</p>
-    <p>Quan acabis aquesta activitat, la carpeta quedarà així (cada fitxer el crees als passos següents):</p>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">estructura de aea2-docker/</span></div>
-      <pre><code>aea2-docker/            <span class="c"># carpeta del projecte</span>
-├── Dockerfile          <span class="c"># instruccions de la imatge (pas 2.4)</span>
-├── certs/              <span class="c"># certificats</span>
-│   ├── aea2.crt        <span class="c"># certificat (pas 2.3)</span>
-│   └── aea2.key        <span class="c"># clau privada (pas 2.3)</span>
-└── web/                <span class="c"># fitxers del lloc web</span>
-    └── index.html      <span class="c"># la teva pàgina (a continuació)</span></code></pre>
-    </div>
-    <p>Ara mateix només existeixen les carpetes <code>certs/</code> i <code>web/</code>; els fitxers els aniràs creant tot seguit.</p>
-    <p>Crea una pàgina web senzilla dins <code>web/</code>:</p>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">web/index.html</span></div>
-      <pre><code>&lt;!DOCTYPE html&gt;
+
+    <h3>2.3 · Crea la pàgina del lloc segur</h3>
+    <div class="role-box all">
+      <span class="role-label all">Màquina Docker</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>nano web/index.html</code></pre>
+      </div>
+      <p>➜ Crea la pàgina d'inici del lloc.</p>
+      <p>Escriu-hi aquest contingut (el mateix de l'A1.2):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">web/index.html</span></div>
+        <pre><code>&lt;!DOCTYPE html&gt;
 &lt;html lang="ca"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Lloc segur&lt;/title&gt;
+&lt;/head&gt;
 &lt;body&gt;
-  &lt;h1&gt;Servidor segur amb Docker · AEA2&lt;/h1&gt;
-  &lt;p&gt;Aquesta pàgina se serveix per HTTPS des d'un contenidor.&lt;/p&gt;
+    &lt;h1&gt;Lloc segur · AEA2&lt;/h1&gt;
+    &lt;p&gt;Aquesta pàgina només es serveix per HTTPS.&lt;/p&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
+      </div>
+      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>).</p>
     </div>
 
-    <h3>2.3 · Generar el certificat autofirmat</h3>
-    <p>Genera el certificat dins <code>certs/</code> (a <em>Common Name</em> pots posar <code>localhost</code>):</p>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-      <pre><code>openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout certs/aea2.key \
-  -out certs/aea2.crt</code></pre>
-    </div>
-    <p>➜ Genera el certificat i la clau dins <code>certs/</code>. És <strong>una sola ordre</strong> (les barres <code>\</code> uneixen les línies): <code>-x509</code> crea un certificat autofirmat, <code>-nodes</code> no posa contrasenya a la clau i <code>-days 365</code> el fa vàlid un any.</p>
-    <p>En executar-la, l'<code>openssl</code> et farà unes quantes preguntes (el <em>subject</em> del certificat). Pots respondre-les així:</p>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">preguntes del certificat</span></div>
-      <pre><code>Country Name (2 letter code):    <span class="c"># país, 2 lletres → ES</span>
+    <h3>2.4 · Genera el certificat autofirmat</h3>
+    <div class="role-box all">
+      <span class="role-label all">Màquina Docker</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout certs/segur.key \
+  -out certs/segur.crt</code></pre>
+      </div>
+      <p>➜ Genera el certificat i la clau dins <code>certs/</code>. És <strong>una sola ordre</strong> (les barres <code>\</code> uneixen les línies): <code>-x509</code> crea un certificat autofirmat, <code>-nodes</code> no posa contrasenya a la clau i <code>-days 365</code> el fa vàlid un any. No cal <code>sudo</code>: els fitxers són a la teva carpeta.</p>
+      <p>En executar-la, l'<code>openssl</code> et farà unes quantes preguntes (el <em>subject</em> del certificat). Pots respondre-les així:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">preguntes del certificat</span></div>
+        <pre><code>Country Name (2 letter code):    <span class="c"># país, 2 lletres → ES</span>
 State or Province Name:          <span class="c"># província → Barcelona</span>
 Locality Name (eg, city):        <span class="c"># ciutat → Barcelona</span>
 Organization Name:               <span class="c"># organització → Institut La Merce</span>
 Organizational Unit Name:        <span class="c"># departament (opcional) → DAW</span>
-Common Name:                     <span class="c"># ⚠ EL MÉS IMPORTANT: l'adreça del servidor → localhost</span>
+Common Name:                     <span class="c"># ⚠ EL MÉS IMPORTANT: el nom del lloc → www.segur.local</span>
 Email Address:                   <span class="c"># correu (opcional) → pots deixar-ho buit</span></code></pre>
+      </div>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>El camp que de debò importa és el <strong>Common Name (CN)</strong>: ha de coincidir amb l'adreça per la qual accediràs al servidor (aquí <code>www.segur.local</code>, com a l'A1.2). La resta de camps són informatius i els pots deixar buits prement <code>Enter</code>.</p>
+      </div>
     </div>
+
+    <h3>2.5 · Escriu el httpd.conf</h3>
+    <div class="role-box all">
+      <span class="role-label all">Màquina Docker</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>nano httpd.conf</code></pre>
+      </div>
+      <p>➜ Crea la configuració general d'Apache, a l'arrel de <code>segur-docker/</code>.</p>
+      <p>Escriu-hi aquest contingut. Les línies que comencen amb <code>#</code> són comentaris: Apache no les llegeix.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">httpd.conf</span></div>
+        <pre><code><span class="c"># On és Apache dins la imatge, nom del servidor i port HTTP</span>
+ServerRoot "/usr/local/apache2"
+ServerName localhost
+Listen 80
+
+<span class="c"># Mòduls que activem</span>
+LoadModule mpm_event_module     modules/mod_mpm_event.so
+LoadModule unixd_module         modules/mod_unixd.so
+LoadModule authz_core_module    modules/mod_authz_core.so
+LoadModule dir_module           modules/mod_dir.so
+LoadModule mime_module          modules/mod_mime.so
+LoadModule log_config_module    modules/mod_log_config.so
+LoadModule alias_module         modules/mod_alias.so
+LoadModule ssl_module           modules/mod_ssl.so
+LoadModule socache_shmcb_module modules/mod_socache_shmcb.so
+
+<span class="c"># Usuari amb què funciona Apache</span>
+User daemon
+Group daemon
+
+<span class="c"># Lloc per defecte (la pàgina It works! de la imatge)</span>
+DocumentRoot "/usr/local/apache2/htdocs"
+&lt;Directory "/usr/local/apache2/htdocs"&gt;
+    Require all granted
+&lt;/Directory&gt;
+DirectoryIndex index.html
+TypesConfig conf/mime.types
+
+<span class="c"># Registres: a la sortida del contenidor</span>
+ErrorLog /proc/self/fd/2
+LogFormat "%h %t \"%r\" %&gt;s" senzill
+CustomLog /proc/self/fd/1 senzill
+
+<span class="c"># Els nostres llocs</span>
+Include conf/extra/segur.conf</code></pre>
+      </div>
+      <p>➜ Explicació de cada bloc:</p>
+      <ul>
+        <li><code>ServerRoot</code> → on és Apache <strong>dins la imatge</strong>. Les rutes relatives, com <code>modules/…</code> o <code>conf/…</code>, parteixen d'aquí.</li>
+        <li><code>ServerName localhost</code> → el nom general del servidor. Gràcies a aquesta línia no surt l'avís <code>AH00558</code>.</li>
+        <li><code>Listen 80</code> → Apache escolta al port <strong>80</strong> del contenidor (HTTP).</li>
+        <li><code>LoadModule</code> → cada línia activa una peça d'Apache: el motor (<code>mpm_event</code>, <code>unixd</code>), els permisos (<code>authz_core</code>, que fa funcionar <code>Require</code>), la pàgina d'índex (<code>dir</code>), els tipus de fitxer (<code>mime</code>), els registres (<code>log_config</code>) i la redirecció (<code>alias</code>, que fa funcionar <code>Redirect</code>). Les dues últimes, <code>ssl</code> i <code>socache_shmcb</code>, són <strong>el nostre <code>a2enmod ssl</code></strong>.</li>
+        <li><code>User daemon</code> i <code>Group daemon</code> → Apache funciona amb un usuari sense privilegis, no com a <code>root</code>.</li>
+        <li><code>DocumentRoot</code> i <code>&lt;Directory&gt;</code> → el lloc per defecte és la carpeta <code>htdocs</code> de la imatge, on hi ha la pàgina <em>It works!</em>, i <code>Require all granted</code> permet llegir-la. Aquest permís també cobreix <code>htdocs/segur/</code>, on muntarem la nostra pàgina.</li>
+        <li><code>DirectoryIndex</code> i <code>TypesConfig</code> → quina pàgina s'obre per defecte i on és la llista de tipus de fitxer (la porta la imatge).</li>
+        <li><code>ErrorLog</code>, <code>LogFormat</code> i <code>CustomLog</code> → envien els errors i els accessos a la sortida del contenidor, perquè els puguis veure amb <code>docker compose logs</code>.</li>
+        <li><code>Include conf/extra/segur.conf</code> → fa que Apache llegeixi el nostre host virtual. És <strong>el nostre <code>a2ensite segur</code></strong>.</li>
+      </ul>
+      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>).</p>
+    </div>
+
+    <h3>2.6 · Crea el host virtual HTTPS</h3>
+    <div class="role-box all">
+      <span class="role-label all">Màquina Docker</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>nano extra/segur.conf</code></pre>
+      </div>
+      <p>➜ Crea el fitxer del lloc segur dins <code>extra/</code>. Fa el mateix paper que <code>sites-available/segur.conf</code> a l'A1.2.</p>
+      <p>Escriu-hi aquest contingut:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">extra/segur.conf</span></div>
+        <pre><code>Listen 443
+
+&lt;VirtualHost *:443&gt;
+    ServerName www.segur.local
+    DocumentRoot /usr/local/apache2/htdocs/segur
+
+    SSLEngine on
+    SSLCertificateFile    /usr/local/apache2/conf/certs/segur.crt
+    SSLCertificateKeyFile /usr/local/apache2/conf/certs/segur.key
+&lt;/VirtualHost&gt;</code></pre>
+      </div>
+      <p>➜ És el mateix host virtual de l'A1.2. Només canvien les rutes, que són les de <strong>dins del contenidor</strong> (on muntarem les carpetes al pas 2.7):</p>
+      <ul>
+        <li><code>Listen 443</code> → fa que Apache escolti també al port <strong>443</strong>. A Debian això ja ho feia <code>a2enmod ssl</code>; aquí ho escrivim nosaltres.</li>
+        <li><code>&lt;VirtualHost *:443&gt;</code> → aquest lloc escolta al port <strong>443</strong> (HTTPS).</li>
+        <li><code>ServerName www.segur.local</code> → el <strong>nom</strong> del lloc.</li>
+        <li><code>DocumentRoot /usr/local/apache2/htdocs/segur</code> → on veurà el contenidor la teva carpeta <code>web/</code>.</li>
+        <li><code>SSLEngine on</code> → <strong>activa el xifrat</strong> en aquest lloc.</li>
+        <li><code>SSLCertificateFile</code> i <code>SSLCertificateKeyFile</code> → on veurà el contenidor el <strong>certificat</strong> i la <strong>clau privada</strong> de la teva carpeta <code>certs/</code>.</li>
+      </ul>
+      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>).</p>
+    </div>
+
+    <h3>2.7 · Escriu el compose.yaml</h3>
+    <div class="role-box all">
+      <span class="role-label all">Màquina Docker</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>nano compose.yaml</code></pre>
+      </div>
+      <p>➜ Crea el fitxer que descriu el contenidor, a l'arrel de <code>segur-docker/</code>.</p>
+      <p>Escriu-hi aquest contingut. <strong>Compte amb els espais</strong>: en YAML el sagnat compta, i s'han de fer servir espais, mai tabuladors.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">compose.yaml</span></div>
+        <pre><code>services:
+  web:
+    image: httpd:2.4
+    container_name: servidor-segur
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+      - ./extra:/usr/local/apache2/conf/extra:ro
+      - ./certs:/usr/local/apache2/conf/certs:ro
+      - ./web:/usr/local/apache2/htdocs/segur:ro</code></pre>
+      </div>
+      <p>➜ Explicació de cada línia:</p>
+      <ul>
+        <li><code>services:</code> → comença la llista de contenidors. Només en tenim un, <code>web</code>.</li>
+        <li><code>image: httpd:2.4</code> → fa servir la imatge oficial tal com ve.</li>
+        <li><code>container_name: servidor-segur</code> → el nom del contenidor (el veuràs a <code>docker ps</code>).</li>
+        <li><code>ports:</code> → <code>8080:80</code> publica l'HTTP al port 8080 de la teva màquina i <code>8443:443</code> publica l'HTTPS al 8443.</li>
+        <li><code>volumes:</code> → cada línia és <code>fitxer-o-carpeta-teva:ruta-dins-del-contenidor:ro</code>:
+          <ul>
+            <li><code>./httpd.conf</code> → substitueix el <code>httpd.conf</code> de la imatge pel teu.</li>
+            <li><code>./extra</code> → la carpeta on hi ha el <code>segur.conf</code>.</li>
+            <li><code>./certs</code> → el certificat i la clau.</li>
+            <li><code>./web</code> → la pàgina del lloc segur.</li>
+            <li><code>:ro</code> → el contenidor només pot <strong>llegir</strong> els teus fitxers, no modificar-los.</li>
+          </ul>
+        </li>
+      </ul>
+      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>).</p>
+    </div>
+
+    <h3>2.8 · Comprova la configuració i engega el contenidor</h3>
+    <div class="role-box all">
+      <span class="role-label all">Màquina Docker</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>docker compose run --rm web httpd -t</code></pre>
+      </div>
+      <p>➜ Crea un contenidor de prova, amb els mateixos volums, que només comprova la configuració d'Apache i després s'esborra sol (<code>--rm</code>). Ha de dir <code>Syntax OK</code>. És l'equivalent de <code>apache2ctl configtest</code>, abans d'engegar res.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>docker compose up -d</code></pre>
+      </div>
+      <p>➜ Llegeix el <code>compose.yaml</code>, crea el contenidor <code>servidor-segur</code> i l'engega en segon pla (<code>-d</code>).</p>
+    </div>
+
+    <h3>2.9 · Accedeix al lloc segur</h3>
+    <div class="role-box all">
+      <span class="role-label all">Màquina Docker</span>
+      <p>Afegeix el nom del lloc al fitxer <code>/etc/hosts</code> de la teva màquina:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>sudo nano /etc/hosts</code></pre>
+      </div>
+      <p>➜ Obre el fitxer que associa noms a adreces IP. Cal <code>sudo</code> perquè és un fitxer del sistema.</p>
+      <p>Afegeix aquesta línia al final:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">/etc/hosts</span></div>
+        <pre><code>127.0.0.1   www.segur.local</code></pre>
+      </div>
+      <p>➜ Associa el nom <code>www.segur.local</code> a la teva pròpia màquina, on hi ha el contenidor.</p>
+      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>).</p>
+      <div class="check">
+        <span class="check-title">🔎 Comprova-ho al navegador</span>
+        <span class="url">https://www.segur.local:8443</span>
+        <p>El navegador mostrarà un <strong>avís de seguretat</strong> perquè el certificat és autofirmat. Accepta'l (a Firefox: <em>Avançat → Accepta el risc</em>). Ha de sortir <strong>Lloc segur · AEA2</strong>. Clica el cadenat de la barra d'adreces i mira el certificat: el nom ha de ser <code>www.segur.local</code>.</p>
+      </div>
+      <div class="check">
+        <span class="check-title">🔎 Comprova-ho al navegador</span>
+        <span class="url">http://www.segur.local:8080</span>
+        <p>Ara prova-ho <strong>sense la s</strong> i pel port 8080. No surt el teu lloc segur: surt <strong>It works!</strong>, la pàgina per defecte de la imatge <code>httpd</code>, servida en clar. Per HTTP el lloc segur no existeix. Això és el que arreglarem a la part 2.</p>
+      </div>
+    </div>
+
+    <h2 style="margin-top:2.5rem">Part 2 · Redirecció HTTP → HTTPS</h2>
+
+    <p>Com a l'A1.2, el port de l'HTTP no ha de servir cap contingut: només ha de respondre <code>301 Moved Permanently</code> amb l'adreça <strong>https</strong>, i el navegador hi va sol. L'única diferència és que aquí l'adreça de destinació porta el port publicat, <code>8443</code>.</p>
+    <figure class="netfig">
+      <svg viewBox="0 0 820 300" role="img" aria-label="Redirecció: el navegador demana http://www.segur.local:8080, que arriba al port 80 del contenidor; el contenidor respon 301 indicant https://www.segur.local:8443/, i el navegador torna a demanar la pàgina pel port 8443, que arriba al port 443 del contenidor, ara xifrada.">
+        <defs>
+          <marker id="aG" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9aa4b2"/></marker>
+          <marker id="aB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1D4E89"/></marker>
+          <marker id="aO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07B1E"/></marker>
+        </defs>
+        <rect x="10" y="12" width="800" height="276" rx="16" fill="#F6F8FB" stroke="#D6DEE8" stroke-dasharray="5 5"/>
+        <text x="410" y="34" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#5A6677">la teva màquina · 127.0.0.1</text>
+        <g>
+          <rect x="30" y="50" width="180" height="220" rx="12" fill="#FFFFFF" stroke="#D6DEE8"/>
+          <text x="120" y="150" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="16" fill="#1A2230">Navegador</text>
+          <text x="120" y="172" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#5A6677">www.segur.local</text>
+        </g>
+        <g>
+          <rect x="610" y="50" width="180" height="220" rx="12" fill="#1A2230"/>
+          <text x="700" y="140" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="16" fill="#FFFFFF">Contenidor</text>
+          <text x="700" y="162" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#E07B1E">servidor-segur</text>
+          <text x="700" y="186" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">8080→80 · 8443→443</text>
+        </g>
+        <line x1="214" y1="100" x2="604" y2="100" stroke="#9aa4b2" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#aG)"/>
+        <text x="409" y="90" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#3A4658">1 · http://www.segur.local:8080  (en clar)</text>
+        <line x1="604" y1="160" x2="214" y2="160" stroke="#1D4E89" stroke-width="2" marker-end="url(#aB)"/>
+        <text x="409" y="150" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#1D4E89">2 · 301 → ves a https://www.segur.local:8443/</text>
+        <line x1="214" y1="220" x2="604" y2="220" stroke="#E07B1E" stroke-width="2.6" marker-end="url(#aO)"/>
+        <text x="409" y="210" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#9c5813">3 · https://www.segur.local:8443  (xifrat)</text>
+      </svg>
+      <figcaption>El navegador i el contenidor són a la mateixa màquina; els ports 8080 i 8443 porten les peticions als ports 80 i 443 del contenidor.</figcaption>
+    </figure>
+
+    <h3>2.10 · Afegeix la redirecció al segur.conf</h3>
+    <div class="role-box all">
+      <span class="role-label all">Màquina Docker</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>nano extra/segur.conf</code></pre>
+      </div>
+      <p>➜ Torna a obrir la configuració del lloc segur per afegir-hi la redirecció.</p>
+      <p>Afegeix el bloc del port 80 <strong>entre</strong> la línia <code>Listen 443</code> i el bloc del 443. El fitxer ha de quedar així:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">extra/segur.conf</span></div>
+        <pre><code>Listen 443
+
+&lt;VirtualHost *:80&gt;
+    ServerName www.segur.local
+    Redirect permanent / https://www.segur.local:8443/
+&lt;/VirtualHost&gt;
+
+&lt;VirtualHost *:443&gt;
+    ServerName www.segur.local
+    DocumentRoot /usr/local/apache2/htdocs/segur
+
+    SSLEngine on
+    SSLCertificateFile    /usr/local/apache2/conf/certs/segur.crt
+    SSLCertificateKeyFile /usr/local/apache2/conf/certs/segur.key
+&lt;/VirtualHost&gt;</code></pre>
+      </div>
+      <p>➜ Explicació del bloc nou:</p>
+      <ul>
+        <li><code>&lt;VirtualHost *:80&gt;</code> → un segon lloc, ara al port <strong>80</strong> del contenidor (el 8080 de la teva màquina), amb el <strong>mateix nom</strong>.</li>
+        <li><code>Redirect permanent / https://www.segur.local:8443/</code> → a qualsevol petició li respon <code>301</code> amb l'adreça <strong>https</strong>. Hi posem <code>:8443</code> perquè és el port pel qual el navegador arriba a l'HTTPS del contenidor. No té <code>DocumentRoot</code> perquè no serveix cap pàgina: només redirigeix.</li>
+      </ul>
+      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>).</p>
+    </div>
+
+    <h3>2.11 · Comprova i aplica el canvi</h3>
     <div class="callout tip">
       <span class="ico">💡</span>
-      <p>El camp que de debò importa és el <strong>Common Name (CN)</strong>: ha de coincidir amb l'adreça per la qual accediràs al servidor (aquí <code>localhost</code>). La resta de camps són informatius i els pots deixar buits prement <code>Enter</code>.</p>
+      <p>El contenidor llegeix el <code>segur.conf</code> <strong>directament de la teva carpeta</strong> (és un volum), així que ja veu el fitxer nou. Però Apache només llegeix la configuració quan arrenca: cal <strong>reiniciar</strong> el contenidor, igual que a l'A1.2 calia recarregar Apache.</p>
     </div>
-
-    <h3>2.4 · Escriure el Dockerfile</h3>
-    <p>A l'arrel de <code>aea2-docker/</code>, crea un fitxer anomenat <code>Dockerfile</code> (sense extensió):</p>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">Dockerfile</span></div>
-      <pre><code><span class="c"># Partim de la imatge oficial d'Apache</span>
-FROM httpd:2.4
-
-<span class="c"># Activem els mòduls d'SSL i la configuració HTTPS d'Apache</span>
-RUN sed -i \
-  -e 's/^#\(LoadModule ssl_module .*\)/\1/' \
-  -e 's/^#\(LoadModule socache_shmcb_module .*\)/\1/' \
-  -e 's/^#\(Include .*httpd-ssl.conf\)/\1/' \
-  conf/httpd.conf
-
-<span class="c"># Copiem el nostre certificat (Apache els busca amb aquests noms)</span>
-COPY certs/aea2.crt /usr/local/apache2/conf/server.crt
-COPY certs/aea2.key /usr/local/apache2/conf/server.key
-
-<span class="c"># Copiem la nostra pàgina web</span>
-COPY web/ /usr/local/apache2/htdocs/</code></pre>
+    <div class="role-box all">
+      <span class="role-label all">Màquina Docker</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>docker compose exec web httpd -t</code></pre>
+      </div>
+      <p>➜ Executa dins del contenidor la comprovació de la configuració d'Apache. Ha de dir <code>Syntax OK</code>. És l'equivalent de <code>apache2ctl configtest</code>.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>docker compose restart</code></pre>
+      </div>
+      <p>➜ Reinicia el contenidor perquè Apache torni a llegir la configuració. És el nostre <code>systemctl reload apache2</code>.</p>
+      <div class="check">
+        <span class="check-title">🔎 Comprova-ho al navegador</span>
+        <span class="url">http://www.segur.local:8080</span>
+        <p>Escriu l'adreça <strong>amb http</strong> i prem <code>Ctrl+F5</code>. Fixa't en la barra d'adreces: canvia sola a <strong>https://www.segur.local:8443</strong> i surt el teu lloc segur.</p>
+      </div>
     </div>
-    <div class="callout tip">
-      <span class="ico">💡</span>
-      <p>Cada línia és una instrucció: <code>FROM</code> tria la base, <code>RUN</code> executa ordres en construir la imatge, i <code>COPY</code> hi posa els nostres fitxers a dins.</p>
-    </div>
-
-    <h3>2.5 · Construir la imatge</h3>
-    <p>Des de dins de <code>aea2-docker/</code> (on hi ha el Dockerfile):</p>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-      <pre><code>docker build -t aea2-web .</code></pre>
-    </div>
-    <p>➜ Construeix la imatge a partir del Dockerfile. <code>-t aea2-web</code> li posa nom i el punt final indica que el Dockerfile és a la carpeta actual.</p>
-
-    <h3>2.6 · Executar el contenidor</h3>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-      <pre><code>docker run -d --name servidor-aea2 -p 8443:443 aea2-web</code></pre>
-    </div>
-    <p>➜ Crea i engega el contenidor. <code>-d</code> l'executa en segon pla, <code>--name servidor-aea2</code> li posa nom i <code>-p 8443:443</code> publica el port HTTPS del contenidor al 8443 de la teva màquina.</p>
-
-    <h3>2.7 · Accedir al web</h3>
-    <p>Obre el navegador de la teva màquina i ves a:</p>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>
-      <pre><code>https://localhost:8443</code></pre>
-    </div>
-    <p>Accepta l'avís del certificat autofirmat i veuràs la teva pàgina servida per HTTPS des del contenidor.</p>
   </section>
 
   <!-- ============ 3 · VERIFICACIÓ ============ -->
@@ -275,35 +607,55 @@ COPY web/ /usr/local/apache2/htdocs/</code></pre>
       <span class="sec-num">3</span>
       <h2>Verificació</h2>
     </div>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-      <pre><code>docker ps
-curl -k https://localhost:8443</code></pre>
-    </div>
-    <p>Sortida esperada de <code>docker ps</code> (resumida):</p>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
-      <pre><code>CONTAINER ID   IMAGE      COMMAND              STATUS         PORTS
-a1b2c3d4e5f6   aea2-web   "httpd-foreground"   Up 2 minutes   <span class="c"># ⚠ EL MÉS IMPORTANT</span>
-                                                                0.0.0.0:8443-&gt;443/tcp
-NAMES
-servidor-aea2</code></pre>
-    </div>
-    <p>Sortida esperada de <code>curl -k https://localhost:8443</code> (resumida: el codi HTML complet de la teva pàgina; el contingut exacte depèn del que hagis posat a <code>web/index.html</code>):</p>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
-      <pre><code>&lt;h1&gt;Servidor segur amb Docker · AEA2&lt;/h1&gt;
-&lt;p&gt;Aquesta pàgina se serveix per HTTPS des d'un contenidor.&lt;/p&gt;</code></pre>
+    <ul>
+      <li><code>https://www.segur.local:8443</code> mostra el lloc segur amb el certificat <code>www.segur.local</code>.</li>
+      <li><code>http://www.segur.local:8080</code> salta automàticament a <code>https://www.segur.local:8443</code>.</li>
+      <li>El contenidor <code>servidor-segur</code> està en marxa i publica els ports <code>8080</code> i <code>8443</code>.</li>
+    </ul>
+    <div class="role-box all">
+      <span class="role-label all">Màquina Docker</span>
+      <p>Comprova que el contenidor funciona i quins ports publica:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>docker compose ps</code></pre>
+      </div>
+      <p>➜ Llista els contenidors del <code>compose.yaml</code> i el seu estat.</p>
+      <p>Sortida esperada (resumida):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>NAME             IMAGE       SERVICE   STATUS         PORTS
+servidor-segur   httpd:2.4   web       Up 2 minutes   0.0.0.0:8080-&gt;80/tcp, 0.0.0.0:8443-&gt;443/tcp   <span class="c"># ⚠ EL MÉS IMPORTANT</span></code></pre>
+      </div>
+      <p>Comprova la redirecció. L'opció <code>-I</code> mostra només la capçalera de la resposta:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>curl -I http://www.segur.local:8080</code></pre>
+      </div>
+      <p>➜ Demana la pàgina per HTTP i mostra què respon el contenidor.</p>
+      <p>Sortida esperada:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>HTTP/1.1 301 Moved Permanently                 <span class="c"># ⚠ EL MÉS IMPORTANT: redirecció</span>
+Server: Apache/2.4.65 (Unix) OpenSSL/3.5.1
+Location: https://www.segur.local:8443/       <span class="c"># on et fa anar</span></code></pre>
+      </div>
+      <p>Ara demana la pàgina per HTTPS:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>curl -k https://www.segur.local:8443</code></pre>
+      </div>
+      <p>➜ <code>-k</code> accepta el certificat autofirmat. Ha de retornar el codi HTML del lloc segur, on hi ha <code>&lt;h1&gt;Lloc segur · AEA2&lt;/h1&gt;</code>.</p>
+      <p>Per acabar, mira els registres del contenidor:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — màquina Docker</span></div>
+        <pre><code>docker compose logs</code></pre>
+      </div>
+      <p>➜ Mostra el que ha escrit Apache: hi has de veure les teves peticions, amb un <code>301</code> per a les de HTTP i un <code>200</code> per a les de HTTPS.</p>
     </div>
     <div class="callout tip">
       <span class="ico">💡</span>
-      <p>L'opció <code>-k</code> fa que <code>curl</code> accepti el certificat autofirmat sense donar l'error <em>SSL certificate problem</em>. Si l'ordre respon amb HTML (sense error de connexió), la verificació és correcta.</p>
+      <p>Els números de versió de la línia <code>Server:</code> poden ser diferents als teus; depenen de la versió de la imatge que hagis descarregat.</p>
     </div>
-    <ul>
-      <li><code>docker ps</code> mostra el contenidor <code>servidor-aea2</code> en estat <code>Up</code> amb el mapatge <code>8443-&gt;443</code>.</li>
-      <li><code>curl -k</code> retorna el codi HTML de la teva pàgina.</li>
-      <li>El navegador mostra la pàgina per <code>https://localhost:8443</code>.</li>
-    </ul>
   </section>
 
   <!-- ============ 4 · ERRORS FREQÜENTS ============ -->
@@ -316,12 +668,24 @@ servidor-aea2</code></pre>
     <table>
       <thead><tr><th>Problema</th><th>Causa</th><th>Solució</th></tr></thead>
       <tbody>
-        <tr><td><code>docker: command not found</code></td><td>Docker no està instal·lat o el servei està aturat.</td><td>Revisa la instal·lació de l'AEA0 i que el servei de Docker funcioni.</td></tr>
-        <tr><td><code>Cannot connect to the Docker daemon</code></td><td>El teu usuari no té permís o el dimoni no s'executa.</td><td>Executa amb <code>sudo</code> o afegeix el teu usuari al grup <code>docker</code> i torna a iniciar sessió.</td></tr>
-        <tr><td><code>COPY failed: ... no such file</code></td><td>El Dockerfile no troba <code>certs/</code> o <code>web/</code>.</td><td>Executa <code>docker build</code> des de dins de <code>aea2-docker/</code>, on hi ha les carpetes i el Dockerfile.</td></tr>
-        <tr><td><code>port is already allocated</code></td><td>El port 8443 ja l'ocupa un altre contenidor.</td><td>Atura'l (<code>docker rm -f servidor-aea2</code>) o fes servir un altre port, ex. <code>-p 9443:443</code>.</td></tr>
-        <tr><td><code>Conflict. The container name "/servidor-aea2" is already in use</code></td><td>Ja hi ha un contenidor amb aquest nom d'un intent anterior.</td><td>Esborra'l amb <code>docker rm -f servidor-aea2</code> i torna a executar <code>docker run</code>.</td></tr>
-        <tr><td>El navegador no carrega res</td><td>S'accedeix per <code>http://</code> o per un port equivocat.</td><td>Fes servir <code>https://localhost:8443</code> (amb <strong>s</strong> i el port publicat).</td></tr>
+        <tr><td><code>Cannot connect to the Docker daemon</code></td><td>El teu usuari no té permís o el servei de Docker no s'executa.</td><td>Executa amb <code>sudo</code> o afegeix el teu usuari al grup <code>docker</code> i torna a iniciar sessió.</td></tr>
+        <tr><td><code>docker: 'compose' is not a docker command</code></td><td>Falta el connector de Docker Compose.</td><td>Revisa la instal·lació de l'AEA0. Fem servir <code>docker compose</code> (amb espai), no l'antic <code>docker-compose</code>.</td></tr>
+        <tr><td><code>no configuration file provided</code></td><td>Executes <code>docker compose</code> fora de <code>segur-docker/</code>.</td><td>Fes <code>cd segur-docker</code>; ha de ser la carpeta on hi ha el <code>compose.yaml</code>.</td></tr>
+        <tr><td><code>yaml: line …: did not find expected key</code></td><td>El sagnat del <code>compose.yaml</code> és incorrecte o hi ha tabuladors.</td><td>Copia el fitxer amb els mateixos espais del pas 2.7. Cada nivell són 2 espais.</td></tr>
+        <tr><td><em>Are you trying to mount a directory onto a file (or vice-versa)?</em></td><td>Quan vas fer <code>up</code>, el <code>httpd.conf</code> no existia (o tenia un altre nom) i Docker ha creat una <strong>carpeta</strong> amb aquest nom.</td><td>Fes <code>docker compose down</code>, esborra la carpeta amb <code>sudo rm -r httpd.conf</code>, crea el fitxer (pas 2.5) i torna a fer <code>docker compose up -d</code>.</td></tr>
+        <tr><td><code>httpd -t</code> dona <em>Invalid command 'SSLEngine'</em></td><td>Falta <code>LoadModule ssl_module</code> al <code>httpd.conf</code>.</td><td>Revisa el bloc de <code>LoadModule</code> del pas 2.5.</td></tr>
+        <tr><td><code>httpd -t</code> dona <em>Invalid command 'Require'</em> o <em>'Redirect'</em></td><td>Falta <code>LoadModule authz_core_module</code> (<code>Require</code>) o <code>LoadModule alias_module</code> (<code>Redirect</code>).</td><td>Afegeix la línia que falta i torna a comprovar.</td></tr>
+        <tr><td><code>httpd -t</code> diu que no troba el certificat</td><td>Els noms de <code>certs/</code> no coincideixen amb els del <code>segur.conf</code>, o el volum de <code>certs</code> està mal escrit.</td><td>Comprova amb <code>ls certs/</code> que hi ha <code>segur.crt</code> i <code>segur.key</code>, i revisa la línia <code>./certs:…</code> del <code>compose.yaml</code>.</td></tr>
+        <tr><td><code>https://www.segur.local:8443</code> dona <em>Forbidden</em> o <em>Not Found</em></td><td>El volum de <code>web</code> apunta a una ruta diferent de la del <code>DocumentRoot</code>.</td><td>La línia ha de ser <code>./web:/usr/local/apache2/htdocs/segur:ro</code>. Corregeix i fes <code>docker compose up -d</code>.</td></tr>
+        <tr><td>El contenidor no surt a <code>docker compose ps</code></td><td>Apache s'ha aturat en arrencar per un error de configuració.</td><td>Mira el motiu amb <code>docker compose logs</code>, corregeix el fitxer i torna a fer <code>docker compose up -d</code>.</td></tr>
+        <tr><td><code>port is already allocated</code></td><td>El 8080 o el 8443 ja l'ocupa un altre contenidor (per exemple, d'una activitat anterior).</td><td>Mira quin és amb <code>docker ps</code> i atura'l amb <code>docker rm -f &lt;nom&gt;</code>.</td></tr>
+        <tr><td><code>Conflict. The container name "/servidor-segur" is already in use</code></td><td>Ja hi ha un contenidor amb aquest nom d'un intent anterior.</td><td>Esborra'l amb <code>docker rm -f servidor-segur</code> i torna a fer <code>docker compose up -d</code>.</td></tr>
+        <tr><td><code>www.segur.local</code> no s'obre</td><td>Falta la línia a <code>/etc/hosts</code>, o té una IP incorrecta.</td><td>Afegeix <code>127.0.0.1 www.segur.local</code> a <code>/etc/hosts</code>.</td></tr>
+        <tr><td>El navegador diu <em>No es pot connectar</em></td><td>Falta el port a l'adreça.</td><td>Escriu sempre el port: <code>https://www.segur.local:8443</code> o <code>http://www.segur.local:8080</code>.</td></tr>
+        <tr><td><code>http://www.segur.local:8080</code> no redirigeix</td><td>Has editat el <code>segur.conf</code> però no has reiniciat el contenidor, o el navegador mostra la versió antiga.</td><td>Fes <code>docker compose restart</code> i recarrega amb <code>Ctrl+F5</code>.</td></tr>
+        <tr><td>Redirigeix, però després no es pot connectar</td><td>Al <code>Redirect</code> falta el port <code>:8443</code> i el navegador va al 443, on no hi ha res.</td><td>Escriu <code>Redirect permanent / https://www.segur.local:8443/</code>, fes <code>docker compose restart</code> i esborra l'historial del navegador (recorda la redirecció antiga).</td></tr>
+        <tr><td>El navegador avisa que la connexió no és segura</td><td>El certificat és autofirmat.</td><td>És normal: accepta l'avís. El trànsit va xifrat igualment.</td></tr>
+        <tr><td><code>curl</code> dona <em>SSL certificate problem</em></td><td>Falta l'opció <code>-k</code>.</td><td>Afegeix <code>-k</code> perquè accepti el certificat autofirmat.</td></tr>
       </tbody>
     </table>
   </section>
