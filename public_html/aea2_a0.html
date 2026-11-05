@@ -394,7 +394,35 @@ iface enp2s0 inet static
       <p>Si reps respostes, la xarxa interna funciona. Fes la mateixa prova des del <strong>client</strong>.</p>
     </div>
 
-    <h3>2.4 · Instal·lar el servei SSH al servidor</h3>
+    <h3>2.4 · Crear l'usuari <code>isard_ssh</code> al servidor</h3>
+    <div class="role-box server">
+      <span class="role-label server">Servidor</span>
+      <p>Les tres màquines d'IsardVDI tenen el mateix usuari per defecte i, quan et connectes per SSH, és fàcil confondre's i no saber a quina màquina ets. Per evitar-ho, crearem al <strong>servidor</strong> un usuari propi que farem servir <strong>només per entrar-hi per SSH</strong>: <code>isard_ssh</code>.</p>
+      <p>Ves a la màquina <strong>servidor</strong> i crea l'usuari:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — servidor</span></div>
+        <pre><code>sudo adduser isard_ssh</code></pre>
+      </div>
+      <p>➜ Crea l'usuari <code>isard_ssh</code> amb la seva carpeta personal (<code>/home/isard_ssh</code>).</p>
+      <p>Et demanarà la contrasenya dues vegades (no es veu mentre l'escrius). <strong>Apunta-la</strong>: la necessitaràs per connectar-te per SSH. Després et farà preguntes sobre el nom complet, el telèfon, etc.: les pots deixar buides prement <code>Enter</code> i, al final, confirmar amb <code>Y</code>.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — servidor</span></div>
+        <pre><code>sudo usermod -aG sudo isard_ssh</code></pre>
+      </div>
+      <p>➜ Afegeix <code>isard_ssh</code> al grup <code>sudo</code> perquè pugui fer tasques d'administrador (com instal·lar Apache a les activitats següents). <code>-aG</code> l'<strong>afegeix</strong> al grup sense treure'l dels que ja tenia.</p>
+      <p>Comprova que l'usuari existeix i és al grup <code>sudo</code>:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — servidor</span></div>
+        <pre><code>groups isard_ssh</code></pre>
+      </div>
+      <p>➜ Mostra els grups de l'usuari. Ha de sortir <code>isard_ssh : isard_ssh sudo</code> (pot haver-hi algun grup més).</p>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>Com que només el servidor té l'usuari <code>isard_ssh</code>, quan el <em>prompt</em> digui <code>isard_ssh@...</code> sabràs segur que estàs treballant <strong>al servidor per SSH</strong>.</p>
+      </div>
+    </div>
+
+    <h3>2.5 · Instal·lar el servei SSH al servidor</h3>
     <div class="role-box server">
       <span class="role-label server">Servidor</span>
       <p>Ves a la màquina <strong>servidor</strong>. Instal·la el servidor SSH (es baixa per la targeta <em>default</em>):</p>
@@ -417,16 +445,16 @@ iface enp2s0 inet static
       <p>Ha d'aparèixer <code>active (running)</code>. Prem <code>q</code> per sortir.</p>
     </div>
 
-    <h3>2.5 · Connectar-se des de l'administrador per SSH</h3>
+    <h3>2.6 · Connectar-se des de l'administrador per SSH</h3>
     <div class="role-box admin">
       <span class="role-label admin">Administrador</span>
-      <p>Torna a la màquina <strong>administrador</strong> i connecta't al servidor (substitueix <code>usuari</code> pel teu nom d'usuari del servidor):</p>
+      <p>Torna a la màquina <strong>administrador</strong> i connecta't al servidor amb l'usuari <code>isard_ssh</code> que has creat al pas 2.4:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
-        <pre><code>ssh usuari@192.168.1.10</code></pre>
+        <pre><code>ssh isard_ssh@192.168.1.10</code></pre>
       </div>
-      <p>➜ Obre una sessió de terminal xifrada al servidor per SSH. Substitueix <code>usuari</code> pel teu nom d'usuari del servidor.</p>
-      <p>El primer cop et demanarà confirmar la <em>fingerprint</em> del servidor: escriu <code>yes</code> i prem <code>Enter</code>. Després introdueix la contrasenya. Quan hi entris, el <em>prompt</em> del terminal canviarà al del servidor: <strong>ja estàs administrant el servidor de manera remota</strong>.</p>
+      <p>➜ Obre una sessió de terminal xifrada al servidor per SSH amb l'usuari <code>isard_ssh</code>.</p>
+      <p>El primer cop et demanarà confirmar la <em>fingerprint</em> del servidor: escriu <code>yes</code> i prem <code>Enter</code>. Després introdueix la contrasenya d'<code>isard_ssh</code>. Quan hi entris, el <em>prompt</em> del terminal canviarà a <code>isard_ssh@...</code>: <strong>ja estàs administrant el servidor de manera remota</strong>.</p>
     </div>
     <div class="callout switch">
       <span class="ico">💻→</span>
@@ -444,7 +472,7 @@ iface enp2s0 inet static
     <ul>
       <li>Les tres màquines tenen la IP fixa correcta a la targeta interna (<code>.10</code>, <code>.20</code> i <code>.30</code>).</li>
       <li>L'administrador i el client arriben al servidor amb <code>ping</code>.</li>
-      <li>L'administrador entra al servidor per SSH.</li>
+      <li>Al servidor existeix l'usuari <code>isard_ssh</code> i l'administrador hi entra per SSH amb aquest usuari.</li>
     </ul>
     <div class="role-box client">
       <span class="role-label client">Client</span>
@@ -465,10 +493,10 @@ iface enp2s0 inet static
     </div>
     <div class="role-box admin">
       <span class="role-label admin">Administrador</span>
-      <p>Entra al servidor per SSH i, un cop dins, mira la IP de la targeta interna:</p>
+      <p>Entra al servidor per SSH amb l'usuari <code>isard_ssh</code> i, un cop dins, mira la IP de la targeta interna:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
-        <pre><code>ssh usuari@192.168.1.10</code></pre>
+        <pre><code>ssh isard_ssh@192.168.1.10</code></pre>
       </div>
       <p>➜ Obre la sessió SSH al servidor.</p>
       <div class="term">
@@ -498,7 +526,8 @@ iface enp2s0 inet static
         <tr><td>Després de canviar la xarxa, la màquina no té Internet</td><td>Has tocat la targeta <em>default</em>.</td><td>Deixa la targeta <em>default</em> com estava (DHCP) i posa la IP fixa només a la interna.</td></tr>
         <tr><td><code>sudo apt install</code> falla al servidor</td><td>No hi ha sortida a Internet per la targeta <em>default</em>, o no has fet <code>sudo apt update</code>.</td><td>Comprova amb <code>ip a</code> que la targeta <em>default</em> té IP i torna a fer <code>sudo apt update</code>.</td></tr>
         <tr><td><code>ssh</code> dona <em>Connection refused</em></td><td>El servei SSH no està instal·lat o no està actiu al servidor.</td><td>Al servidor, fes <code>sudo apt install openssh-server -y</code> i comprova <code>systemctl status ssh</code>.</td></tr>
-        <tr><td><code>ssh</code> dona <em>Permission denied</em></td><td>Nom d'usuari o contrasenya incorrectes.</td><td>Fes servir l'usuari que tens al <strong>servidor</strong> (el que veus al seu terminal) i escriu la contrasenya amb calma.</td></tr>
+        <tr><td><code>ssh</code> dona <em>Permission denied</em></td><td>Nom d'usuari o contrasenya incorrectes, o l'usuari <code>isard_ssh</code> no existeix al servidor.</td><td>Connecta't amb <code>ssh isard_ssh@192.168.1.10</code> i escriu la contrasenya que vas posar al pas 2.4. Si no recordes la contrasenya, canvia-la al servidor amb <code>sudo passwd isard_ssh</code>; si l'usuari no existeix, crea'l (pas 2.4).</td></tr>
+        <tr><td>Per SSH, <code>sudo</code> diu <em>isard_ssh is not in the sudoers file</em></td><td>No has afegit <code>isard_ssh</code> al grup <code>sudo</code>.</td><td>Al servidor, fes <code>sudo usermod -aG sudo isard_ssh</code>, surt de la sessió SSH amb <code>exit</code> i torna-hi a entrar.</td></tr>
       </tbody>
     </table>
   </section>
