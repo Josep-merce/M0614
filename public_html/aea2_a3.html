@@ -69,6 +69,12 @@
   .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
   .callout.warn{background:#FDECEC;border-color:#F4C7C7}
 
+  /* Comprova-ho al navegador */
+  .check{background:#EAF1FB;border:1px solid #BBD3F0;border-left:5px solid #1D4E89;border-radius:12px;padding:.9rem 1.1rem;margin:1.1rem 0;font-size:.93rem}
+  .check .check-title{font-family:var(--display);font-weight:600;color:#1D4E89;display:block;margin-bottom:.35rem}
+  .check .url{font-family:var(--mono);font-size:.86rem;background:#fff;border:1px solid #BBD3F0;color:#1D4E89;padding:.2rem .5rem;border-radius:6px;display:inline-block;margin:.15rem 0 .45rem}
+  .check p{margin:.3rem 0}
+
 
   footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
   @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
@@ -207,6 +213,11 @@
       <pre><code>sudo apt install apache2 -y</code></pre>
     </div>
     <p>➜ Instal·la el servidor web Apache. <code>-y</code> accepta automàticament la instal·lació.</p>
+    <div class="check">
+      <span class="check-title">🔎 Comprova-ho al navegador</span>
+      <span class="url">http://IP-PUBLICA</span>
+      <p>Al navegador de la teva màquina, obre la IP pública de l'EC2 <strong>sense la s</strong>. Ha de sortir la pàgina per defecte d'Apache, <strong>Apache2 Default Page · It works!</strong>, servida en clar pel port 80. Si no carrega, revisa que el <em>security group</em> tingui el port 80 obert.</p>
+    </div>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — la teva màquina → EC2 (SSH)</span></div>
       <pre><code>sudo a2enmod ssl</code></pre>
@@ -260,12 +271,12 @@ SSLCertificateKeyFile   /etc/ssl/private/aea2.key</code></pre>
     <p>➜ Recarrega Apache perquè apliqui la nova configuració sense aturar el servei.</p>
 
     <h3>2.6 · Accedir al web des del navegador</h3>
-    <p>Al navegador de la teva màquina, escriu la IP pública de l'EC2 amb <code>https</code>:</p>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">navegador</span></div>
-      <pre><code>https://IP-PUBLICA</code></pre>
+    <p>Al navegador de la teva màquina, escriu la IP pública de l'EC2, ara amb <code>https</code>:</p>
+    <div class="check">
+      <span class="check-title">🔎 Comprova-ho al navegador</span>
+      <span class="url">https://IP-PUBLICA</span>
+      <p>El navegador mostrarà un <strong>avís de seguretat</strong> perquè el certificat és autofirmat. Accepta'l (a Firefox: <em>Avançat → Accepta el risc</em>). Ha de sortir la mateixa <strong>Apache2 Default Page</strong>, però ara servida per HTTPS des del núvol. Clica el cadenat de la barra d'adreces i mira el certificat: el nom (<em>Common Name</em>) ha de ser la <code>IP-PUBLICA</code> de la teva EC2 i l'emissor, tu mateix (<em>Institut La Merce</em>).</p>
     </div>
-    <p>Accepta l'avís del certificat autofirmat i veuràs la pàgina d'Apache servida per HTTPS des del núvol.</p>
   </section>
 
   <!-- ============ 3 · VERIFICACIÓ ============ -->
