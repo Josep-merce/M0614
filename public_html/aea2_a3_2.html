@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA2·A3.2 — HTTPS amb certificat de confiança: S3 + CloudFront · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+  .table-scroll{overflow-x:auto}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout p + p{margin-top:.5rem}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+
+  /* Comprova-ho al navegador */
+  .check{background:#EAF1FB;border:1px solid #BBD3F0;border-left:5px solid #1D4E89;border-radius:12px;padding:.9rem 1.1rem;margin:1.1rem 0;font-size:.93rem}
+  .check .check-title{font-family:var(--display);font-weight:600;color:#1D4E89;display:block;margin-bottom:.35rem}
+  .check .url{font-family:var(--mono);font-size:.86rem;background:#fff;border:1px solid #BBD3F0;color:#1D4E89;padding:.2rem .5rem;border-radius:6px;display:inline-block;margin:.15rem 0 .45rem}
+  .check p{margin:.3rem 0}
+
+  /* Diagrama */
+  .diagram{background:var(--surface);border:1px solid var(--hairline);border-radius:12px;padding:1.1rem;margin:1.2rem 0;overflow-x:auto}
+  .diagram svg{display:block;width:100%;min-width:620px;height:auto}
+  .diagram figcaption{font-size:.85rem;color:var(--muted);margin-top:.6rem}
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea2.html"><span class="arrow">←</span> Tornar a l'AEA2</a>
+
+  <header>
+    <span class="badge">AEA2 · A3.2</span>
+    <span class="eyebrow">M0614 · AWS</span>
+    <h1>HTTPS amb certificat de confiança: <span class="code">S3 + CloudFront</span></h1>
+    <p class="lede">A l'A3.1 vas posar HTTPS amb un certificat fet per tu i el navegador en desconfiava. Ara publicaràs el web en un bucket S3 i hi posaràs al davant CloudFront, que el servirà per HTTPS amb un certificat de confiança, sense cap avís de seguretat.</p>
+    <div class="meta">
+      <span class="pill">RA <strong>RA2</strong></span>
+      <span class="pill">CA <strong>2.5 · 2.6 · 2.9</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En aquesta activitat aprendràs a:</p>
+    <ul>
+      <li>Publicar una web estàtica en un <strong>bucket S3</strong>.</li>
+      <li>Entendre què és una <strong>CDN</strong> i què fa <strong>CloudFront</strong>.</li>
+      <li>Crear una <strong>distribució</strong> de CloudFront que serveixi el web per <strong>HTTPS</strong> i redirigeixi HTTP a HTTPS.</li>
+      <li>Diferenciar un <strong>certificat autofirmat</strong> (A3.1) d'un <strong>certificat de confiança</strong>.</li>
+    </ul>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Accés a <strong>AWS Academy · Learner Lab</strong> (AEA0).</li>
+      <li>Un terminal a la teva màquina per fer <code>curl</code>.</li>
+      <li>Recomanat: haver fet l'<a href="aea2_a3_1.html">A3.1</a>, per poder comparar els dos certificats.</li>
+    </ul>
+
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>El Learner Lab té temps limitat. Crear la distribució de CloudFront triga uns minuts: comença l'activitat amb temps i fes les captures a mesura que avances.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <h3>El problema: S3 només parla HTTP</h3>
+    <p><strong>Amazon S3</strong> és el servei d'AWS per emmagatzemar fitxers. Té una opció, l'<strong>allotjament de lloc web estàtic</strong>, que fa que serveixi els teus HTML com una web, sense haver de muntar cap servidor. Però l'adreça que et dona (l'<em>endpoint</em> del lloc web) <strong>només funciona amb <code>http://</code></strong>: no té certificat i no accepta HTTPS.</p>
+
+    <h3>La solució: CloudFront</h3>
+    <p><strong>Amazon CloudFront</strong> és la <strong>CDN</strong> (<em>Content Delivery Network</em>, xarxa de distribució de continguts) d'AWS. AWS té centenars de servidors repartits pel món, anomenats <strong>edge locations</strong> (n'hi ha a Madrid, a Barcelona, a París…). CloudFront es posa <strong>davant</strong> del teu bucket i atén ell les peticions dels usuaris:</p>
+    <ol>
+      <li>El navegador es connecta per <strong>HTTPS</strong> a l'<em>edge location</em> més propera.</li>
+      <li>Si aquell servidor ja té una còpia de la pàgina a la <strong>memòria cau</strong> (<em>cache</em>), la serveix al moment.</li>
+      <li>Si no la té, la demana al bucket S3 (l'<strong>origen</strong>), la serveix a l'usuari i se'n guarda una còpia per a les properes peticions.</li>
+    </ol>
+
+    <figure class="diagram">
+      <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="El navegador es connecta per HTTPS a una edge location de CloudFront, que té una memòria cau i demana els fitxers al bucket S3 per HTTP.">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3A4658"/></marker>
+          <marker id="ar-o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07B1E"/></marker>
+        </defs>
+        <!-- Navegador -->
+        <rect x="20" y="70" width="170" height="110" rx="12" fill="#EAF1FB" stroke="#1D4E89" stroke-width="1.5"/>
+        <rect x="20" y="70" width="170" height="26" rx="12" fill="#1D4E89"/>
+        <rect x="20" y="84" width="170" height="12" fill="#1D4E89"/>
+        <text x="105" y="88" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600" fill="#fff">Navegador</text>
+        <text x="105" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" fill="#1A2230">L'usuari</text>
+        <text x="105" y="150" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#5A6677">(Barcelona)</text>
+
+        <!-- Fletxa HTTPS -->
+        <line x1="196" y1="125" x2="298" y2="125" stroke="#E07B1E" stroke-width="2.5" marker-end="url(#ar-o)" marker-start="url(#ar-o)"/>
+        <text x="247" y="112" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" font-weight="600" fill="#E07B1E">HTTPS 🔒</text>
+        <text x="247" y="146" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#5A6677">certificat d'Amazon</text>
+
+        <!-- CloudFront edge -->
+        <rect x="305" y="40" width="200" height="170" rx="12" fill="#FBEFE0" stroke="#E07B1E" stroke-width="1.5"/>
+        <text x="405" y="66" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="600" fill="#1A2230">CloudFront</text>
+        <text x="405" y="84" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#5A6677">edge location (Madrid)</text>
+        <rect x="335" y="102" width="140" height="56" rx="8" fill="#fff" stroke="#F1D7B4"/>
+        <text x="405" y="126" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="12.5" font-weight="600" fill="#3A4658">memòria cau</text>
+        <text x="405" y="144" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#5A6677">index.html (còpia)</text>
+        <text x="405" y="190" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#5A6677">proxy invers amb cache</text>
+
+        <!-- Fletxa HTTP -->
+        <line x1="511" y1="125" x2="563" y2="125" stroke="#3A4658" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ar)" marker-start="url(#ar)"/>
+        <text x="537" y="112" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" font-weight="600" fill="#3A4658">HTTP</text>
+        <text x="537" y="146" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#5A6677">si no hi és</text>
+
+        <!-- S3 -->
+        <rect x="570" y="70" width="170" height="110" rx="12" fill="#EDF1F6" stroke="#3A4658" stroke-width="1.5"/>
+        <text x="655" y="98" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="600" fill="#1A2230">Bucket S3</text>
+        <text x="655" y="118" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#5A6677">origen</text>
+        <text x="655" y="146" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#3A4658">index.html</text>
+        <text x="655" y="164" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#5A6677">(us-east-1)</text>
+      </svg>
+      <figcaption>L'usuari només parla amb CloudFront, per HTTPS. CloudFront demana els fitxers al bucket per HTTP només quan no els té a la memòria cau.</figcaption>
+    </figure>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>CloudFront és un <strong>proxy invers amb memòria cau</strong>. Un <em>proxy directe</em> és al costat del client (com el proxy de l'institut per on surt la xarxa de l'aula). Un <em>proxy invers</em> és al costat del servidor: rep les peticions en nom seu i les hi reenvia. L'usuari creu que parla amb el servidor, però parla amb el proxy.</p>
+      <p>És el mateix que faries posant un Apache o un Nginx davant d'una aplicació, però gestionat per AWS i repetit a centenars de llocs del món.</p>
+    </div>
+
+    <h3>Autofirmat o de confiança?</h3>
+    <p>Totes dues opcions xifren la connexió igual de bé. La diferència és <strong>qui signa el certificat</strong> i, per tant, si el navegador se'n refia.</p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th></th><th>A3.1 · Apache a l'EC2</th><th>A3.2 · CloudFront</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Qui signa el certificat</strong></td><td>Tu mateix, amb <code>openssl</code> (autofirmat).</td><td>Amazon, una autoritat de certificació de confiança.</td></tr>
+        <tr><td><strong>Avís al navegador</strong></td><td>Sí: cal acceptar el risc.</td><td>No: surt el cadenat directament.</td></tr>
+        <tr><td><strong><code>curl</code></strong></td><td>Cal <code>-k</code> per ignorar l'error.</td><td>Funciona sense <code>-k</code>.</td></tr>
+        <tr><td><strong>Qui el renova</strong></td><td>Tu, abans que caduqui.</td><td>AWS, automàticament.</td></tr>
+        <tr><td><strong>Servidor</strong></td><td>Una màquina que administres per SSH.</td><td>Cap: S3 i CloudFront són serveis gestionats.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>Conceptes</h3>
+    <table>
+      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bucket</strong></td><td>Una "carpeta" a S3. El nom ha de ser únic a tot AWS.</td></tr>
+        <tr><td><strong>Allotjament de lloc web estàtic</strong></td><td>Opció del bucket que fa que els HTML es vegin com una pàgina web (només per HTTP).</td></tr>
+        <tr><td><strong>Distribució</strong></td><td>La configuració de CloudFront per a un lloc web: d'on treu els fitxers i com els serveix.</td></tr>
+        <tr><td><strong>Origen</strong></td><td>El servidor on hi ha els fitxers originals. Aquí, el teu bucket S3.</td></tr>
+        <tr><td><strong>Edge location</strong></td><td>Cada un dels servidors de CloudFront repartits pel món.</td></tr>
+        <tr><td><strong>Memòria cau (cache)</strong></td><td>Les còpies dels fitxers que guarda cada <em>edge location</em> per no haver-los de demanar cada cop.</td></tr>
+        <tr><td><strong>Default root object</strong></td><td>El fitxer que CloudFront serveix quan es demana l'arrel (<code>/</code>). Aquí, <code>index.html</code>.</td></tr>
+        <tr><td><strong>Viewer protocol policy</strong></td><td>Com accepta CloudFront els usuaris: aquí, redirigint HTTP a HTTPS.</td></tr>
+        <tr><td><strong>Distribution domain name</strong></td><td>L'adreça que et dona CloudFront, del tipus <code>dXXXXXXXXXXXX.cloudfront.net</code>.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <h3>2.1 · Entrar al Learner Lab i obrir la consola</h3>
+    <ol>
+      <li>Entra a <strong>AWS Academy</strong> i obre el teu <strong>Learner Lab</strong>.</li>
+      <li>Prem <strong>Start Lab</strong> i espera que el punt del costat d'<strong>AWS</strong> es posi verd.</li>
+      <li>Fes clic a <strong>AWS</strong> per obrir la consola d'AWS.</li>
+    </ol>
+
+    <h3>2.2 · Crear el bucket S3</h3>
+    <ol>
+      <li>A la consola, cerca <strong>S3</strong> i entra-hi. Prem <strong>Create bucket</strong>.</li>
+      <li>Posa-li un nom <strong>únic</strong>, per exemple <code>aea2-nomcognom-2026</code>. Només minúscules, números i guions: sense majúscules, espais, accents, ñ ni ç (Núria Muñoz → <code>aea2-nuriamunoz-2026</code>).</li>
+      <li>Desmarca <strong>Block all public access</strong> i marca la casella de confirmació que apareix a sota.</li>
+      <li>Prem <strong>Create bucket</strong>.</li>
+    </ol>
+
+    <h3>2.3 · Activar l'allotjament de lloc web estàtic</h3>
+    <ol>
+      <li>Entra al bucket i ves a la pestanya <strong>Properties</strong>.</li>
+      <li>Baixa fins a <strong>Static website hosting</strong> i prem <strong>Edit</strong>.</li>
+      <li>Marca <strong>Enable</strong> i escriu <code>index.html</code> a <strong>Index document</strong>.</li>
+      <li>Desa i apunta l'adreça de <strong>Bucket website endpoint</strong>.</li>
+    </ol>
+
+    <h3>2.4 · Crear i pujar l'<code>index.html</code></h3>
+    <p>A la teva màquina, crea amb VS Code un fitxer anomenat exactament <code>index.html</code>, posant-hi el teu nom:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ca"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;Lloc segur a AWS — AEA2&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Lloc segur a AWS — AEA2&lt;/h1&gt;
+  &lt;p&gt;Nom Cognom&lt;/p&gt;
+  &lt;p&gt;Servit per CloudFront amb HTTPS.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+    <ol>
+      <li>Al bucket, a la pestanya <strong>Objects</strong>, prem <strong>Upload</strong>.</li>
+      <li><strong>Add files</strong> → tria el teu <code>index.html</code> → <strong>Upload</strong>.</li>
+    </ol>
+
+    <h3>2.5 · Fer públic el contingut del bucket</h3>
+    <ol>
+      <li>Ves a la pestanya <strong>Permissions</strong> del bucket.</li>
+      <li>A <strong>Bucket policy</strong>, prem <strong>Edit</strong> i enganxa-hi això (canviant <code>NOM-DEL-TEU-BUCKET</code>):</li>
+    </ol>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bucket policy — JSON</span></div>
+      <pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AccesPublicLectura",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::NOM-DEL-TEU-BUCKET/*"
+    }
+  ]
+}</code></pre>
+    </div>
+    <p>➜ Permet que qualsevol (<code>"Principal": "*"</code>) pugui llegir (<code>s3:GetObject</code>) els fitxers del bucket. Desa amb <strong>Save changes</strong>.</p>
+    <div class="check">
+      <span class="check-title">🔎 Comprova-ho al navegador</span>
+      <span class="url">http://NOM-DEL-TEU-BUCKET.s3-website-us-east-1.amazonaws.com</span>
+      <p>Obre l'endpoint que has apuntat al pas 2.3. Ha de sortir la teva pàgina. Ara prova la mateixa adreça canviant <code>http</code> per <strong><code>https</code></strong>: <strong>no carregarà</strong>. Aquest és el problema que resoldrem amb CloudFront.</p>
+    </div>
+
+    <h3>2.6 · Crear la distribució de CloudFront</h3>
+    <ol>
+      <li>A la consola, cerca <strong>CloudFront</strong> i entra-hi. Prem <strong>Create distribution</strong>.</li>
+      <li>Si et demana triar un pla de preus, tria <strong>Free</strong>.</li>
+      <li>Posa-li de nom <code>aea2-nomcognom</code>.</li>
+    </ol>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>No triïs mai un pla de pagament (Pro, Business…). Si la consola no et deixa continuar amb el pla Free, avisa el professorat.</p>
+    </div>
+
+    <h3>2.7 · Triar l'origen: el teu bucket</h3>
+    <ol>
+      <li>A <strong>Origin type</strong>, tria <strong>Amazon S3</strong>.</li>
+      <li>Prem <strong>Browse S3</strong> i selecciona el teu bucket <code>aea2-nomcognom-2026</code>.</li>
+      <li>Com que el bucket té l'allotjament web activat, la consola et proposarà fer servir l'<strong>endpoint del lloc web</strong> (<em>Use website endpoint</em>). <strong>Accepta-ho.</strong> L'origen ha de quedar com <code>…s3-website-us-east-1.amazonaws.com</code>.</li>
+    </ol>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Fixa't que l'origen és la <strong>mateixa adreça <code>http://</code></strong> que has provat al pas 2.5. CloudFront parlarà amb el bucket per HTTP, però amb els usuaris parlarà per HTTPS.</p>
+    </div>
+
+    <h3>2.8 · Configurar HTTPS i crear la distribució</h3>
+    <p>Abans de crear-la, revisa aquests tres valors (segons la versió de la consola, alguns ja surten per defecte):</p>
+    <table>
+      <thead><tr><th>Opció</th><th>Valor</th><th>Per a què</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Viewer protocol policy</strong></td><td><code>Redirect HTTP to HTTPS</code></td><td>Qui entri per <code>http://</code> és enviat automàticament a <code>https://</code>.</td></tr>
+        <tr><td><strong>Default root object</strong></td><td><code>index.html</code></td><td>Que l'arrel (<code>/</code>) mostri la teva pàgina.</td></tr>
+        <tr><td><strong>Security / WAF</strong></td><td><em>Do not enable</em></td><td>El tallafoc web (WAF) té cost i no el necessitem.</td></tr>
+      </tbody>
+    </table>
+    <p>Prem <strong>Create distribution</strong>.</p>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Si durant l'assistent no t'ha sortit el <strong>Default root object</strong>, un cop creada la distribució ves a la pestanya <strong>General</strong> → <strong>Settings</strong> → <strong>Edit</strong>, escriu-hi <code>index.html</code> i desa.</p>
+    </div>
+
+    <h3>2.9 · Esperar el desplegament</h3>
+    <ol>
+      <li>Ves a la llista de distribucions. La teva sortirà amb l'estat <strong>Deploying</strong>: CloudFront està copiant la configuració a totes les <em>edge locations</em>. Pot trigar entre 5 i 15 minuts.</li>
+      <li>Quan a <strong>Last modified</strong> surti una data (en lloc de <em>Deploying</em>), la distribució ja està llesta.</li>
+      <li>Copia el <strong>Distribution domain name</strong>: és l'adreça del teu web, del tipus <code>dXXXXXXXXXXXX.cloudfront.net</code>.</li>
+    </ol>
+
+    <h3>2.10 · Accedir al web per HTTPS</h3>
+    <div class="check">
+      <span class="check-title">🔎 Comprova-ho al navegador</span>
+      <span class="url">https://dXXXXXXXXXXXX.cloudfront.net</span>
+      <p>Ha de sortir la teva pàgina amb el <strong>cadenat</strong> i <strong>sense cap avís de seguretat</strong>, a diferència de l'A3.1. Clica el cadenat i mira el certificat: és vàlid per a <code>*.cloudfront.net</code> i l'emissor és <strong>Amazon</strong>, no tu.</p>
+    </div>
+    <div class="check">
+      <span class="check-title">🔎 Comprova-ho al navegador</span>
+      <span class="url">http://dXXXXXXXXXXXX.cloudfront.net</span>
+      <p>Escriu ara l'adreça <strong>sense la s</strong>. El navegador ha de saltar sol a <code>https://</code>: és la redirecció que has configurat al pas 2.8.</p>
+    </div>
+
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Fer <strong>End Lab</strong> <strong>no atura</strong> CloudFront ni esborra el bucket. Quan el professorat t'ho indiqui en acabar l'AEA, ves a CloudFront, selecciona la distribució, prem <strong>Disable</strong>, espera que es desactivi i prem <strong>Delete</strong>.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+    <p>Des del terminal de la teva màquina, demana només les capçaleres de la resposta (<code>-I</code>), ara <strong>sense <code>-k</code></strong>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>curl -I https://dXXXXXXXXXXXX.cloudfront.net</code></pre>
+    </div>
+    <p>➜ Fa una petició HTTPS a CloudFront i mostra només les capçaleres. No cal <code>-k</code>: el certificat és de confiança i <code>curl</code> l'accepta sense queixar-se.</p>
+    <p>Sortida esperada (resumida):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+      <pre><code>HTTP/2 200                                     <span class="c"># ⚠ EL MÉS IMPORTANT: la pàgina s'ha servit bé</span>
+content-type: text/html
+server: AmazonS3                               <span class="c"># el fitxer ve del bucket</span>
+x-cache: Miss from cloudfront                  <span class="c"># no era a la cache: l'ha anat a buscar a S3</span>
+via: 1.1 xxxxxxxx.cloudfront.net (CloudFront)  <span class="c"># ha passat pel proxy</span>
+x-amz-cf-pop: MAD53-P1                         <span class="c"># l'edge location que t'ha atès (MAD = Madrid)</span></code></pre>
+    </div>
+    <p>Repeteix exactament la mateixa ordre:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>curl -I https://dXXXXXXXXXXXX.cloudfront.net</code></pre>
+    </div>
+    <p>➜ Torna a demanar la pàgina. Aquest cop l'<em>edge location</em> ja en té una còpia.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+      <pre><code>HTTP/2 200
+x-cache: Hit from cloudfront                   <span class="c"># ⚠ ara s'ha servit des de la memòria cau</span></code></pre>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Si ja havies obert la pàgina al navegador, és possible que surti <code>Hit</code> des de la primera vegada: la còpia ja era a la cache. El codi del <code>x-amz-cf-pop</code> pot ser un altre (per exemple, <code>BCN</code>), segons l'<em>edge location</em> que t'atengui.</p>
+    </div>
+    <p>Comprova ara la redirecció d'HTTP a HTTPS:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+      <pre><code>curl -I http://dXXXXXXXXXXXX.cloudfront.net</code></pre>
+    </div>
+    <p>➜ Fa la petició per HTTP, sense xifrar. CloudFront no serveix la pàgina: respon que vagis a l'adreça HTTPS.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+      <pre><code>HTTP/1.1 301 Moved Permanently                       <span class="c"># ⚠ redirecció permanent</span>
+Server: CloudFront
+Location: https://dXXXXXXXXXXXX.cloudfront.net/      <span class="c"># cap a on t'envia</span></code></pre>
+    </div>
+    <ul>
+      <li>L'endpoint del bucket funciona per <code>http://</code> però no per <code>https://</code>.</li>
+      <li>La distribució de CloudFront està creada i ja no surt <em>Deploying</em>.</li>
+      <li>El navegador obre <code>https://dXXXXXXXXXXXX.cloudfront.net</code> amb el cadenat i sense cap avís.</li>
+      <li><code>curl -I</code> sense <code>-k</code> retorna <code>HTTP/2 200</code> i, en repetir-lo, <code>x-cache: Hit from cloudfront</code>.</li>
+      <li><code>curl -I http://…</code> retorna <code>301</code> cap a <code>https://</code>.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA2 · A3.2
+  </footer>
+
+</div>
+</body>
+</html>
