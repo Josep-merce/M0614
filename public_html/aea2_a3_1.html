@@ -166,7 +166,7 @@
       <li>A la consola, cerca <strong>EC2</strong> i entra-hi. Prem <strong>Launch instance</strong>.</li>
       <li>Posa-li de nom <code>servidor-aea2</code>.</li>
       <li>A <strong>Application and OS Images</strong>, tria <strong>Ubuntu</strong> (Free tier).</li>
-      <li>A <strong>Instance type</strong>, deixa <code>t2.micro</code> (Free tier).</li>
+      <li>A <strong>Instance type</strong>, tria <code>t3.micro</code> (2 vCPU, 1 GiB de RAM; també és <em>Free tier eligible</em>).</li>
       <li>A <strong>Key pair</strong>, prem <strong>Create new key pair</strong>, posa-li nom <code>aea2-key</code>, format <strong>.pem</strong>, i descarrega-la. <strong>Guarda-la bé: només es descarrega un cop.</strong></li>
     </ol>
 
@@ -277,6 +277,42 @@ SSLCertificateKeyFile   /etc/ssl/private/aea2.key</code></pre>
       <span class="url">https://IP-PUBLICA</span>
       <p>El navegador mostrarà un <strong>avís de seguretat</strong> perquè el certificat és autofirmat. Accepta'l (a Firefox: <em>Avançat → Accepta el risc</em>). Ha de sortir la mateixa <strong>Apache2 Default Page</strong>, però ara servida per HTTPS des del núvol. Clica el cadenat de la barra d'adreces i mira el certificat: el nom (<em>Common Name</em>) ha de ser la <code>IP-PUBLICA</code> de la teva EC2 i l'emissor, tu mateix (<em>Institut La Merce</em>).</p>
     </div>
+
+    <h3>2.7 · Pujar un index.html personalitzat</h3>
+    <p>Ara substituiràs la pàgina per defecte d'Apache per una de pròpia. A la <strong>teva màquina</strong> (no a l'EC2), a la mateixa carpeta on tens la clau, crea el fitxer <code>index.html</code>:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — la teva màquina</span></div>
+      <pre><code>nano index.html</code></pre>
+    </div>
+    <p>➜ Crea i obre el fitxer amb l'editor. Hi pots enganxar aquest contingut (posa-hi el teu nom):</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ca"&gt;
+&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;title&gt;Servidor AEA2&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Servidor AEA2 de NOM COGNOM&lt;/h1&gt;
+  &lt;p&gt;Pàgina servida per HTTPS des d'una EC2 d'AWS.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+    <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>). Puja'l a l'EC2 amb <code>scp</code>, que copia fitxers per SSH amb la mateixa clau:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — la teva màquina</span></div>
+      <pre><code>scp -i aea2-key.pem index.html ubuntu@IP-PUBLICA:/home/ubuntu/</code></pre>
+    </div>
+    <p>➜ Copia <code>index.html</code> a la carpeta personal de l'usuari <code>ubuntu</code> a l'EC2. No es pot copiar directament a <code>/var/www/html</code> perquè aquesta carpeta és de <code>root</code>.</p>
+    <p>Ara, <strong>dins l'EC2 per SSH</strong>, mou-lo a la carpeta del web, substituint el per defecte:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — la teva màquina → EC2 (SSH)</span></div>
+      <pre><code>sudo mv /home/ubuntu/index.html /var/www/html/index.html</code></pre>
+    </div>
+    <p>➜ Mou el fitxer a <code>/var/www/html</code>, el <em>DocumentRoot</em> d'Apache, i sobreescriu la pàgina per defecte. Cal <code>sudo</code> perquè la carpeta és de <code>root</code>.</p>
+    <div class="check">
+      <span class="check-title">🔎 Comprova-ho al navegador</span>
+      <span class="url">https://IP-PUBLICA</span>
+      <p>Recarrega la pàgina (si cal, amb <code>Ctrl+F5</code> per evitar la memòria cau). Ara ha de sortir <strong>la teva pàgina</strong>, amb el títol <strong>Servidor AEA2 de NOM COGNOM</strong>, en lloc de l'<em>Apache2 Default Page</em>.</p>
+    </div>
   </section>
 
   <!-- ============ 3 · VERIFICACIÓ ============ -->
@@ -315,10 +351,17 @@ LISTEN 0 128 0.0.0.0:443   0.0.0.0:*  users:(("apache2",pid=1234,fd=6)) <span cl
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
       <pre><code>curl -k https://IP-PUBLICA</code></pre>
     </div>
-    <p>Sortida esperada (el codi HTML de la pàgina; el contingut exacte depèn del que hi hagis publicat):</p>
+    <p>Sortida esperada (el codi HTML del teu <code>index.html</code> personalitzat):</p>
     <div class="term">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
-      <pre><code>&lt;html&gt;&lt;body&gt;&lt;h1&gt;It works!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;</code></pre>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ca"&gt;
+&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;title&gt;Servidor AEA2&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Servidor AEA2 de NOM COGNOM&lt;/h1&gt;
+  &lt;p&gt;Pàgina servida per HTTPS des d'una EC2 d'AWS.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
     </div>
     <div class="callout tip">
       <span class="ico">💡</span>
@@ -327,7 +370,7 @@ LISTEN 0 128 0.0.0.0:443   0.0.0.0:*  users:(("apache2",pid=1234,fd=6)) <span cl
     <ul>
       <li>La sessió SSH s'ha establert amb la clau <code>.pem</code>.</li>
       <li><code>systemctl status apache2</code> mostra <code>active (running)</code>.</li>
-      <li><code>curl -k</code> retorna el codi HTML de la pàgina.</li>
+      <li><code>curl -k</code> retorna el codi HTML del teu <code>index.html</code> personalitzat.</li>
       <li>El navegador obre <code>https://IP-PUBLICA</code> correctament.</li>
     </ul>
   </section>
