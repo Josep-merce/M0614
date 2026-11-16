@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA3·A1.1 — Instal·la Tomcat 10 i desplega la primera aplicació · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --admin-bg:#FBEFE0;--admin-border:#F1D7B4;--admin-ink:#A85610;
+    --server-bg:#E1F5EE;--server-border:#9FE1CB;--server-ink:#0F6E56;
+    --client-bg:#E8EFFC;--client-border:#BBD3F0;--client-ink:#1D4E89;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+  .callout.switch{background:#EAF1FB;border-color:#BBD3F0}
+  .callout.switch strong{color:#1D4E89}
+
+  /* Capses de màquina: qui fa cada pas */
+  .role-box{border-radius:12px;padding:1.1rem 1.3rem;margin:1.1rem 0;border:1px solid}
+  .role-box.admin{background:var(--admin-bg);border-color:var(--admin-border)}
+  .role-box.server{background:var(--server-bg);border-color:var(--server-border)}
+  .role-box.client{background:var(--client-bg);border-color:var(--client-border)}
+  .role-box.all{background:var(--slate-soft);border-color:var(--hairline)}
+  .role-box > *:first-child{margin-top:0}
+  .role-box > *:last-child{margin-bottom:0}
+  .role-label{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+  .role-label.admin{color:var(--admin-ink)}
+  .role-label.server{color:var(--server-ink)}
+  .role-label.client{color:var(--client-ink)}
+  .role-label.all{color:var(--slate-ink)}
+
+  .legend{display:inline;font-size:.86rem;color:var(--slate-ink)}
+  .legend > span{display:inline-block;margin-right:1rem;white-space:nowrap}
+  .legend .sw{display:inline-block;width:.85rem;height:.85rem;border-radius:4px;margin-right:.4rem;vertical-align:-2px;border:1px solid rgba(0,0,0,.12)}
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+
+  /* Figura de xarxa (SVG) */
+  .netfig{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;padding:1.2rem 1rem .8rem;margin:1.2rem 0}
+  .netfig svg{width:100%;height:auto;display:block}
+  .netfig figcaption{font-family:var(--mono);font-size:.74rem;color:var(--muted);text-align:center;margin-top:.4rem}
+
+  /* Comprova-ho al navegador */
+  .check{background:#EAF1FB;border:1px solid #BBD3F0;border-left:5px solid #1D4E89;border-radius:12px;padding:.9rem 1.1rem;margin:1.1rem 0;font-size:.93rem}
+  .check .check-title{font-family:var(--display);font-weight:600;color:#1D4E89;display:block;margin-bottom:.35rem}
+  .check .url{font-family:var(--mono);font-size:.86rem;background:#fff;border:1px solid #BBD3F0;color:#1D4E89;padding:.2rem .5rem;border-radius:6px;display:inline-block;margin:.15rem 0 .45rem}
+  .check p{margin:.3rem 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea3.html"><span class="arrow">←</span> Tornar a l'AEA3</a>
+
+  <header>
+    <span class="badge">AEA3 · A1.1</span>
+    <span class="eyebrow">M0614 · Linux</span>
+    <h1>Instal·la Tomcat 10 <span class="code">i desplega la primera aplicació</span></h1>
+    <p class="lede">Instal·laràs Apache Tomcat 10.1 al servidor des del paquet oficial, el convertiràs en un servei de systemd, coneixeràs la seva estructura de carpetes i hi desplegaràs la primera aplicació Java empaquetada en un fitxer .war.</p>
+    <div class="meta">
+      <span class="pill">RA <strong>RA3</strong></span>
+      <!-- REVISAR: confirmar la numeració dels CA del RA3 segons la programació del mòdul -->
+      <span class="pill">CA <strong>3.1 · 3.2 · 3.3 · 3.4</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En aquesta activitat aprendràs a:</p>
+    <ul>
+      <li>Descarregar Tomcat 10.1 del web oficial i <strong>comprovar-ne la integritat</strong> amb SHA-512.</li>
+      <li>Instal·lar-lo a <code>/opt/tomcat</code> amb un <strong>usuari de sistema</strong> propi.</li>
+      <li>Crear un <strong>servei de systemd</strong> perquè Tomcat arrenqui sol amb el servidor.</li>
+      <li>Reconèixer les carpetes clau: <code>conf</code>, <code>webapps</code> i <code>logs</code>.</li>
+      <li>Desplegar una aplicació <code>.war</code> i comprovar-la des del client pel port <strong>8080</strong>.</li>
+    </ul>
+
+    <h3>Prerequisit important</h3>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Necessites la xarxa, l'usuari <code>isard_ssh</code> i Java 21 de l'<a href="aea3_a1_0.html">A1.0</a>. Comprova-ho abans de començar: <code>java -version</code> ha de dir 21 i <code>echo $JAVA_HOME</code> ha de mostrar la carpeta de Java.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <h3>Quin Tomcat instal·lem?</h3>
+    <p>Tomcat té diverses branques actives. Farem servir la <strong>10.1</strong>, que implementa <strong>Jakarta EE 10</strong> (Servlet 6.0) i necessita Java 11 o superior. Amb el Java 21 de l'A1.0 en tens de sobres.</p>
+    <p>Ubuntu porta un paquet <code>tomcat10</code>, però l'instal·larem <strong>des del paquet oficial d'Apache</strong> (<code>.tar.gz</code>). Així tindràs la versió més nova, totes les carpetes juntes a <code>/opt/tomcat</code> i veuràs com es crea un servei de systemd a mà.</p>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Des de Tomcat 10, les classes de Java EE van passar de <code>javax.*</code> a <code>jakarta.*</code>. Una aplicació feta per a Tomcat 9 o anterior <strong>no funciona</strong> a Tomcat 10 sense adaptar-la. L'aplicació d'exemple que farem servir ja és de Tomcat 10.1.</p>
+    </div>
+
+    <h3>Com s'organitza Tomcat per dins</h3>
+    <p>Una petició entra per un <strong>connector</strong> (el port 8080), passa al <strong>host</strong> <code>localhost</code>, que mira la carpeta <code>webapps</code>, i acaba a l'<strong>aplicació</strong> (context) que correspon al principi de la URL.</p>
+
+    <figure class="netfig">
+      <svg viewBox="0 0 820 300" role="img" aria-label="Recorregut d'una petició dins de Tomcat: el client demana http://192.168.1.10:8080/sample; entra pel connector HTTP del port 8080, passa al host localhost, que busca a la carpeta webapps, i arriba a l'aplicació /sample. Al costat hi ha les aplicacions ROOT i manager.">
+        <defs>
+          <marker id="aO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07B1E"/></marker>
+        </defs>
+        <g>
+          <rect x="20" y="110" width="150" height="90" rx="12" fill="#FFFFFF" stroke="#D6DEE8"/>
+          <text x="95" y="146" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="16" fill="#1A2230">Client</text>
+          <text x="95" y="170" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#1A2230">192.168.1.30</text>
+        </g>
+        <line x1="174" y1="155" x2="236" y2="155" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#aO)"/>
+        <text x="205" y="98" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">GET</text>
+        <text x="205" y="112" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">/sample</text>
+        <rect x="240" y="20" width="560" height="265" rx="14" fill="#1A2230"/>
+        <text x="260" y="48" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">Tomcat · /opt/tomcat</text>
+        <text x="780" y="48" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="13" fill="#E07B1E">192.168.1.10</text>
+        <rect x="260" y="110" width="130" height="90" rx="10" fill="#263042" stroke="#E07B1E" stroke-width="1.6"/>
+        <text x="325" y="145" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="14" fill="#FFFFFF">Connector</text>
+        <text x="325" y="167" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">HTTP · :8080</text>
+        <line x1="394" y1="155" x2="426" y2="155" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#aO)"/>
+        <rect x="430" y="70" width="350" height="195" rx="10" fill="#263042" stroke="#3A4658"/>
+        <text x="450" y="96" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="14" fill="#FFFFFF">Host localhost</text>
+        <text x="760" y="96" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">webapps/</text>
+        <rect x="450" y="115" width="140" height="40" rx="8" fill="#1A2230" stroke="#3A4658"/>
+        <text x="520" y="140" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#E6ECF5">/ → ROOT</text>
+        <rect x="450" y="165" width="140" height="40" rx="8" fill="#1A2230" stroke="#3A4658"/>
+        <text x="520" y="190" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#E6ECF5">/manager</text>
+        <rect x="620" y="115" width="140" height="90" rx="8" fill="#FBEFE0" stroke="#E07B1E" stroke-width="2"/>
+        <text x="690" y="152" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#A85610">/sample</text>
+        <text x="690" y="174" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#A85610">sample.war</text>
+        <text x="450" y="240" font-family="JetBrains Mono, monospace" font-size="11" fill="#7c8aa0">cada carpeta o .war de webapps/ és una aplicació</text>
+      </svg>
+      <figcaption>La URL /sample porta a l'aplicació que Tomcat ha desplegat a partir de webapps/sample.war.</figcaption>
+    </figure>
+
+    <h3>Conceptes clau</h3>
+    <table>
+      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
+      <tbody>
+        <tr><td><strong><code>CATALINA_HOME</code></strong></td><td>Carpeta on és instal·lat Tomcat (aquí <code>/opt/tomcat</code>). <em>Catalina</em> és el nom intern del motor de Tomcat.</td></tr>
+        <tr><td><strong>Connector</strong></td><td>La part de Tomcat que escolta un port i parla HTTP. Per defecte, el <code>8080</code>.</td></tr>
+        <tr><td><strong>Fitxer <code>.war</code></strong></td><td><em>Web Application Archive</em>. Un ZIP amb una aplicació web Java: classes, JSP, HTML i configuració.</td></tr>
+        <tr><td><strong>Desplegar</strong></td><td>Posar una aplicació en marxa al servidor. A Tomcat, n'hi ha prou amb copiar el <code>.war</code> a <code>webapps</code>.</td></tr>
+        <tr><td><strong>Context</strong></td><td>Cada aplicació desplegada. El nom del <code>.war</code> en fixa la ruta: <code>sample.war</code> → <code>/sample</code>.</td></tr>
+        <tr><td><strong>Servlet / JSP</strong></td><td>Codi Java que genera la resposta. Un JSP és una pàgina HTML amb Java a dins, que Tomcat converteix en servlet.</td></tr>
+        <tr><td><strong>Servei systemd</strong></td><td>Fitxer <code>.service</code> que diu a Linux com engegar, aturar i reiniciar un programa, i si ha d'arrencar amb el sistema.</td></tr>
+      </tbody>
+    </table>
+
+    <p>Així quedarà la instal·lació:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">estructura</span></div>
+      <pre><code>/opt/tomcat/                          <span class="c"># CATALINA_HOME, propietat de l'usuari tomcat</span>
+├── bin/                              <span class="c"># scripts: startup.sh, shutdown.sh, catalina.sh…</span>
+├── conf/                             <span class="c"># configuració</span>
+│   ├── server.xml                    <span class="c"># ports, connectors i hosts</span>
+│   ├── tomcat-users.xml              <span class="c"># usuaris i rols (A1.3)</span>
+│   └── web.xml                       <span class="c"># configuració comuna a totes les aplicacions</span>
+├── lib/                              <span class="c"># biblioteques .jar de Tomcat</span>
+├── logs/                             <span class="c"># catalina.out, accessos, errors</span>
+├── temp/                             <span class="c"># fitxers temporals i el PID</span>
+├── webapps/                          <span class="c"># aplicacions desplegades</span>
+│   ├── ROOT/  docs/  examples/  manager/  host-manager/
+│   └── sample.war → sample/          <span class="c"># la que desplegaràs tu</span>
+└── work/                             <span class="c"># JSP compilats</span>
+/etc/systemd/system/tomcat.service    <span class="c"># el servei</span></code></pre>
+    </div>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Cada pas ve dins d'una <strong>capsa de color</strong> que indica qui l'ha de fer: <span class="legend"><span><span class="sw" style="background:var(--admin-bg);border-color:var(--admin-border)"></span>Administrador</span><span><span class="sw" style="background:var(--server-bg);border-color:var(--server-border)"></span>Servidor</span><span><span class="sw" style="background:var(--client-bg);border-color:var(--client-border)"></span>Client</span></span>. Els fitxers de configuració no porten capsa.</p>
+    </div>
+
+    <h2 style="margin-top:2rem">Part 1 · Instal·lació</h2>
+
+    <h3>2.1 · Connecta't al servidor per SSH</h3>
+    <div class="role-box admin">
+      <span class="role-label admin">Administrador</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
+        <pre><code>ssh isard_ssh@192.168.1.10</code></pre>
+      </div>
+      <p>➜ Obre una sessió de terminal xifrada al servidor per SSH.</p>
+    </div>
+    <div class="callout switch">
+      <span class="ico">💻→</span>
+      <p>A partir d'aquí, tot el que escrius s'executa <strong>al servidor</strong>, no a l'administrador. Per tornar a l'administrador quan acabis, escriu <code>exit</code>.</p>
+    </div>
+
+    <h3>2.2 · Crea l'usuari de sistema <code>tomcat</code></h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>Tomcat no s'ha d'executar mai com a <code>root</code>: si algú en trenca una aplicació, tindria el control de tot el servidor. Li crearàs un usuari propi, sense contrasenya i sense terminal.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo mkdir /opt/tomcat</code></pre>
+      </div>
+      <p>➜ Crea la carpeta on instal·laràs Tomcat.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo useradd -r -U -d /opt/tomcat -s /usr/sbin/nologin tomcat</code></pre>
+      </div>
+      <p>➜ Crea l'usuari <code>tomcat</code>. <code>-r</code> el fa <strong>de sistema</strong>, <code>-U</code> crea també un grup <code>tomcat</code>, <code>-d</code> li assigna <code>/opt/tomcat</code> com a carpeta personal i <code>-s /usr/sbin/nologin</code> impedeix que s'hi pugui iniciar sessió.</p>
+    </div>
+
+    <h3>2.3 · Descarrega Tomcat 10.1</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>Tomcat publica una versió nova de la branca 10.1 cada poques setmanes, i el servidor de descàrregues només guarda la més recent. Primer, esbrina quina és:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>VER=$(curl -s https://dlcdn.apache.org/tomcat/tomcat-10/ | grep -oP 'v\K10\.1\.[0-9]+' | sort -V | tail -1)
+echo $VER</code></pre>
+      </div>
+      <p>➜ Llegeix el llistat de versions del servidor oficial d'Apache, n'extreu les <code>10.1.x</code>, es queda amb la més alta i la desa a la variable <code>VER</code>. L'<code>echo</code> l'ha de mostrar, per exemple <code>10.1.NN</code>.</p>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>Si <code>echo $VER</code> surt buit, obre <a href="https://tomcat.apache.org/download-10.cgi" target="_blank" rel="noopener">tomcat.apache.org/download-10.cgi</a>, mira la versió que s'hi anuncia i escriu-la a mà: <code>VER=10.1.NN</code> (canviant <code>NN</code> pel número real). La variable només dura mentre no tanquis la sessió SSH.</p>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>cd /tmp</code></pre>
+      </div>
+      <p>➜ Et mou a la carpeta de fitxers temporals per fer-hi la descàrrega.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>wget https://dlcdn.apache.org/tomcat/tomcat-10/v$VER/bin/apache-tomcat-$VER.tar.gz</code></pre>
+      </div>
+      <p>➜ Descarrega el paquet de Tomcat. <code>$VER</code> es substitueix pel número de versió.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>wget https://downloads.apache.org/tomcat/tomcat-10/v$VER/bin/apache-tomcat-$VER.tar.gz.sha512</code></pre>
+      </div>
+      <p>➜ Descarrega el fitxer amb la suma de verificació SHA-512 que publica Apache per a aquest paquet.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sha512sum -c apache-tomcat-$VER.tar.gz.sha512</code></pre>
+      </div>
+      <p>➜ Calcula la suma del fitxer descarregat i la compara amb l'oficial. Ha de respondre <code>apache-tomcat-10.1.NN.tar.gz: OK</code>. Si diu <code>FAILED</code>, el fitxer està malmès o no és l'original: torna'l a descarregar.</p>
+    </div>
+
+    <h3>2.4 · Descomprimeix-lo a /opt/tomcat</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo tar -xzf apache-tomcat-$VER.tar.gz -C /opt/tomcat --strip-components=1</code></pre>
+      </div>
+      <p>➜ Descomprimeix el paquet. <code>-C /opt/tomcat</code> indica on, i <code>--strip-components=1</code> treu la carpeta <code>apache-tomcat-10.1.NN/</code> del principi perquè els fitxers quedin directament a <code>/opt/tomcat</code>.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo chown -R tomcat:tomcat /opt/tomcat</code></pre>
+      </div>
+      <p>➜ Fa que tota la carpeta sigui de l'usuari i el grup <code>tomcat</code>. <code>-R</code> ho aplica a totes les subcarpetes.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo ls -l /opt/tomcat</code></pre>
+      </div>
+      <p>➜ Llista el contingut. Hi has de veure <code>bin</code>, <code>conf</code>, <code>lib</code>, <code>logs</code>, <code>temp</code>, <code>webapps</code> i <code>work</code>, tots de <code>tomcat tomcat</code>.</p>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>Algunes carpetes de Tomcat (<code>conf</code>, <code>logs</code>) només les pot llegir l'usuari <code>tomcat</code>. Per això, per mirar-les com a <code>isard_ssh</code>, cal <code>sudo</code> davant de <code>ls</code>, <code>cat</code> o <code>tail</code>.</p>
+      </div>
+    </div>
+
+    <h3>2.5 · Crea el servei de systemd</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo nano /etc/systemd/system/tomcat.service</code></pre>
+      </div>
+      <p>➜ Crea el fitxer del servei. Els serveis propis de l'administrador van a <code>/etc/systemd/system/</code>.</p>
+      <p>Escriu-hi aquest contingut. Revisa que <code>JAVA_HOME</code> sigui la ruta que et va sortir a l'A1.0:</p>
+    </div>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">/etc/systemd/system/tomcat.service</span></div>
+      <pre><code>[Unit]
+Description=Apache Tomcat 10.1
+After=network.target                       <span class="c"># arrenca quan ja hi ha xarxa</span>
+
+[Service]
+Type=forking                               <span class="c"># startup.sh engega Java en segon pla i acaba</span>
+User=tomcat                                <span class="c"># s'executa com a tomcat, no com a root</span>
+Group=tomcat
+
+Environment="JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64"   <span class="c"># systemd NO llegeix /etc/environment</span>
+Environment="CATALINA_HOME=/opt/tomcat"
+Environment="CATALINA_BASE=/opt/tomcat"
+Environment="CATALINA_PID=/opt/tomcat/temp/tomcat.pid"       <span class="c"># on desa el número de procés</span>
+Environment="CATALINA_OPTS=-Xms256M -Xmx512M"                 <span class="c"># memòria inicial i màxima de Java</span>
+
+ExecStart=/opt/tomcat/bin/startup.sh
+ExecStop=/opt/tomcat/bin/shutdown.sh
+
+[Install]
+WantedBy=multi-user.target                 <span class="c"># s'activa en l'arrencada normal del sistema</span></code></pre>
+    </div>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>).</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo systemctl daemon-reload</code></pre>
+      </div>
+      <p>➜ Fa que systemd torni a llegir els fitxers de serveis i descobreixi <code>tomcat.service</code>.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo systemctl enable --now tomcat</code></pre>
+      </div>
+      <p>➜ <code>enable</code> fa que Tomcat arrenqui sol cada cop que s'engega el servidor, i <code>--now</code> l'engega ara mateix.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>systemctl status tomcat</code></pre>
+      </div>
+      <p>➜ Mostra l'estat del servei. Prem <code>q</code> per sortir.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>● tomcat.service - Apache Tomcat 10.1
+     Loaded: loaded (/etc/systemd/system/tomcat.service; enabled; ...)   <span class="c"># enabled → arrenca amb el sistema</span>
+     Active: active (running) since ...                                  <span class="c"># ⚠ EL MÉS IMPORTANT</span>
+   Main PID: 2345 (java)
+     CGroup: /system.slice/tomcat.service
+             └─2345 /usr/lib/jvm/java-21-openjdk-amd64/bin/java ... org.apache.catalina.startup.Bootstrap start</code></pre>
+      </div>
+    </div>
+
+    <h3>2.6 · Comprova el port 8080</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>Java triga uns segons a arrencar del tot. Espera una mica i mira els ports:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo ss -tlnp | grep java</code></pre>
+      </div>
+      <p>➜ Llista els ports TCP en escolta i filtra els que són del procés <code>java</code> (Tomcat).</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>LISTEN 0 100  *:8080                 *:*  users:(("java",pid=2345,...))   <span class="c"># ⚠ connector HTTP, obert a la xarxa</span>
+LISTEN 0 1    [::ffff:127.0.0.1]:8005  *:*  users:(("java",pid=2345,...))   <span class="c"># port d'aturada, només local</span></code></pre>
+      </div>
+      <p>El <code>8005</code> és el port per on <code>shutdown.sh</code> diu a Tomcat que s'aturi. Només escolta a <code>127.0.0.1</code>: des de fora no s'hi pot arribar.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo grep -n '&lt;Connector port' /opt/tomcat/conf/server.xml</code></pre>
+      </div>
+      <p>➜ Busca a <code>server.xml</code> on es defineix el connector. <code>-n</code> mostra el número de línia.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>NN:    &lt;Connector port="8080" protocol="HTTP/1.1"    <span class="c"># aquí es tria el port</span></code></pre>
+      </div>
+    </div>
+
+    <h3>2.7 · Obre Tomcat des del client</h3>
+    <div class="role-box client">
+      <span class="role-label client">Client</span>
+      <div class="check">
+        <span class="check-title">🔎 Comprova-ho al navegador</span>
+        <span class="url">http://192.168.1.10:8080</span>
+        <p>Al navegador del <strong>client</strong>, obre aquesta adreça. A l'A1.0 fallava; ara ha de sortir la pàgina d'inici de Tomcat, amb el gat, el títol <strong>Apache Tomcat/10.1.NN</strong> i el missatge <em>If you're seeing this, you've successfully installed Tomcat. Congratulations!</em>. És l'aplicació <code>ROOT</code>.</p>
+        <p>Si prems <strong>Manager App</strong>, et sortirà <em>403 Access Denied</em>: per defecte el Manager només s'obre des del mateix servidor. El configuraràs a l'A1.3.</p>
+      </div>
+    </div>
+
+    <h2 style="margin-top:2rem">Part 2 · Desplegament d'una aplicació</h2>
+
+    <h3>2.8 · Desplega <code>sample.war</code></h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>El paquet de Tomcat porta, dins de la documentació, l'aplicació d'exemple oficial <code>sample.war</code>. Té una pàgina HTML, un JSP i un servlet: perfecta per provar-ho tot.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo ls -l /opt/tomcat/webapps</code></pre>
+      </div>
+      <p>➜ Mostra les aplicacions que ja hi ha desplegades: <code>ROOT</code>, <code>docs</code>, <code>examples</code>, <code>host-manager</code> i <code>manager</code>.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo install -o tomcat -g tomcat -m 644 /opt/tomcat/webapps/docs/appdev/sample/sample.war /opt/tomcat/webapps/</code></pre>
+      </div>
+      <p>➜ Copia <code>sample.war</code> a <code>webapps</code> i alhora en fixa el propietari (<code>-o</code>, <code>-g</code>) i els permisos (<code>-m 644</code>). És com un <code>cp</code> seguit d'un <code>chown</code> i un <code>chmod</code>.</p>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>No cal reiniciar res. Tomcat revisa <code>webapps</code> cada pocs segons (<em>autoDeploy</em>): quan hi troba un <code>.war</code> nou, el descomprimeix en una carpeta amb el mateix nom i el posa en marxa.</p>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo tail -n 20 /opt/tomcat/logs/catalina.out</code></pre>
+      </div>
+      <p>➜ Mostra les últimes 20 línies del registre principal de Tomcat. Hi ha d'aparèixer el desplegament.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada (resumida)</span></div>
+        <pre><code>... INFO ... HostConfig.deployWAR Deploying web application archive [/opt/tomcat/webapps/sample.war]
+... INFO ... HostConfig.deployWAR Deployment of web application archive [/opt/tomcat/webapps/sample.war] has finished in [NNN] ms   <span class="c"># ⚠ desplegada</span></code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo ls /opt/tomcat/webapps/sample</code></pre>
+      </div>
+      <p>➜ Mostra el contingut de l'aplicació descomprimida: <code>index.html</code>, <code>hello.jsp</code>, <code>images</code>, <code>META-INF</code> i <code>WEB-INF</code> (on hi ha <code>web.xml</code> i les classes del servlet).</p>
+    </div>
+
+    <h3>2.9 · Prova l'aplicació des del client</h3>
+    <div class="role-box client">
+      <span class="role-label client">Client</span>
+      <div class="check">
+        <span class="check-title">🔎 Comprova-ho al navegador</span>
+        <span class="url">http://192.168.1.10:8080/sample/</span>
+        <p>Ha de sortir la pàgina d'inici de l'aplicació d'exemple, <strong>Sample "Hello, World" Application</strong>, amb dos enllaços. <!-- REVISAR: comprovar els textos exactes de la pàgina d'índex de sample.war de la versió 10.1 instal·lada --> Prem el del <strong>JSP</strong> i després el del <strong>servlet</strong>: totes dues pàgines les genera Java en el moment, no existeixen com a HTML al disc.</p>
+      </div>
+    </div>
+
+    <h3>2.10 · Retira i torna a desplegar l'aplicació</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo mv /opt/tomcat/webapps/sample.war /tmp/</code></pre>
+      </div>
+      <p>➜ Treu el <code>.war</code> de <code>webapps</code>. En pocs segons Tomcat <strong>replega</strong> l'aplicació i esborra la carpeta <code>sample</code>. Al navegador, <code>/sample/</code> donarà <em>404 Not Found</em>.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo mv /tmp/sample.war /opt/tomcat/webapps/</code></pre>
+      </div>
+      <p>➜ Torna a posar el <code>.war</code> a <code>webapps</code>. Tomcat el torna a desplegar sol. Recarrega <code>/sample/</code> al client: ha de tornar a funcionar.</p>
+      <div class="callout warn">
+        <span class="ico">⚠️</span>
+        <p>No esborris la carpeta <code>webapps/sample</code> deixant-hi el <code>.war</code>: Tomcat la tornaria a crear. Per retirar una aplicació desplegada des d'un <code>.war</code>, treu sempre el <code>.war</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>Comprova que el servei arrenca amb el sistema i qui l'executa:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>systemctl is-enabled tomcat
+systemctl is-active tomcat
+ps -o user=,cmd= -C java | cut -c1-80</code></pre>
+      </div>
+      <p>➜ Les dues primeres diuen si el servei està habilitat i actiu. La tercera mostra l'usuari i l'ordre del procés <code>java</code>, retallada a 80 caràcters.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>enabled                                                       <span class="c"># arrenca amb el servidor</span>
+active                                                        <span class="c"># ara funciona</span>
+tomcat   /usr/lib/jvm/java-21-openjdk-amd64/bin/java ...      <span class="c"># ⚠ EL MÉS IMPORTANT: usuari tomcat, no root</span></code></pre>
+      </div>
+      <p>Comprova el registre d'accessos, on Tomcat apunta cada petició que rep:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo sh -c 'tail -n 5 /opt/tomcat/logs/localhost_access_log.*.txt'</code></pre>
+      </div>
+      <p>➜ Mostra les últimes peticions. Es fa amb <code>sh -c</code> perquè l'asterisc s'ha d'expandir amb permisos de <code>root</code>: la carpeta <code>logs</code> no la pot llegir <code>isard_ssh</code>.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>192.168.1.30 - - [16/Nov/2026:10:15:02 +0000] "GET /sample/ HTTP/1.1" 200 ...            <span class="c"># IP del client</span>
+192.168.1.30 - - [16/Nov/2026:10:15:05 +0000] "GET /sample/hello.jsp HTTP/1.1" 200 ...   <span class="c"># el JSP</span></code></pre>
+      </div>
+    </div>
+
+    <div class="role-box client">
+      <span class="role-label client">Client</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — client</span></div>
+        <pre><code>curl -I http://192.168.1.10:8080/sample/</code></pre>
+      </div>
+      <p>➜ <code>-I</code> mostra només la capçalera de la resposta de l'aplicació.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>HTTP/1.1 200                     <span class="c"># ⚠ EL MÉS IMPORTANT: l'aplicació respon</span>
+Accept-Ranges: bytes
+Content-Type: text/html
+...</code></pre>
+      </div>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>Fixa't que Tomcat respon <code>HTTP/1.1 200</code> sense el text <code>OK</code> i sense capçalera <code>Server</code>: no diu quin programa és ni quina versió té. Apache, en canvi, sí que ho deia. A l'A1.2 l'usuari ja no veurà el port 8080: entrarà per Apache.</p>
+      </div>
+    </div>
+
+    <h3>Llista de comprovació</h3>
+    <ul>
+      <li><code>sha512sum -c</code> va donar <code>OK</code> abans d'instal·lar.</li>
+      <li>Tomcat és a <code>/opt/tomcat</code> i tot és de l'usuari <code>tomcat</code>.</li>
+      <li><code>systemctl status tomcat</code> mostra <code>enabled</code> i <code>active (running)</code>, i el procés <code>java</code> és de l'usuari <code>tomcat</code>.</li>
+      <li>El port <code>8080</code> escolta a tota la xarxa i el <code>8005</code> només a <code>127.0.0.1</code>.</li>
+      <li>Des del client, <code>http://192.168.1.10:8080</code> mostra la pàgina de Tomcat.</li>
+      <li><code>http://192.168.1.10:8080/sample/</code> funciona, igual que el JSP i el servlet.</li>
+      <li>Saps retirar i tornar a desplegar l'aplicació movent el <code>.war</code>.</li>
+    </ul>
+
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Si el servei no arrenca, mira què ha passat amb <code>sudo journalctl -u tomcat -n 30</code> i <code>sudo tail -n 30 /opt/tomcat/logs/catalina.out</code>. Les causes habituals són un <code>JAVA_HOME</code> incorrecte al <code>.service</code>, haver oblidat el <code>chown</code> del pas 2.4 o no haver fet <code>daemon-reload</code> després d'editar el servei.</p>
+    </div>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA3 · A1.1
+  </footer>
+
+</div>
+</body>
+</html>

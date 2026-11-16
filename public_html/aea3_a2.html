@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA3·A2 — Tomcat i Apache amb Docker Compose · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --admin-bg:#FBEFE0;--admin-border:#F1D7B4;--admin-ink:#A85610;
+    --server-bg:#E1F5EE;--server-border:#9FE1CB;--server-ink:#0F6E56;
+    --client-bg:#E8EFFC;--client-border:#BBD3F0;--client-ink:#1D4E89;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+  .callout.switch{background:#EAF1FB;border-color:#BBD3F0}
+  .callout.switch strong{color:#1D4E89}
+
+  /* Capses de màquina: qui fa cada pas */
+  .role-box{border-radius:12px;padding:1.1rem 1.3rem;margin:1.1rem 0;border:1px solid}
+  .role-box.admin{background:var(--admin-bg);border-color:var(--admin-border)}
+  .role-box.server{background:var(--server-bg);border-color:var(--server-border)}
+  .role-box.client{background:var(--client-bg);border-color:var(--client-border)}
+  .role-box.all{background:var(--slate-soft);border-color:var(--hairline)}
+  .role-box > *:first-child{margin-top:0}
+  .role-box > *:last-child{margin-bottom:0}
+  .role-label{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+  .role-label.admin{color:var(--admin-ink)}
+  .role-label.server{color:var(--server-ink)}
+  .role-label.client{color:var(--client-ink)}
+  .role-label.all{color:var(--slate-ink)}
+
+  .legend{display:inline;font-size:.86rem;color:var(--slate-ink)}
+  .legend > span{display:inline-block;margin-right:1rem;white-space:nowrap}
+  .legend .sw{display:inline-block;width:.85rem;height:.85rem;border-radius:4px;margin-right:.4rem;vertical-align:-2px;border:1px solid rgba(0,0,0,.12)}
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+
+  /* Figura de xarxa (SVG) */
+  .netfig{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;padding:1.2rem 1rem .8rem;margin:1.2rem 0}
+  .netfig svg{width:100%;height:auto;display:block}
+  .netfig figcaption{font-family:var(--mono);font-size:.74rem;color:var(--muted);text-align:center;margin-top:.4rem}
+
+  /* Comprova-ho al navegador */
+  .check{background:#EAF1FB;border:1px solid #BBD3F0;border-left:5px solid #1D4E89;border-radius:12px;padding:.9rem 1.1rem;margin:1.1rem 0;font-size:.93rem}
+  .check .check-title{font-family:var(--display);font-weight:600;color:#1D4E89;display:block;margin-bottom:.35rem}
+  .check .url{font-family:var(--mono);font-size:.86rem;background:#fff;border:1px solid #BBD3F0;color:#1D4E89;padding:.2rem .5rem;border-radius:6px;display:inline-block;margin:.15rem 0 .45rem}
+  .check p{margin:.3rem 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea3.html"><span class="arrow">←</span> Tornar a l'AEA3</a>
+
+  <header>
+    <span class="badge">AEA3 · A2</span>
+    <span class="eyebrow">M0614 · Docker</span>
+    <h1>Tomcat i Apache <span class="code">amb Docker Compose</span></h1>
+    <p class="lede">Muntaràs la mateixa arquitectura de l'A1.2, Apache davant de Tomcat, però amb contenidors. Faràs servir les imatges oficials, volums per a les aplicacions i els registres, i un fitxer de Docker Compose que aixeca els dos contenidors connectats per una xarxa interna.</p>
+    <div class="meta">
+      <span class="pill">RA <strong>RA3</strong></span>
+      <!-- REVISAR: confirmar la numeració dels CA del RA3 segons la programació del mòdul -->
+      <span class="pill">CA <strong>3.2 · 3.5 · 3.6 · 3.8</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En aquesta activitat aprendràs a:</p>
+    <ul>
+      <li>Fer servir les imatges oficials <code>tomcat</code> i <code>httpd</code> de Docker Hub.</li>
+      <li>Distingir un <strong>bind mount</strong> (carpeta del servidor) d'un <strong>volum amb nom</strong> (gestionat per Docker).</li>
+      <li>Escriure un fitxer <code>compose.yaml</code> amb dos serveis i una <strong>xarxa interna</strong>.</li>
+      <li>Fer que Apache trobi Tomcat pel <strong>nom del servei</strong> i que Tomcat no tingui cap port publicat.</li>
+      <li>Desplegar una aplicació copiant un <code>.war</code> al volum.</li>
+    </ul>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>La xarxa de l'<a href="aea3_a1_0.html">A1.0</a> i la configuració de proxy de l'<a href="aea3_a1_2.html">A1.2</a>: aquí la tornaràs a escriure, ara per a contenidors.</li>
+      <li>El client amb <code>www.app.local</code> a <code>/etc/hosts</code> apuntant a <code>192.168.1.10</code>.</li>
+      <li>Els conceptes bàsics de Docker de l'AEA2: imatge, contenidor, <code>docker run</code>, <code>docker ps</code>.</li>
+    </ul>
+
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Al servidor ja hi ha l'Apache i el Tomcat de l'A1, que ocupen els ports 80, 443 i 8080. Els <strong>aturaràs</strong> mentre dura aquesta activitat i, al final, els tornaràs a engegar. No els desinstal·lis: les activitats A3 hi tornen.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <h3>Per què contenidors?</h3>
+    <p>A l'A1 has instal·lat Java, Tomcat i Apache a mà, pas per pas, i has deixat fitxers per tot el servidor. Amb contenidors, cada servei ve en una <strong>imatge</strong> ja preparada, i tota l'arquitectura queda descrita en <strong>un sol fitxer de text</strong> (<code>compose.yaml</code>). Qualsevol altra persona, amb aquest fitxer, aixeca exactament el mateix amb una ordre.</p>
+
+    <h3>Les dues imatges oficials</h3>
+    <table>
+      <thead><tr><th>Imatge</th><th>Què porta</th><th>Detalls importants</th></tr></thead>
+      <tbody>
+        <tr><td><code>tomcat:10.1-jdk21</code> <!-- REVISAR: comprovar que l'etiqueta 10.1-jdk21 continua publicada a Docker Hub --></td><td>Tomcat 10.1 amb Java 21 (Eclipse Temurin).</td><td>Instal·lat a <code>/usr/local/tomcat</code>. La carpeta <code>webapps</code> ve <strong>buida</strong> per seguretat: les aplicacions d'exemple i el Manager són a <code>webapps.dist</code>.</td></tr>
+        <tr><td><code>httpd:2.4</code></td><td>Apache HTTP Server 2.4 oficial.</td><td>Instal·lat a <code>/usr/local/apache2</code>. <strong>No</strong> té <code>a2enmod</code> ni <code>sites-available</code>: tot es configura a <code>conf/httpd.conf</code>. Els registres van a la sortida del contenidor.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Volums: dues maneres de guardar dades</h3>
+    <p>El que s'escriu dins d'un contenidor desapareix quan l'esborres. Per conservar dades o per posar-hi fitxers des de fora es fan servir volums:</p>
+    <ul>
+      <li><strong>Bind mount</strong> → una carpeta del servidor que apareix dins del contenidor. La faràs servir per a <code>webapps</code>: copies un <code>.war</code> al servidor i Tomcat el veu a l'instant.</li>
+      <li><strong>Volum amb nom</strong> → un espai que crea i gestiona Docker. El faràs servir per als <strong>registres</strong> de Tomcat: sobreviuen encara que esborris el contenidor.</li>
+    </ul>
+
+    <figure class="netfig">
+      <svg viewBox="0 0 820 360" role="img" aria-label="Arquitectura amb Docker al servidor 192.168.1.10: el client entra pel port 80, que Docker publica cap al contenidor apache. Dins de la xarxa interna de Docker, apache reenvia a tomcat:8080 pel nom del servei. El contenidor tomcat no té cap port publicat. La carpeta ./webapps del servidor es munta a webapps de Tomcat i el volum tomcat-logs guarda els registres.">
+        <defs>
+          <marker id="aO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07B1E"/></marker>
+          <marker id="aG" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9aa4b2"/></marker>
+        </defs>
+        <g>
+          <rect x="20" y="100" width="150" height="90" rx="12" fill="#FFFFFF" stroke="#D6DEE8"/>
+          <text x="95" y="138" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="16" fill="#1A2230">Client</text>
+          <text x="95" y="162" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#1A2230">192.168.1.30</text>
+        </g>
+        <rect x="230" y="20" width="570" height="320" rx="14" fill="#1A2230"/>
+        <text x="250" y="48" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">Servidor · Docker</text>
+        <text x="780" y="48" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="13" fill="#E07B1E">192.168.1.10</text>
+        <rect x="250" y="65" width="530" height="165" rx="12" fill="none" stroke="#E07B1E" stroke-width="1.4" stroke-dasharray="6 5"/>
+        <text x="765" y="85" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#E07B1E">xarxa interna</text>
+        <rect x="270" y="95" width="200" height="115" rx="10" fill="#263042" stroke="#3A4658"/>
+        <text x="370" y="128" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">apache</text>
+        <text x="370" y="150" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">httpd:2.4</text>
+        <text x="370" y="172" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E07B1E">publica 80:80</text>
+        <text x="370" y="193" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">ProxyPass → tomcat:8080</text>
+        <rect x="560" y="95" width="200" height="115" rx="10" fill="#263042" stroke="#3A4658"/>
+        <text x="660" y="128" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">tomcat</text>
+        <text x="660" y="150" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">tomcat:10.1-jdk21</text>
+        <text x="660" y="172" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">8080 · sense publicar</text>
+        <line x1="174" y1="145" x2="264" y2="145" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#aO)"/>
+        <text x="219" y="135" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9c5813">:80</text>
+        <line x1="474" y1="152" x2="554" y2="152" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#aO)"/>
+        <text x="514" y="142" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9c5813">tomcat:8080</text>
+        <rect x="470" y="260" width="140" height="56" rx="8" fill="#FBEFE0" stroke="#E07B1E"/>
+        <text x="540" y="283" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="11.5" fill="#A85610">./webapps</text>
+        <text x="540" y="302" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#A85610">bind mount</text>
+        <rect x="630" y="260" width="150" height="56" rx="8" fill="#EDF1F6" stroke="#D6DEE8"/>
+        <text x="705" y="283" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="11.5" fill="#3A4658">tomcat-logs</text>
+        <text x="705" y="302" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#3A4658">volum amb nom</text>
+        <line x1="600" y1="258" x2="640" y2="214" stroke="#9aa4b2" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#aG)"/>
+        <line x1="700" y1="258" x2="675" y2="214" stroke="#9aa4b2" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#aG)"/>
+        <text x="270" y="290" font-family="JetBrains Mono, monospace" font-size="11" fill="#7c8aa0">~/aea3-docker/compose.yaml</text>
+      </svg>
+      <figcaption>Només Apache té un port publicat. Tomcat és accessible per a Apache dins de la xarxa interna, però no des de fora.</figcaption>
+    </figure>
+
+    <h3>Conceptes clau</h3>
+    <table>
+      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Docker Compose</strong></td><td>Eina que aixeca diversos contenidors a partir d'un fitxer <code>compose.yaml</code>. S'executa amb <code>docker compose</code>.</td></tr>
+        <tr><td><strong>Servei</strong></td><td>Cada contenidor descrit al <code>compose.yaml</code> (aquí, <code>apache</code> i <code>tomcat</code>).</td></tr>
+        <tr><td><strong>Xarxa de Compose</strong></td><td>Xarxa privada entre contenidors. Dins d'ella, cada servei es pot trobar pel seu <strong>nom</strong>: Docker fa de DNS.</td></tr>
+        <tr><td><strong><code>ports: "80:80"</code></strong></td><td>Publica un port: el 80 del servidor porta al 80 del contenidor. Un servei sense <code>ports</code> no es veu des de fora.</td></tr>
+        <tr><td><strong>Bind mount</strong></td><td><code>./carpeta:/ruta</code>. Una carpeta del servidor dins del contenidor.</td></tr>
+        <tr><td><strong>Volum amb nom</strong></td><td><code>nom:/ruta</code>. Espai gestionat per Docker que persisteix encara que s'esborri el contenidor.</td></tr>
+      </tbody>
+    </table>
+
+    <p>Així quedarà el projecte:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">estructura</span></div>
+      <pre><code>~/aea3-docker/
+├── compose.yaml          <span class="c"># els dos serveis, la xarxa i els volums</span>
+├── apache/
+│   ├── httpd.conf        <span class="c"># configuració principal d'Apache, amb els mòduls de proxy activats</span>
+│   └── app.conf          <span class="c"># host virtual www.app.local → tomcat:8080</span>
+└── webapps/
+    └── sample.war        <span class="c"># l'aplicació que es desplegarà</span></code></pre>
+    </div>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Cada pas ve dins d'una <strong>capsa de color</strong> que indica qui l'ha de fer: <span class="legend"><span><span class="sw" style="background:var(--admin-bg);border-color:var(--admin-border)"></span>Administrador</span><span><span class="sw" style="background:var(--server-bg);border-color:var(--server-border)"></span>Servidor</span><span><span class="sw" style="background:var(--client-bg);border-color:var(--client-border)"></span>Client</span></span>. Els fitxers de configuració no porten capsa.</p>
+    </div>
+
+    <h2 style="margin-top:2rem">Part 1 · Preparació</h2>
+
+    <h3>2.1 · Connecta't al servidor per SSH</h3>
+    <div class="role-box admin">
+      <span class="role-label admin">Administrador</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
+        <pre><code>ssh isard_ssh@192.168.1.10</code></pre>
+      </div>
+      <p>➜ Obre una sessió de terminal xifrada al servidor per SSH.</p>
+    </div>
+    <div class="callout switch">
+      <span class="ico">💻→</span>
+      <p>A partir d'aquí, tot el que escrius s'executa <strong>al servidor</strong>, no a l'administrador. Per tornar a l'administrador quan acabis, escriu <code>exit</code>.</p>
+    </div>
+
+    <h3>2.2 · Atura l'Apache i el Tomcat de l'A1</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo systemctl stop apache2 tomcat</code></pre>
+      </div>
+      <p>➜ Atura els dos serveis per alliberar els ports. Continuen <strong>habilitats</strong>: si reinicies el servidor, tornaran a engegar-se i ocuparan el port 80. Si et passa, torna a fer aquesta ordre.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo ss -tlnp | grep -E <span class="c">':(80|443|8080) '</span></code></pre>
+      </div>
+      <p>➜ Comprova que cap d'aquests ports està en ús. No ha de sortir <strong>cap línia</strong>.</p>
+    </div>
+
+    <h3>2.3 · Instal·la Docker i Docker Compose</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo apt update</code></pre>
+      </div>
+      <p>➜ Actualitza la llista de paquets disponibles.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo apt install -y docker.io docker-compose-v2</code></pre>
+      </div>
+      <p>➜ Instal·la Docker (<code>docker.io</code>) i el connector de Compose (<code>docker-compose-v2</code>), tots dos dels repositoris d'Ubuntu. Si ja tens Docker instal·lat des del repositori oficial de Docker, salta aquest pas.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo usermod -aG docker isard_ssh</code></pre>
+      </div>
+      <p>➜ Afegeix <code>isard_ssh</code> al grup <code>docker</code> perquè pugui fer servir Docker sense <code>sudo</code>. Com a l'A1.0, el canvi de grup s'aplica en tornar a iniciar sessió.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>exit</code></pre>
+      </div>
+      <p>➜ Tanca la sessió SSH. Torna a entrar amb <code>ssh isard_ssh@192.168.1.10</code>.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker version --format '{{.Server.Version}}'
+docker compose version</code></pre>
+      </div>
+      <p>➜ La primera mostra la versió del motor de Docker; la segona, la de Compose. Si la primera dona <em>permission denied</em>, no has tornat a iniciar sessió.</p>
+    </div>
+
+    <h2 style="margin-top:2rem">Part 2 · El projecte</h2>
+
+    <h3>2.4 · Crea les carpetes i descarrega les imatges</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>mkdir -p ~/aea3-docker/apache ~/aea3-docker/webapps &amp;&amp; cd ~/aea3-docker</code></pre>
+      </div>
+      <p>➜ Crea la carpeta del projecte amb les subcarpetes <code>apache</code> i <code>webapps</code>, i hi entra. Totes les ordres següents s'executen des d'aquí.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker pull tomcat:10.1-jdk21
+docker pull httpd:2.4</code></pre>
+      </div>
+      <p>➜ Descarrega les dues imatges oficials de Docker Hub. La part de després dels dos punts és l'<strong>etiqueta</strong>: la branca de Tomcat amb Java 21, i la branca 2.4 d'Apache.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker run --rm tomcat:10.1-jdk21 ls /usr/local/tomcat/webapps /usr/local/tomcat/webapps.dist</code></pre>
+      </div>
+      <p>➜ Engega un contenidor d'un sol ús (<code>--rm</code> l'esborra en acabar) per mirar-ne les carpetes. Veuràs que <code>webapps</code> és buida i que <code>ROOT</code>, <code>manager</code>, <code>docs</code>… són a <code>webapps.dist</code>.</p>
+    </div>
+
+    <h3>2.5 · Prepara la configuració d'Apache</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>La imatge <code>httpd</code> no té <code>a2enmod</code>. El procediment que recomana la seva documentació és copiar el <code>httpd.conf</code> de la imatge, modificar-lo i muntar-lo al contenidor.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker run --rm httpd:2.4 cat /usr/local/apache2/conf/httpd.conf &gt; apache/httpd.conf</code></pre>
+      </div>
+      <p>➜ Engega un contenidor d'un sol ús, n'imprimeix la configuració per defecte i la desa a <code>apache/httpd.conf</code>.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sed -i \
+  -e 's|^#LoadModule proxy_module |LoadModule proxy_module |' \
+  -e 's|^#LoadModule proxy_http_module |LoadModule proxy_http_module |' \
+  apache/httpd.conf</code></pre>
+      </div>
+      <p>➜ Treu el <code>#</code> de les dues línies que carreguen <code>mod_proxy</code> i <code>mod_proxy_http</code>. És el que feia <code>a2enmod proxy proxy_http</code> a l'A1.2. <code>-i</code> modifica el fitxer directament.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>echo 'Include conf/extra/app.conf' &gt;&gt; apache/httpd.conf</code></pre>
+      </div>
+      <p>➜ Afegeix al final una línia que carrega el fitxer del host virtual. <code>&gt;&gt;</code> afegeix sense esborrar.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>grep -E '^(LoadModule proxy|Include conf/extra/app)' apache/httpd.conf</code></pre>
+      </div>
+      <p>➜ Comprova els tres canvis.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>LoadModule proxy_module modules/mod_proxy.so              <span class="c"># sense #</span>
+LoadModule proxy_http_module modules/mod_proxy_http.so    <span class="c"># sense #</span>
+Include conf/extra/app.conf                               <span class="c"># afegida al final</span></code></pre>
+      </div>
+      <p>Ara crea el host virtual:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>nano apache/app.conf</code></pre>
+      </div>
+      <p>➜ Crea el fitxer del host virtual dins del projecte.</p>
+    </div>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">apache/app.conf</span></div>
+      <pre><code>&lt;VirtualHost *:80&gt;
+    ServerName  www.app.local
+    ServerAlias app.local
+
+    ProxyRequests     Off
+    ProxyPreserveHost On
+
+    ProxyPass        / http://tomcat:8080/       <span class="c"># "tomcat" és el NOM DEL SERVEI, no una IP</span>
+    ProxyPassReverse / http://tomcat:8080/
+&lt;/VirtualHost&gt;</code></pre>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Compara'l amb el de l'A1.2: l'única diferència important és <code>tomcat</code> en lloc de <code>127.0.0.1</code>. Ara Tomcat és un altre contenidor, amb una altra IP dins de la xarxa de Docker, i Docker resol el nom <code>tomcat</code> a aquesta IP. No hi posem <code>ErrorLog</code> ni <code>CustomLog</code>: la imatge envia els registres a la sortida del contenidor, i els veuràs amb <code>docker compose logs</code>.</p>
+    </div>
+
+    <h3>2.6 · Posa l'aplicació a webapps</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>wget -P webapps https://tomcat.apache.org/tomcat-10.1-doc/appdev/sample/sample.war</code></pre>
+      </div>
+      <p>➜ Descarrega l'aplicació d'exemple oficial dins de la carpeta <code>webapps</code> del projecte (<code>-P</code> indica la carpeta de destinació).</p>
+    </div>
+
+    <h3>2.7 · Escriu el compose.yaml</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>nano compose.yaml</code></pre>
+      </div>
+      <p>➜ Crea el fitxer que descriu tota l'arquitectura.</p>
+    </div>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">compose.yaml</span></div>
+      <pre><code>services:
+
+  tomcat:
+    image: tomcat:10.1-jdk21
+    container_name: app-tomcat
+    restart: unless-stopped                          <span class="c"># es torna a engegar sol si cau</span>
+    volumes:
+      - ./webapps:/usr/local/tomcat/webapps          <span class="c"># bind mount: aplicacions</span>
+      - tomcat-logs:/usr/local/tomcat/logs           <span class="c"># volum amb nom: registres</span>
+    networks:
+      - interna
+    <span class="c"># sense "ports": Tomcat NO es publica fora de Docker</span>
+
+  apache:
+    image: httpd:2.4
+    container_name: app-apache
+    restart: unless-stopped
+    ports:
+      - "80:80"                                      <span class="c"># port 80 del servidor → port 80 del contenidor</span>
+    volumes:
+      - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+      - ./apache/app.conf:/usr/local/apache2/conf/extra/app.conf:ro   <span class="c"># :ro → només lectura</span>
+    depends_on:
+      - tomcat                                       <span class="c"># engega primer Tomcat</span>
+    networks:
+      - interna
+
+networks:
+  interna:                                           <span class="c"># xarxa privada dels dos contenidors</span>
+
+volumes:
+  tomcat-logs:                                       <span class="c"># Docker el crea i el gestiona</span></code></pre>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>És YAML, com el Netplan de l'A1.0: només <strong>espais</strong>, mai tabuladors, i el sagnat marca què va dins de què. Els comentaris amb <code>#</code> els pots deixar o treure.</p>
+    </div>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>Desa i surt.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker compose config --quiet &amp;&amp; echo "compose.yaml correcte"</code></pre>
+      </div>
+      <p>➜ Valida el fitxer sense engegar res. Si hi ha un error de sintaxi o de sagnat, el mostra; si no, escriu <code>compose.yaml correcte</code>.</p>
+    </div>
+
+    <h2 style="margin-top:2rem">Part 3 · En marxa</h2>
+
+    <h3>2.8 · Aixeca els contenidors</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker compose up -d</code></pre>
+      </div>
+      <p>➜ Crea la xarxa, el volum i els dos contenidors, i els engega en segon pla (<code>-d</code>).</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker compose ps</code></pre>
+      </div>
+      <p>➜ Mostra els contenidors del projecte i els seus ports.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada (resumida)</span></div>
+        <pre><code>NAME         IMAGE               SERVICE   STATUS         PORTS
+app-apache   httpd:2.4           apache    Up 5 seconds   0.0.0.0:80-&gt;80/tcp   <span class="c"># ⚠ publicat</span>
+app-tomcat   tomcat:10.1-jdk21   tomcat    Up 6 seconds   8080/tcp             <span class="c"># ⚠ només intern</span></code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker compose logs tomcat | grep -i deploy</code></pre>
+      </div>
+      <p>➜ Mostra els registres del contenidor de Tomcat i filtra els desplegaments. Ha de sortir que ha desplegat <code>/usr/local/tomcat/webapps/sample.war</code>.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>ls -l webapps</code></pre>
+      </div>
+      <p>➜ Com que <code>webapps</code> és un bind mount, la carpeta <code>sample</code> que ha creat Tomcat en descomprimir el <code>.war</code> apareix també al servidor. És de <code>root</code> perquè el contenidor de Tomcat s'executa com a <code>root</code>.</p>
+    </div>
+
+    <h3>2.9 · Prova-ho des del client</h3>
+    <div class="role-box client">
+      <span class="role-label client">Client</span>
+      <div class="callout warn">
+        <span class="ico">⚠️</span>
+        <p>A l'A1.3 el navegador va rebre una redirecció <strong>permanent</strong> (<code>301</code>) de <code>http://www.app.local</code> a <code>https://</code>, i la recorda. Ara no hi ha HTTPS: fes les proves en una <strong>finestra privada</strong> o amb <code>curl</code>.</p>
+      </div>
+      <div class="check">
+        <span class="check-title">🔎 Comprova-ho al navegador</span>
+        <span class="url">http://www.app.local/sample/</span>
+        <p>En una finestra privada, ha de sortir l'aplicació d'exemple, igual que a l'A1.2. Ara, però, l'Apache i el Tomcat que la serveixen són contenidors.</p>
+      </div>
+      <div class="check">
+        <span class="check-title">🔎 Comprova-ho al navegador</span>
+        <span class="url">http://www.app.local/</span>
+        <p>Ha de sortir un <strong>404</strong> de Tomcat. És correcte: la imatge oficial no porta l'aplicació <code>ROOT</code> ni el Manager a <code>webapps</code>. Només hi ha el que tu hi has posat.</p>
+      </div>
+    </div>
+
+    <h3>2.10 · Inspecciona la xarxa interna</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker network ls</code></pre>
+      </div>
+      <p>➜ Llista les xarxes de Docker. Hi ha d'haver <code>aea3-docker_interna</code>: Compose li posa davant el nom de la carpeta del projecte.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker compose exec apache getent hosts tomcat</code></pre>
+      </div>
+      <p>➜ Executa <code>getent</code> <strong>dins</strong> del contenidor <code>apache</code> per preguntar quina IP té el nom <code>tomcat</code>. Respon una IP privada de Docker (per exemple <code>172.18.0.2  tomcat</code>): així és com Apache troba Tomcat.</p>
+    </div>
+
+    <h3>2.11 · Desplega una segona aplicació en calent</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>cp webapps/sample.war webapps/demo.war</code></pre>
+      </div>
+      <p>➜ Copia el <code>.war</code> amb un altre nom a la carpeta del servidor. Com que és un bind mount, Tomcat el veu dins del contenidor i el desplega a <code>/demo</code> en pocs segons, sense reiniciar res.</p>
+      <div class="check">
+        <span class="check-title">🔎 Comprova-ho al navegador</span>
+        <span class="url">http://www.app.local/demo/</span>
+        <p>Des del <strong>client</strong> (finestra privada): ha de sortir l'aplicació d'exemple a la ruta nova.</p>
+      </div>
+    </div>
+
+    <h3>2.12 · Comprova que els registres persisteixen</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker compose exec tomcat ls logs</code></pre>
+      </div>
+      <p>➜ Llista els registres de Tomcat dins del contenidor. Hi ha d'haver un <code>localhost_access_log.*.txt</code> amb les visites que has fet.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker compose down</code></pre>
+      </div>
+      <p>➜ Atura i <strong>esborra</strong> els contenidors i la xarxa. Els volums amb nom <strong>no</strong> s'esborren.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker volume ls</code></pre>
+      </div>
+      <p>➜ Llista els volums. <code>aea3-docker_tomcat-logs</code> continua existint, encara que ja no hi hagi cap contenidor.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker compose up -d
+docker compose exec tomcat sh -c 'tail -n 3 logs/localhost_access_log.*.txt'</code></pre>
+      </div>
+      <p>➜ Torna a crear els contenidors i mostra les últimes visites. Hi continuen les d'abans del <code>down</code>: el volum ha conservat els registres.</p>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>Si volguessis esborrar també els volums, faries <code>docker compose down -v</code>. Fes-ho només quan vulguis perdre aquestes dades.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker compose ps --format 'table {{.Service}}\t{{.Status}}\t{{.Ports}}'
+docker network inspect aea3-docker_interna --format '{{range .Containers}}{{.Name}} {{.IPv4Address}}{{"\n"}}{{end}}'</code></pre>
+      </div>
+      <p>➜ La primera resumeix l'estat i els ports dels serveis. La segona mostra quins contenidors hi ha a la xarxa interna i amb quina IP.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>SERVICE   STATUS          PORTS
+apache    Up 2 minutes    0.0.0.0:80-&gt;80/tcp      <span class="c"># únic port publicat</span>
+tomcat    Up 2 minutes    8080/tcp                <span class="c"># ⚠ EL MÉS IMPORTANT: intern</span>
+app-tomcat 172.18.0.2/16                          <span class="c"># les IP poden variar</span>
+app-apache 172.18.0.3/16</code></pre>
+      </div>
+    </div>
+
+    <div class="role-box client">
+      <span class="role-label client">Client</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — client</span></div>
+        <pre><code>curl -I http://www.app.local/sample/
+curl -m 5 -s -o /dev/null http://192.168.1.10:8080/ &amp;&amp; echo "8080: obert" || echo "8080: tancat"</code></pre>
+      </div>
+      <p>➜ La primera mostra la capçalera de l'aplicació. La segona intenta arribar directament a Tomcat pel 8080.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>HTTP/1.1 200 OK
+Server: Apache/2.4.NN (Unix)       <span class="c"># ⚠ "(Unix)": és l'Apache del contenidor, no el d'Ubuntu</span>
+...
+8080: tancat                       <span class="c"># Tomcat no es veu des de fora</span></code></pre>
+      </div>
+    </div>
+
+    <h3>Llista de comprovació</h3>
+    <ul>
+      <li><code>docker compose ps</code> mostra <code>apache</code> i <code>tomcat</code> en marxa, i només <code>apache</code> amb port publicat.</li>
+      <li><code>http://www.app.local/sample/</code> funciona des del client i la capçalera <code>Server</code> diu <code>(Unix)</code>.</li>
+      <li>Dins del contenidor <code>apache</code>, el nom <code>tomcat</code> es resol a una IP de la xarxa interna.</li>
+      <li>Copiar un <code>.war</code> a <code>./webapps</code> el desplega sense reiniciar.</li>
+      <li>Després d'un <code>docker compose down</code> i <code>up -d</code>, els registres de Tomcat continuen al volum <code>tomcat-logs</code>.</li>
+      <li>El client no pot arribar al port 8080.</li>
+    </ul>
+
+    <h3>En acabar</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>docker compose down
+sudo systemctl start tomcat apache2</code></pre>
+      </div>
+      <p>➜ Atura els contenidors i torna a engegar el Tomcat i l'Apache de l'A1, que tornen a ocupar els ports 80, 443 i 8080.</p>
+    </div>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA3 · A2
+  </footer>
+
+</div>
+</body>
+</html>
