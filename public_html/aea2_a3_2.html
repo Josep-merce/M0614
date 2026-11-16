@@ -305,6 +305,13 @@
 }</code></pre>
     </div>
     <p>➜ Permet que qualsevol (<code>"Principal": "*"</code>) pugui llegir (<code>s3:GetObject</code>) els fitxers del bucket. Desa amb <strong>Save changes</strong>.</p>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <div>
+        <p>Si surt <strong>«Your bucket policy changes can't be saved»</strong>, és que el bucket encara té activat el <strong>Block Public Access</strong>: S3 no accepta cap política amb <code>"Principal": "*"</code> mentre estigui activat. Cancel·la, ves a <strong>Permissions</strong> → <strong>Block public access (bucket settings)</strong> → <strong>Edit</strong>, desmarca <strong>Block all public access</strong> (han de quedar les 4 caselles desmarcades), desa, escriu <code>confirm</code> i torna a enganxar la política.</p>
+        <p>L'error <code>access-analyzer:ValidatePolicy</code> el pots ignorar: és el validador automàtic de la consola, que el Learner Lab no deixa fer servir. La política es desa igualment.</p>
+      </div>
+    </div>
     <div class="check">
       <span class="check-title">🔎 Comprova-ho al navegador</span>
       <span class="url">http://NOM-DEL-TEU-BUCKET.s3-website-us-east-1.amazonaws.com</span>
@@ -314,19 +321,24 @@
     <h3>2.6 · Crear la distribució de CloudFront</h3>
     <ol>
       <li>A la consola, cerca <strong>CloudFront</strong> i entra-hi. Prem <strong>Create distribution</strong>.</li>
-      <li>Si et demana triar un pla de preus, tria <strong>Free</strong>.</li>
+      <li>Si et demana triar un pla (<em>Choose a plan</em>), tria <strong>Pay as you go</strong> (<em>Pagament per ús</em>), no cap pla de tarifa plana.</li>
       <li>Posa-li de nom <code>aea2-nomcognom</code>.</li>
     </ol>
     <div class="callout warn">
       <span class="ico">⚠️</span>
-      <p>No triïs mai un pla de pagament (Pro, Business…). Si la consola no et deixa continuar amb el pla Free, avisa el professorat.</p>
+      <div>
+        <p>Els plans de tarifa plana (Free, Pro, Business…) no funcionen al Learner Lab. El pla Free porta el WAF inclòs per força, i el rol del laboratori no té permís per crear-lo: en crear la distribució surt un error del tipus <code>not authorized to perform: cloudfront:CreateDistribution</code>.</p>
+        <p><strong>Pay as you go</strong> no et costarà res a la pràctica. Els 15–25 $/mes que mostra la taula són per a 100 GB i 1 milió de peticions, i el nivell gratuït de CloudFront (1 TB i 10 milions de peticions al mes) ja cobreix de sobres el que faràs. Tot i així, no activis mai res de pagament extra, com ara la protecció DDoS de capa 7.</p>
+      </div>
     </div>
 
     <h3>2.7 · Triar l'origen: el teu bucket</h3>
     <ol>
       <li>A <strong>Origin type</strong>, tria <strong>Amazon S3</strong>.</li>
       <li>Prem <strong>Browse S3</strong> i selecciona el teu bucket <code>aea2-nomcognom-2026</code>.</li>
-      <li>Com que el bucket té l'allotjament web activat, la consola et proposarà fer servir l'<strong>endpoint del lloc web</strong> (<em>Use website endpoint</em>). <strong>Accepta-ho.</strong> L'origen ha de quedar com <code>…s3-website-us-east-1.amazonaws.com</code>.</li>
+      <li>Com que el bucket té l'allotjament web activat, la consola et proposarà fer servir l'<strong>endpoint del lloc web</strong> (<em>Use website endpoint</em>). <strong>Accepta-ho.</strong> L'origen ha de quedar com <code>…s3-website-us-east-1.amazonaws.com</code>, <strong>sense</strong> <code>/index.html</code> al final.</li>
+      <li><strong>Desmarca</strong> <em>Allow private S3 bucket access to CloudFront</em> (<em>Permetre l'accés privat de buckets S3 a CloudFront</em>). Aquesta opció crea un <em>Origin Access Control</em> (OAC) i el Learner Lab no ho permet: dona l'error <code>cloudfront:CreateOriginAccessControl</code>. No el necessites, perquè el bucket ja és públic gràcies a la política del pas 2.5.</li>
+      <li><strong>Origin path</strong>: buit. <strong>Origin settings</strong> i <strong>Cache settings</strong>: deixa els recomanats.</li>
     </ol>
     <div class="callout tip">
       <span class="ico">💡</span>
@@ -340,7 +352,7 @@
       <tbody>
         <tr><td><strong>Viewer protocol policy</strong></td><td><code>Redirect HTTP to HTTPS</code></td><td>Qui entri per <code>http://</code> és enviat automàticament a <code>https://</code>.</td></tr>
         <tr><td><strong>Default root object</strong></td><td><code>index.html</code></td><td>Que l'arrel (<code>/</code>) mostri la teva pàgina.</td></tr>
-        <tr><td><strong>Security / WAF</strong></td><td><em>Do not enable</em></td><td>El tallafoc web (WAF) té cost i no el necessitem.</td></tr>
+        <tr><td><strong>Security / WAF</strong></td><td><em>Do not enable security protections</em></td><td>El tallafoc web (WAF) té cost, no el necessitem i el Learner Lab no deixa crear-lo. Aquesta opció només surt amb <em>Pay as you go</em>.</td></tr>
       </tbody>
     </table>
     <p>Prem <strong>Create distribution</strong>.</p>
@@ -430,6 +442,30 @@ Location: https://dXXXXXXXXXXXX.cloudfront.net/      <span class="c"># cap a on 
       <li><code>curl -I</code> sense <code>-k</code> retorna <code>HTTP/2 200</code> i, en repetir-lo, <code>x-cache: Hit from cloudfront</code>.</li>
       <li><code>curl -I http://…</code> retorna <code>301</code> cap a <code>https://</code>.</li>
     </ul>
+  </section>
+
+  <!-- ============ 4 · PROBLEMES HABITUALS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">4</span>
+      <h2>Problemes habituals al Learner Lab</h2>
+    </div>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th>Error o símptoma</th><th>Causa</th><th>Solució</th></tr></thead>
+      <tbody>
+        <tr><td><code>access-analyzer:ValidatePolicy</code></td><td>El validador de la consola no està permès al laboratori.</td><td>Ignora'l: no impedeix desar la política.</td></tr>
+        <tr><td>«Your bucket policy changes can't be saved»</td><td>Encara hi ha el <em>Block Public Access</em> activat.</td><td>Desactiva'l (pas 2.5) i torna a desar la política.</td></tr>
+        <tr><td><code>cloudfront:CreateOriginAccessControl</code></td><td>Has marcat l'accés privat a S3 (OAC).</td><td>Desmarca-ho a l'origen (pas 2.7).</td></tr>
+        <tr><td><code>cloudfront:CreateDistribution</code></td><td>Has triat un pla de tarifa plana (Free…), que porta WAF.</td><td>Torna al pas 1 de l'assistent, tria <strong>Pay as you go</strong> i, a seguretat, <em>Do not enable</em>.</td></tr>
+        <tr><td><code>AccessDenied</code> en obrir <code>https://dXXXX.cloudfront.net</code></td><td>Falta la política pública del bucket, o falta el <em>Default root object</em>.</td><td>Revisa el pas 2.5. A la distribució, comprova que el <em>Default root object</em> sigui <code>index.html</code>.</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Si tot i així no et deixa crear la distribució, avisa el professorat i adjunta la captura de l'error. Mentrestant, pots provar l'HTTPS amb l'endpoint REST de S3, que ja té un certificat d'Amazon: <code>https://NOM-DEL-TEU-BUCKET.s3.us-east-1.amazonaws.com/index.html</code>. No és CloudFront (no hi ha CDN ni redirecció HTTP→HTTPS), però el certificat és de confiança.</p>
+    </div>
   </section>
 
   <footer>
