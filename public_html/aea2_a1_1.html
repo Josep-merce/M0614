@@ -257,9 +257,20 @@
       <p>Crea una pàgina de prova per comprovar que el lloc funciona (més endavant la canviaràs per la de debò):</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>echo <span class="c">"&lt;h1&gt;Funciona! · AEA2&lt;/h1&gt;"</span> | sudo tee /var/www/aea2/index.html</code></pre>
+        <pre><code>cd /var/www/aea2</code></pre>
       </div>
-      <p>➜ Escriu una pàgina d'inici provisional. La canonada <code>| sudo tee</code> desa el text al fitxer amb permisos d'administrador.</p>
+      <p>➜ Entra a la carpeta del lloc. A partir d'ara pots treballar-hi amb noms de fitxer curts.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo nano index.html</code></pre>
+      </div>
+      <p>➜ Obre amb <code>nano</code> la pàgina d'inici. Cal <code>sudo</code> perquè la carpeta és de l'administrador (<code>root</code>).</p>
+      <p>Escriu-hi aquesta línia:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">index.html</span></div>
+        <pre><code>&lt;h1&gt;Funciona! · AEA2&lt;/h1&gt;</code></pre>
+      </div>
+      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>).</p>
     </div>
 
     <h3>2.4 · Crea i activa el host virtual</h3>
