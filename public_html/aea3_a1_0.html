@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA3·A1.0 — Prepara l'entorn: xarxa, SSH i Java 21 · M0614</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;--surface:#FFFFFF;--ink:#1A2230;--muted:#5A6677;--hairline:#E3E8EF;
+    --accent:#E07B1E;--accent-soft:#FBEFE0;--slate-soft:#EDF1F6;--slate-ink:#3A4658;
+    --admin-bg:#FBEFE0;--admin-border:#F1D7B4;--admin-ink:#A85610;
+    --server-bg:#E1F5EE;--server-border:#9FE1CB;--server-ink:#0F6E56;
+    --client-bg:#E8EFFC;--client-border:#BBD3F0;--client-ink:#1D4E89;
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;padding:clamp(1.5rem,5vw,4.5rem) clamp(1.25rem,5vw,3rem) 3rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  .back{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;transition:color .2s ease}
+  .back:hover{color:var(--accent)}
+  .back .arrow{transition:transform .22s ease}
+  .back:hover .arrow{transform:translateX(-3px)}
+
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.55rem}
+  .eyebrow::before{content:"";width:1.6rem;height:2px;background:var(--accent);display:inline-block}
+  .badge{font-family:var(--mono);font-weight:600;font-size:.8rem;letter-spacing:.04em;color:#fff;background:var(--ink);padding:.32rem .6rem;border-radius:7px;display:inline-block;margin-bottom:1rem}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:-.02em;line-height:1.08;margin:.5rem 0 0}
+  h1 .code{color:var(--accent)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:62ch;margin-top:1.1rem}
+  .meta{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.5rem .55rem;font-family:var(--mono);font-size:.78rem}
+  .pill{border:1px solid var(--hairline);background:var(--surface);color:var(--slate-ink);padding:.4rem .75rem;border-radius:999px}
+  .pill strong{color:var(--ink);font-weight:600}
+  .rule{height:1px;background:var(--hairline);margin:clamp(2rem,5vw,3rem) 0}
+
+  section{margin-top:clamp(2rem,4.5vw,3rem)}
+  .sec-head{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.1rem}
+  .sec-num{font-family:var(--mono);font-weight:600;font-size:1rem;color:#fff;background:var(--accent);min-width:2rem;height:2rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,2.6vw,1.7rem);letter-spacing:-.01em;line-height:1.2}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:1.8rem 0 .7rem;letter-spacing:-.01em}
+  p{margin:.7rem 0;max-width:72ch}
+  ul,ol{margin:.7rem 0 .7rem 1.3rem;max-width:72ch}
+  li{margin:.4rem 0}
+  a{color:var(--accent)}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--slate-soft);color:var(--slate-ink);padding:.12rem .38rem;border-radius:5px}
+
+  .term{background:#1A2230;border-radius:12px;margin:1rem 0;overflow:hidden;border:1px solid #263042}
+  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;background:#11161F;border-bottom:1px solid #263042}
+  .term-bar .dot{width:.7rem;height:.7rem;border-radius:50%}
+  .term-bar .r{background:#ff5f56}.term-bar .y{background:#ffbd2e}.term-bar .g{background:#27c93f}
+  .term-bar .t{font-family:var(--mono);font-size:.72rem;color:#7c8aa0;margin-left:.5rem}
+  .term pre{margin:0;padding:1rem 1.1rem;overflow-x:auto}
+  .term code{font-family:var(--mono);font-size:.84rem;background:none;color:#E6ECF5;padding:0;line-height:1.7}
+  .term .c{color:#7c8aa0}
+  .term .p{color:#E07B1E}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.7rem .85rem;border:1px solid var(--hairline);vertical-align:top}
+  th{background:var(--slate-soft);font-family:var(--display);font-weight:600;color:var(--slate-ink)}
+  tbody tr:nth-child(even){background:#FAFBFC}
+
+  .callout{display:flex;gap:.8rem;padding:1rem 1.1rem;border-radius:12px;margin:1.1rem 0;border:1px solid;font-size:.93rem}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;line-height:1.5}
+  .callout p{margin:0}
+  .callout.tip{background:var(--accent-soft);border-color:#F1D7B4}
+  .callout.warn{background:#FDECEC;border-color:#F4C7C7}
+  .callout.switch{background:#EAF1FB;border-color:#BBD3F0}
+  .callout.switch strong{color:#1D4E89}
+
+  /* Capses de màquina: qui fa cada pas */
+  .role-box{border-radius:12px;padding:1.1rem 1.3rem;margin:1.1rem 0;border:1px solid}
+  .role-box.admin{background:var(--admin-bg);border-color:var(--admin-border)}
+  .role-box.server{background:var(--server-bg);border-color:var(--server-border)}
+  .role-box.client{background:var(--client-bg);border-color:var(--client-border)}
+  .role-box.all{background:var(--slate-soft);border-color:var(--hairline)}
+  .role-box > *:first-child{margin-top:0}
+  .role-box > *:last-child{margin-bottom:0}
+  .role-label{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+  .role-label.admin{color:var(--admin-ink)}
+  .role-label.server{color:var(--server-ink)}
+  .role-label.client{color:var(--client-ink)}
+  .role-label.all{color:var(--slate-ink)}
+
+  .legend{display:inline;font-size:.86rem;color:var(--slate-ink)}
+  .legend > span{display:inline-block;margin-right:1rem;white-space:nowrap}
+  .legend .sw{display:inline-block;width:.85rem;height:.85rem;border-radius:4px;margin-right:.4rem;vertical-align:-2px;border:1px solid rgba(0,0,0,.12)}
+
+  footer{margin-top:clamp(2.5rem,6vw,4rem);padding-top:1.5rem;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.01em}
+  @media (max-width:680px){table{font-size:.84rem}th,td{padding:.5rem .55rem}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto}}
+
+  /* Figura de xarxa (SVG) */
+  .netfig{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;padding:1.2rem 1rem .8rem;margin:1.2rem 0}
+  .netfig svg{width:100%;height:auto;display:block}
+  .netfig figcaption{font-family:var(--mono);font-size:.74rem;color:var(--muted);text-align:center;margin-top:.4rem}
+
+  /* Comprova-ho al navegador */
+  .check{background:#EAF1FB;border:1px solid #BBD3F0;border-left:5px solid #1D4E89;border-radius:12px;padding:.9rem 1.1rem;margin:1.1rem 0;font-size:.93rem}
+  .check .check-title{font-family:var(--display);font-weight:600;color:#1D4E89;display:block;margin-bottom:.35rem}
+  .check .url{font-family:var(--mono);font-size:.86rem;background:#fff;border:1px solid #BBD3F0;color:#1D4E89;padding:.2rem .5rem;border-radius:6px;display:inline-block;margin:.15rem 0 .45rem}
+  .check p{margin:.3rem 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="aea3.html"><span class="arrow">←</span> Tornar a l'AEA3</a>
+
+  <header>
+    <span class="badge">AEA3 · A1.0</span>
+    <span class="eyebrow">M0614 · Linux</span>
+    <h1>Prepara l'entorn: <span class="code">xarxa, SSH i Java 21</span></h1>
+    <p class="lede">Abans d'instal·lar Tomcat, prepararàs l'escenari de tota l'AEA3: tres màquines Ubuntu Server (servidor, administrador i client) en una xarxa privada amb IP fixes, l'accés remot al servidor per SSH i Java 21 instal·lat al servidor, que és el que necessita un servidor d'aplicacions per funcionar.</p>
+    <div class="meta">
+      <span class="pill">RA <strong>RA3</strong></span>
+      <!-- REVISAR: confirmar la numeració dels CA del RA3 segons la programació del mòdul -->
+      <span class="pill">CA <strong>3.1 · 3.2</strong></span>
+      <span class="pill">Activitat de <strong>preparació</strong></span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">0</span>
+      <h2>Objectius i prerequisits</h2>
+    </div>
+
+    <p>En aquesta activitat aprendràs a:</p>
+    <ul>
+      <li>Muntar l'<strong>arquitectura de xarxa</strong> de l'AEA3: quina feina fa cada màquina i per quina targeta viatja cada cosa.</li>
+      <li>Configurar una <strong>IP fixa</strong> a la targeta interna d'Ubuntu Server amb <strong>Netplan</strong>.</li>
+      <li>Administrar el servidor de manera remota i xifrada amb <strong>SSH</strong>.</li>
+      <li>Explicar la diferència entre un <strong>servidor web</strong> i un <strong>servidor d'aplicacions</strong>.</li>
+      <li>Instal·lar l'<strong>OpenJDK 21</strong> al servidor i definir la variable <code>JAVA_HOME</code>.</li>
+    </ul>
+
+    <h3>Prerequisits</h3>
+    <ul>
+      <li>Tres màquines <strong>Ubuntu Server 24.04 LTS</strong> a <strong>IsardVDI</strong>, cadascuna amb <strong>dues targetes de xarxa</strong>: una <em>default</em> (amb sortida a Internet) i una <em>interna</em> (la xarxa privada que connecta les tres màquines). <!-- REVISAR: confirmar la versió d'Ubuntu Server de les plantilles d'IsardVDI --></li>
+      <li>Haver fet l'AEA2: ja coneixes SSH, <code>sudo</code>, <code>nano</code> i el paper de cada màquina.</li>
+    </ul>
+
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>A l'AEA2 les màquines eren Debian i la IP fixa es posava a <code>/etc/network/interfaces</code>. <strong>Ubuntu Server no fa servir aquest fitxer</strong>: la xarxa es configura amb <strong>Netplan</strong>, en fitxers YAML dins de <code>/etc/netplan/</code>. Ho veuràs al pas 2.2.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">1</span>
+      <h2>Context i teoria mínima</h2>
+    </div>
+
+    <h3>Les dues targetes de xarxa</h3>
+    <p>Com a l'AEA2, cada màquina d'IsardVDI té <strong>dues targetes</strong> amb funcions diferents:</p>
+    <ul>
+      <li><strong>Targeta <em>default</em></strong> → té sortida a <strong>Internet</strong>. La fem servir per instal·lar paquets (<code>apt</code>). La seva IP l'assigna IsardVDI per DHCP: no la toquem.</li>
+      <li><strong>Targeta interna</strong> → connecta les <strong>tres màquines entre elles</strong> a la xarxa privada <code>192.168.1.0/24</code>. Aquí posem <strong>IP fixes</strong> i és per on viatgen l'SSH i el web.</li>
+    </ul>
+
+    <h3>Imatge 1 · Arquitectura de xarxa</h3>
+    <figure class="netfig">
+      <svg viewBox="0 0 820 480" role="img" aria-label="Arquitectura de xarxa: tres màquines Ubuntu Server (Client, Servidor d'aplicacions, Administrador), cadascuna amb una targeta default que surt a Internet per DHCP i una targeta interna que les connecta totes a la xarxa 192.168.1.0/24 amb IP fixa 192.168.1.30, .10 i .20 respectivament.">
+        <g>
+          <ellipse cx="410" cy="50" rx="90" ry="30" fill="#EDF1F6" stroke="#D6DEE8"/>
+          <circle cx="356" cy="50" r="24" fill="#EDF1F6" stroke="#D6DEE8"/>
+          <circle cx="464" cy="50" r="22" fill="#EDF1F6" stroke="#D6DEE8"/>
+          <rect x="356" y="48" width="108" height="30" fill="#EDF1F6"/>
+          <text x="410" y="56" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" fill="#3A4658">Internet</text>
+        </g>
+        <g stroke="#9aa4b2" stroke-width="1.6" stroke-dasharray="5 5" fill="none">
+          <path d="M356,78 C260,110 155,130 130,166"/>
+          <path d="M410,80 L410,166"/>
+          <path d="M464,78 C560,110 665,130 690,166"/>
+        </g>
+        <text x="70" y="128" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">enp1s0 · default · DHCP</text>
+        <text x="365" y="128" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">enp1s0 · default · DHCP</text>
+        <text x="600" y="128" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">enp1s0 · default · DHCP</text>
+        <g>
+          <rect x="30" y="166" width="200" height="118" rx="12" fill="#FFFFFF" stroke="#D6DEE8"/>
+          <rect x="30" y="166" width="200" height="30" rx="12" fill="#1A2230"/>
+          <rect x="30" y="184" width="200" height="12" fill="#1A2230"/>
+          <text x="130" y="186" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="14" fill="#FFFFFF">Client</text>
+          <text x="130" y="226" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#5A6677">Navegador · curl</text>
+          <text x="130" y="254" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="15" fill="#1A2230">192.168.1.30</text>
+          <text x="130" y="273" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">enp2s0 · interna</text>
+        </g>
+        <g>
+          <rect x="310" y="166" width="200" height="118" rx="12" fill="#FFFFFF" stroke="#E07B1E" stroke-width="2"/>
+          <rect x="310" y="166" width="200" height="30" rx="12" fill="#E07B1E"/>
+          <rect x="310" y="184" width="200" height="12" fill="#E07B1E"/>
+          <text x="410" y="186" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="14" fill="#FFFFFF">Servidor</text>
+          <text x="410" y="226" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#5A6677">SSH · Java · Tomcat · Apache</text>
+          <text x="410" y="254" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="15" fill="#1A2230">192.168.1.10</text>
+          <text x="410" y="273" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">enp2s0 · interna</text>
+        </g>
+        <g>
+          <rect x="590" y="166" width="200" height="118" rx="12" fill="#FFFFFF" stroke="#D6DEE8"/>
+          <rect x="590" y="166" width="200" height="30" rx="12" fill="#1A2230"/>
+          <rect x="590" y="184" width="200" height="12" fill="#1A2230"/>
+          <text x="690" y="186" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="14" fill="#FFFFFF">Administrador</text>
+          <text x="690" y="226" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#5A6677">Client SSH</text>
+          <text x="690" y="254" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="15" fill="#1A2230">192.168.1.20</text>
+          <text x="690" y="273" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">enp2s0 · interna</text>
+        </g>
+        <g stroke="#3A4658" stroke-width="1.8" fill="none">
+          <line x1="130" y1="284" x2="130" y2="400"/>
+          <line x1="410" y1="284" x2="410" y2="400"/>
+          <line x1="690" y1="284" x2="690" y2="400"/>
+          <line x1="90" y1="400" x2="730" y2="400"/>
+        </g>
+        <circle cx="130" cy="400" r="4" fill="#3A4658"/>
+        <circle cx="410" cy="400" r="4" fill="#3A4658"/>
+        <circle cx="690" cy="400" r="4" fill="#3A4658"/>
+        <rect x="285" y="416" width="250" height="30" rx="8" fill="#EDF1F6" stroke="#D6DEE8"/>
+        <text x="410" y="436" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#3A4658">Xarxa interna · 192.168.1.0/24</text>
+      </svg>
+      <figcaption>Les tres màquines comparteixen la xarxa interna 192.168.1.0/24 per la targeta enp2s0; la targeta enp1s0 només serveix per baixar paquets d'Internet.</figcaption>
+    </figure>
+
+    <h3>Servidor web vs servidor d'aplicacions</h3>
+    <p>A l'AEA2, Apache servia <strong>fitxers</strong>: el navegador demanava <code>index.html</code> i Apache el llegia del disc i l'enviava tal qual. Això és un <strong>servidor web</strong>.</p>
+    <p>Un <strong>servidor d'aplicacions</strong> fa una feina diferent: <strong>executa codi</strong>. Quan arriba una petició, posa en marxa un programa (per exemple, Java) que consulta dades, aplica lògica i <strong>genera la resposta en aquell moment</strong>. La pàgina no existeix al disc: la fabrica l'aplicació.</p>
+    <p>A l'AEA3 farem servir <strong>Apache Tomcat</strong>. Tomcat és un <strong>contenidor de servlets</strong>: executa aplicacions web Java empaquetades en fitxers <code>.war</code>. Per funcionar, necessita Java instal·lat al servidor.</p>
+
+    <table>
+      <thead><tr><th></th><th>Servidor web</th><th>Servidor d'aplicacions</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Exemple</strong></td><td>Apache HTTP Server, Nginx</td><td>Apache Tomcat, WildFly, GlassFish</td></tr>
+        <tr><td><strong>Què serveix</strong></td><td>Fitxers estàtics (HTML, CSS, imatges)</td><td>Respostes generades per una aplicació</td></tr>
+        <tr><td><strong>Què necessita</strong></td><td>Només el propi servidor</td><td>Un entorn d'execució (aquí, Java)</td></tr>
+        <tr><td><strong>Port habitual</strong></td><td><code>80</code> / <code>443</code></td><td><code>8080</code> (Tomcat)</td></tr>
+        <tr><td><strong>Què despleguem</strong></td><td>Una carpeta amb fitxers</td><td>Un paquet <code>.war</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Imatge 2 · Flux d'accés de l'AEA3</h3>
+    <p>L'<strong>Administrador</strong> configura el servidor per SSH. El <strong>Client</strong> hi accedeix amb el navegador. Al final de l'A1.2, el client entrarà per Apache (port 80) i Apache passarà la petició a Tomcat (port 8080), que s'executa a sobre de Java.</p>
+    <figure class="netfig">
+      <svg viewBox="0 0 820 340" role="img" aria-label="Flux de l'AEA3: el Client entra pel port 80 a Apache, al servidor 192.168.1.10. Apache passa la petició a Tomcat, al port 8080, que s'executa sobre Java 21. L'Administrador es connecta al servidor per SSH pel port 22. En aquesta activitat s'instal·la Java.">
+        <defs>
+          <marker id="aG" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9aa4b2"/></marker>
+          <marker id="aO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07B1E"/></marker>
+        </defs>
+        <!-- Client -->
+        <g>
+          <rect x="20" y="130" width="150" height="104" rx="12" fill="#FFFFFF" stroke="#D6DEE8"/>
+          <text x="95" y="166" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="16" fill="#1A2230">Client</text>
+          <text x="95" y="188" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#5A6677">Navegador</text>
+          <text x="95" y="212" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#1A2230">192.168.1.30</text>
+        </g>
+        <!-- Servidor -->
+        <rect x="230" y="70" width="400" height="250" rx="14" fill="#1A2230"/>
+        <text x="250" y="98" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">Servidor</text>
+        <text x="610" y="98" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="13" fill="#E07B1E">192.168.1.10</text>
+        <rect x="250" y="120" width="160" height="80" rx="10" fill="#263042" stroke="#3A4658"/>
+        <text x="330" y="154" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="14" fill="#FFFFFF">Apache</text>
+        <text x="330" y="174" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">web · :80 · A1.2</text>
+        <rect x="450" y="120" width="160" height="80" rx="10" fill="#263042" stroke="#3A4658"/>
+        <text x="530" y="154" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="14" fill="#FFFFFF">Tomcat</text>
+        <text x="530" y="174" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">aplicacions · :8080 · A1.1</text>
+        <rect x="450" y="225" width="160" height="75" rx="10" fill="#FBEFE0" stroke="#E07B1E" stroke-width="2"/>
+        <text x="530" y="257" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="14" fill="#A85610">Java · OpenJDK 21</text>
+        <text x="530" y="279" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#A85610">← A1.0 (ara)</text>
+        <text x="250" y="290" font-family="JetBrains Mono, monospace" font-size="11" fill="#7c8aa0">Ubuntu Server · SSH :22</text>
+        <!-- Administrador -->
+        <g>
+          <rect x="660" y="130" width="150" height="104" rx="12" fill="#FFFFFF" stroke="#D6DEE8"/>
+          <text x="735" y="166" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="16" fill="#1A2230">Administrador</text>
+          <text x="735" y="188" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#5A6677">Client SSH</text>
+          <text x="735" y="212" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#1A2230">192.168.1.20</text>
+        </g>
+        <!-- Fletxes -->
+        <line x1="174" y1="160" x2="246" y2="160" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#aO)"/>
+        <text x="210" y="150" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9c5813">:80</text>
+        <line x1="414" y1="160" x2="446" y2="160" stroke="#9aa4b2" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#aG)"/>
+        <line x1="530" y1="202" x2="530" y2="221" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#aO)"/>
+        <path d="M735,128 C735,40 470,30 430,66" fill="none" stroke="#9aa4b2" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#aG)"/>
+        <rect x="520" y="30" width="190" height="20" rx="6" fill="#EDF1F6"/>
+        <text x="615" y="44" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#3A4658">SSH :22 · administració</text>
+      </svg>
+      <figcaption>Tomcat s'executa a sobre de Java: sense la capa taronja, no arrenca. Avui prepares la xarxa, l'SSH i Java.</figcaption>
+    </figure>
+
+    <h3>Conceptes clau</h3>
+    <table>
+      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Servidor</strong></td><td>La màquina que allotjarà Java, Tomcat i Apache (<code>192.168.1.10</code>).</td></tr>
+        <tr><td><strong>Administrador</strong></td><td>La màquina des d'on entrem al servidor per SSH per configurar-lo (<code>192.168.1.20</code>).</td></tr>
+        <tr><td><strong>Client</strong></td><td>La màquina que consulta les aplicacions amb el navegador (<code>192.168.1.30</code>).</td></tr>
+        <tr><td><strong>Netplan</strong></td><td>Sistema de configuració de xarxa d'Ubuntu. Llegeix fitxers YAML de <code>/etc/netplan/</code>.</td></tr>
+        <tr><td><strong>JVM</strong></td><td><em>Java Virtual Machine</em>. Executa el codi Java compilat (<em>bytecode</em>, fitxers <code>.class</code>).</td></tr>
+        <tr><td><strong>JRE / JDK</strong></td><td>El JRE serveix per <strong>executar</strong> Java. El JDK hi afegeix les eines per <strong>compilar</strong> (<code>javac</code>, <code>jar</code>…).</td></tr>
+        <tr><td><strong>OpenJDK 21</strong></td><td>Implementació lliure de Java. La versió 21 és <strong>LTS</strong> (suport llarg).</td></tr>
+        <tr><td><strong><code>JAVA_HOME</code></strong></td><td>Variable d'entorn amb la carpeta on és instal·lat Java. Tomcat la consulta per trobar-lo.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">2</span>
+      <h2>Pas a pas guiat</h2>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Cada pas ve dins d'una <strong>capsa de color</strong> que indica qui l'ha de fer: <span class="legend"><span><span class="sw" style="background:var(--admin-bg);border-color:var(--admin-border)"></span>Administrador</span><span><span class="sw" style="background:var(--server-bg);border-color:var(--server-border)"></span>Servidor</span><span><span class="sw" style="background:var(--client-bg);border-color:var(--client-border)"></span>Client</span><span><span class="sw" style="background:var(--slate-soft);border-color:var(--hairline)"></span>Totes les màquines</span></span>. Els fitxers de configuració no porten capsa.</p>
+    </div>
+
+    <h2 style="margin-top:2rem">Part 1 · La xarxa i l'SSH</h2>
+
+    <h3>2.1 · Identifica les dues targetes de cada màquina</h3>
+    <div class="role-box all">
+      <span class="role-label all">Totes les màquines</span>
+      <p>A <strong>cada</strong> màquina, mira les targetes de xarxa:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>ip a</code></pre>
+      </div>
+      <p>➜ Llista totes les targetes de xarxa de la màquina amb la seva adreça IP.</p>
+      <p>Veuràs dues interfícies a més de <code>lo</code>. A IsardVDI solen ser <code>enp1s0</code> i <code>enp2s0</code>:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida de ip a</span></div>
+        <pre><code>2: enp1s0: &lt;...&gt; state UP           <span class="c"># targeta DEFAULT (surt a Internet)</span>
+    inet 192.168.120.186/22 ...    <span class="c"># IP posada per DHCP → NO la toquem</span>
+3: enp2s0: &lt;...&gt; state UP           <span class="c"># targeta INTERNA (xarxa privada)</span>
+    (sense línia inet)             <span class="c"># encara sense IP → aquí posarem la fixa</span></code></pre>
+      </div>
+      <p>Ara mira quina configuració de xarxa té Ubuntu:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>ls /etc/netplan/
+sudo cat /etc/netplan/*.yaml</code></pre>
+      </div>
+      <p>➜ Llista i mostra els fitxers de Netplan. Normalment n'hi ha un (per exemple <code>50-cloud-init.yaml</code>) que posa la targeta <em>default</em> en DHCP. No el modifiquis: en crearàs un de nou només per a la targeta interna.</p>
+      <div class="callout warn">
+        <span class="ico">⚠️</span>
+        <p>Apunta el <strong>nom exacte</strong> de la targeta interna de cada màquina (per exemple <code>enp2s0</code>). El necessitaràs al pas següent i pot variar entre màquines.</p>
+      </div>
+    </div>
+
+    <h3>2.2 · Assigna la IP fixa a la targeta interna</h3>
+    <div class="role-box all">
+      <span class="role-label all">Totes les màquines · exemple: servidor</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>sudo nano /etc/netplan/60-interna.yaml</code></pre>
+      </div>
+      <p>➜ Crea un fitxer de Netplan nou per a la targeta interna. Netplan llegeix els fitxers per ordre de nom: el <code>60</code> s'aplica després del <code>50</code> i mana sobre ell.</p>
+      <p>Escriu-hi aquest contingut, <strong>canviant</strong> <code>enp2s0</code> pel nom real de la targeta interna i la IP segons la màquina (servidor <code>.10</code>, administrador <code>.20</code>, client <code>.30</code>). Aquest exemple és el del <strong>servidor</strong>:</p>
+    </div>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">/etc/netplan/60-interna.yaml</span></div>
+      <pre><code><span class="c"># --- Targeta interna (xarxa privada) ---</span>
+network:
+  version: 2
+  ethernets:
+    enp2s0:                  <span class="c"># nom de la targeta INTERNA</span>
+      dhcp4: false           <span class="c"># sense DHCP: IP fixa</span>
+      addresses:
+        - 192.168.1.10/24    <span class="c"># .10 servidor · .20 administrador · .30 client</span></code></pre>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>El YAML és molt estricte: fa servir <strong>espais</strong> (mai tabuladors) i el sagnat ha de ser exactament com a l'exemple. Si un nivell no quadra, Netplan donarà error.</p>
+    </div>
+    <div class="role-box all">
+      <span class="role-label all">Totes les màquines</span>
+      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>).</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>sudo chmod 600 /etc/netplan/60-interna.yaml</code></pre>
+      </div>
+      <p>➜ Deixa el fitxer llegible només per <code>root</code>. Si té permisos oberts, Netplan avisa amb <em>Permissions ... are too open</em>.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>sudo netplan apply</code></pre>
+      </div>
+      <p>➜ Aplica la configuració de xarxa. Si no diu res, ha anat bé. Si hi ha un error de sintaxi, t'indica la línia del YAML.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>ip a show enp2s0</code></pre>
+      </div>
+      <p>➜ Mostra només la targeta interna. Ha d'aparèixer <code>inet 192.168.1.10/24</code> (o la IP de la màquina on ets).</p>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>Repeteix aquest pas a les tres màquines amb la seva IP (<code>.10</code>, <code>.20</code>, <code>.30</code>). No toquis la targeta <em>default</em>: ha de continuar amb DHCP perquè tinguis Internet.</p>
+      </div>
+    </div>
+
+    <h3>2.3 · Comprova la connexió entre màquines</h3>
+    <div class="role-box admin">
+      <span class="role-label admin">Administrador</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
+        <pre><code>ping -c 3 192.168.1.10</code></pre>
+      </div>
+      <p>➜ Envia 3 paquets de prova al servidor per la xarxa interna. Si reps respostes, la xarxa funciona. Fes la mateixa prova des del <strong>client</strong>.</p>
+    </div>
+
+    <h3>2.4 · Crea l'usuari <code>isard_ssh</code> al servidor</h3>
+    <div class="role-box server">
+      <span class="role-label server">Servidor</span>
+      <p>Com a l'AEA2, crearàs al <strong>servidor</strong> un usuari propi per entrar-hi per SSH. Així, quan el <em>prompt</em> digui <code>isard_ssh@...</code>, sabràs segur que treballes al servidor.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — servidor</span></div>
+        <pre><code>sudo adduser isard_ssh</code></pre>
+      </div>
+      <p>➜ Crea l'usuari <code>isard_ssh</code> amb la seva carpeta personal. Et demanarà la contrasenya dues vegades: <strong>apunta-la</strong>. La resta de preguntes les pots deixar buides amb <code>Enter</code> i confirmar amb <code>Y</code>.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — servidor</span></div>
+        <pre><code>sudo usermod -aG sudo isard_ssh</code></pre>
+      </div>
+      <p>➜ Afegeix <code>isard_ssh</code> al grup <code>sudo</code> perquè pugui instal·lar Java i Tomcat. <code>-aG</code> l'<strong>afegeix</strong> al grup sense treure'l dels altres.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — servidor</span></div>
+        <pre><code>groups isard_ssh</code></pre>
+      </div>
+      <p>➜ Mostra els grups de l'usuari. Ha de sortir <code>isard_ssh : isard_ssh sudo</code> (pot haver-hi algun grup més).</p>
+    </div>
+
+    <h3>2.5 · Instal·la i comprova el servei SSH</h3>
+    <div class="role-box server">
+      <span class="role-label server">Servidor</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — servidor</span></div>
+        <pre><code>sudo apt update</code></pre>
+      </div>
+      <p>➜ Actualitza la llista de paquets disponibles.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — servidor</span></div>
+        <pre><code>sudo apt install -y openssh-server</code></pre>
+      </div>
+      <p>➜ Instal·la el servei SSH. Si ja el vas triar en instal·lar Ubuntu Server, et dirà que ja és a l'última versió: no passa res.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — servidor</span></div>
+        <pre><code>sudo ss -tlnp | grep ':22 '</code></pre>
+      </div>
+      <p>➜ Comprova que hi ha algú escoltant al port 22. Ha de sortir una línia <code>LISTEN</code> amb <code>*:22</code> o <code>0.0.0.0:22</code>.</p>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>A Ubuntu 24.04, l'SSH s'activa per <strong>socket</strong>: <code>systemd</code> escolta el port 22 i engega <code>sshd</code> quan arriba la primera connexió. Per això <code>systemctl status ssh</code> pot dir <code>inactive</code> abans de connectar-te, i a <code>ss</code> el procés que escolta pot ser <code>systemd</code>. És normal.</p>
+      </div>
+    </div>
+
+    <h3>2.6 · Connecta't des de l'administrador per SSH</h3>
+    <div class="role-box admin">
+      <span class="role-label admin">Administrador</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
+        <pre><code>ssh isard_ssh@192.168.1.10</code></pre>
+      </div>
+      <p>➜ Obre una sessió de terminal xifrada al servidor amb l'usuari <code>isard_ssh</code>. El primer cop, accepta la <em>fingerprint</em> amb <code>yes</code> i escriu la contrasenya. El <em>prompt</em> passarà a ser <code>isard_ssh@...</code>.</p>
+    </div>
+    <div class="callout switch">
+      <span class="ico">💻→</span>
+      <p>A partir d'aquí, tot el que escrius s'executa <strong>al servidor</strong>, no a l'administrador. Per tornar a l'administrador quan acabis, escriu <code>exit</code>.</p>
+    </div>
+
+    <h2 style="margin-top:2rem">Part 2 · Java al servidor</h2>
+
+    <h3>2.7 · Comprova que Java encara no hi és</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>java -version</code></pre>
+      </div>
+      <p>➜ Demana la versió de Java. Ubuntu respon <em>Command 'java' not found</em> i et suggereix paquets. És el resultat esperat.</p>
+    </div>
+
+    <h3>2.8 · Busca el paquet de Java 21</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>apt-cache policy openjdk-21-jdk-headless</code></pre>
+      </div>
+      <p>➜ Mostra si el paquet existeix, quina versió s'instal·laria (<em>Candidate</em>) i si ja està instal·lat (<em>Installed</em>).</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>openjdk-21-jdk-headless:
+  Installed: (none)                         <span class="c"># encara no està instal·lat</span>
+  Candidate: 21.0.x+y~...-0ubuntu1~24.04    <span class="c"># la versió exacta pot variar</span></code></pre>
+      </div>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>La versió <strong>headless</strong> és el JDK complet sense les biblioteques d'interfície gràfica, que en un servidor sense escriptori no calen.</p>
+      </div>
+    </div>
+
+    <h3>2.9 · Instal·la l'OpenJDK 21</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo apt install -y openjdk-21-jdk-headless</code></pre>
+      </div>
+      <p>➜ Instal·la el JDK 21 sense interfície gràfica. <code>-y</code> accepta la instal·lació sense preguntar. Pot trigar un minut.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>java -version
+javac -version</code></pre>
+      </div>
+      <p>➜ La primera mostra la versió de la JVM; la segona, la del compilador. Si totes dues responen <strong>21</strong>, tens el JDK complet.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>openjdk version "21.0.x" 20XX-XX-XX                   <span class="c"># ⚠ EL MÉS IMPORTANT: versió 21</span>
+OpenJDK Runtime Environment (build 21.0.x+y-Ubuntu-...)
+OpenJDK 64-Bit Server VM (build 21.0.x+y-Ubuntu-..., mixed mode, sharing)
+javac 21.0.x                                          <span class="c"># compilador del JDK</span></code></pre>
+      </div>
+    </div>
+
+    <h3>2.10 · Localitza la carpeta de Java</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>readlink -f $(which java)</code></pre>
+      </div>
+      <p>➜ <code>which java</code> diu on és l'ordre (<code>/usr/bin/java</code>) i <code>readlink -f</code> segueix els enllaços simbòlics fins al fitxer real.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>/usr/lib/jvm/java-21-openjdk-amd64/bin/java</code></pre>
+      </div>
+      <p><code>JAVA_HOME</code> és aquesta ruta <strong>sense</strong> el <code>/bin/java</code> final: <code>/usr/lib/jvm/java-21-openjdk-amd64</code>.</p>
+      <div class="callout tip">
+        <span class="ico">💡</span>
+        <p>El final <code>-amd64</code> depèn del processador. En una màquina ARM sortiria <code>-arm64</code>. Fes servir sempre la ruta que <strong>t'ha sortit a tu</strong>.</p>
+      </div>
+    </div>
+
+    <h3>2.11 · Defineix JAVA_HOME per a tot el sistema</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo nano /etc/environment</code></pre>
+      </div>
+      <p>➜ Obre el fitxer de variables d'entorn globals. S'aplica a tots els usuaris quan inicien sessió.</p>
+      <p>Deixa la línia <code>PATH=...</code> tal com està i afegeix-ne una de nova al final:</p>
+    </div>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">/etc/environment</span></div>
+      <pre><code>PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"   <span class="c"># no la toquis</span>
+JAVA_HOME="/usr/lib/jvm/java-21-openjdk-amd64"                                                         <span class="c"># línia nova</span></code></pre>
+    </div>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>Desa i surt. La variable es carrega en iniciar sessió: tanca l'SSH i torna a entrar.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>exit</code></pre>
+      </div>
+      <p>➜ Tanca la sessió SSH i tornes a l'administrador.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
+        <pre><code>ssh isard_ssh@192.168.1.10</code></pre>
+      </div>
+      <p>➜ Obre una sessió nova, que ja llegeix el <code>/etc/environment</code> actualitzat.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>echo $JAVA_HOME</code></pre>
+      </div>
+      <p>➜ Mostra el valor de la variable. Ha de sortir <code>/usr/lib/jvm/java-21-openjdk-amd64</code>.</p>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><code>/etc/environment</code> no és un script: només accepta línies <code>NOM="valor"</code>, sense <code>export</code> ni <code>$VARIABLES</code>. A més, els serveis de <strong>systemd</strong> no el llegeixen: a l'A1.1 també indicaràs <code>JAVA_HOME</code> dins del servei de Tomcat.</p>
+    </div>
+
+    <h3>2.12 · Compila i executa un programa de prova</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>mkdir -p ~/proves-java &amp;&amp; cd ~/proves-java</code></pre>
+      </div>
+      <p>➜ Crea una carpeta de proves a la teva carpeta personal i hi entra.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>nano Hola.java</code></pre>
+      </div>
+      <p>➜ Crea el fitxer de codi font. El nom del fitxer ha de coincidir amb el de la classe (<code>Hola</code>).</p>
+      <p>Escriu-hi aquest contingut:</p>
+    </div>
+    <div class="term">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">Hola.java</span></div>
+      <pre><code>public class Hola {
+    public static void main(String[] args) {
+        System.out.println("Hola des de Java " + System.getProperty("java.version"));
+        System.out.println("JAVA_HOME = " + System.getenv("JAVA_HOME"));
+    }
+}</code></pre>
+    </div>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>javac Hola.java</code></pre>
+      </div>
+      <p>➜ Compila el codi i genera <code>Hola.class</code>, el <em>bytecode</em> que entén la JVM. Si no diu res, ha anat bé.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>java Hola</code></pre>
+      </div>
+      <p>➜ La JVM carrega <code>Hola.class</code> i l'executa (sense posar <code>.class</code> al final).</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>Hola des de Java 21.0.x                         <span class="c"># versió 21</span>
+JAVA_HOME = /usr/lib/jvm/java-21-openjdk-amd64  <span class="c"># si surt null, revisa el pas 2.11</span></code></pre>
+      </div>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Això és el que farà Tomcat a gran escala. Un fitxer <code>.war</code> és un paquet comprimit amb molts <code>.class</code> com aquest, més pàgines i configuració. Tomcat el desplega i la JVM n'executa el codi cada cop que arriba una petició.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3 · VERIFICACIÓ ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">3</span>
+      <h2>Verificació</h2>
+    </div>
+
+    <div class="role-box client">
+      <span class="role-label client">Client</span>
+      <p>Comprova que el client arriba al servidor per la xarxa interna:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — client</span></div>
+        <pre><code>ping -c 3 192.168.1.10</code></pre>
+      </div>
+      <p>➜ Envia tres paquets de prova al servidor.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>64 bytes from 192.168.1.10: icmp_seq=1 ttl=64 time=0.5 ms
+64 bytes from 192.168.1.10: icmp_seq=2 ttl=64 time=0.4 ms
+64 bytes from 192.168.1.10: icmp_seq=3 ttl=64 time=0.4 ms
+3 packets transmitted, 3 received, 0% packet loss   <span class="c"># ⚠ EL MÉS IMPORTANT</span></code></pre>
+      </div>
+      <div class="check">
+        <span class="check-title">🔎 Comprova-ho al navegador</span>
+        <span class="url">http://192.168.1.10:8080</span>
+        <p>Al navegador del <strong>client</strong>, obre aquesta adreça. Ha de fallar amb un missatge com <em>No es pot connectar</em>: encara no hi ha cap servidor d'aplicacions. A l'A1.1 hi instal·laràs Tomcat i aquesta mateixa adreça mostrarà la seva pàgina d'inici.</p>
+      </div>
+    </div>
+
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <p>Dins del servidor, comprova la xarxa, Java i <code>JAVA_HOME</code>:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>ip -4 a show enp2s0 | grep inet
+java -XshowSettings:properties -version 2&gt;&amp;1 | grep -E <span class="c">'java.home|java.version '</span>
+echo $JAVA_HOME</code></pre>
+      </div>
+      <p>➜ La primera mostra la IP de la targeta interna. La segona demana a Java les seves propietats i en filtra dues (<code>2&gt;&amp;1</code> cal perquè Java les escriu per la sortida d'errors). La tercera mostra la variable.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>    inet 192.168.1.10/24 ... scope global enp2s0     <span class="c"># estàs al servidor</span>
+    java.home = /usr/lib/jvm/java-21-openjdk-amd64   <span class="c"># on és Java de veritat</span>
+    java.version = 21.0.x                             <span class="c"># versió 21</span>
+/usr/lib/jvm/java-21-openjdk-amd64                    <span class="c"># ⚠ EL MÉS IMPORTANT: ha de coincidir amb java.home</span></code></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <pre><code>sudo ss -tlnp | grep -E <span class="c">':(22|8080) '</span></code></pre>
+      </div>
+      <p>➜ Llista els ports en escolta i filtra el 22 (SSH) i el 8080 (on anirà Tomcat).</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
+        <pre><code>LISTEN 0 4096  *:22  *:*  users:(("sshd",...),("systemd",pid=1,...))   <span class="c"># SSH escolta</span>
+                                                                    <span class="c"># cap línia amb :8080 → encara no hi ha Tomcat</span></code></pre>
+      </div>
+    </div>
+
+    <h3>Llista de comprovació</h3>
+    <ul>
+      <li>Les tres màquines tenen la IP fixa correcta a la targeta interna (<code>.10</code>, <code>.20</code> i <code>.30</code>) i continuen tenint Internet per la <em>default</em>.</li>
+      <li>L'administrador i el client arriben al servidor amb <code>ping</code>.</li>
+      <li>L'administrador entra al servidor per SSH amb l'usuari <code>isard_ssh</code>.</li>
+      <li><code>java -version</code> i <code>javac -version</code> mostren la versió <strong>21</strong>.</li>
+      <li><code>echo $JAVA_HOME</code> mostra la carpeta de Java en una sessió SSH nova i coincideix amb <code>java.home</code>.</li>
+      <li><code>java Hola</code> imprimeix la versió 21 i la ruta de <code>JAVA_HOME</code>, no <code>null</code>.</li>
+      <li>El port <code>8080</code> encara està lliure: el client no s'hi pot connectar.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA3 · A1.0
+  </footer>
+
+</div>
+</body>
+</html>
