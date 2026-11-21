@@ -116,11 +116,11 @@
     <div class="meta">
       <span class="pill">RA <strong>RA2</strong></span>
       <span class="pill">Activitat de <strong>preparació</strong></span>
-      <span class="pill">Màquines <strong>Ubuntu</strong></span>
+      <span class="pill">Màquines <strong>Ubuntu 26.04</strong></span>
     </div>
     <div class="callout switch">
       <span class="ico">🐧</span>
-      <p>Aquesta versió és per a màquines <strong>Ubuntu</strong>. Si les teves màquines són <strong>Debian</strong>, fes l'<a href="aea2_a0a.html">A0a</a>. El resultat final és el mateix; el que canvia és com es configura la IP fixa (<strong>Netplan</strong>), com s'activa el servei SSH i el tallafocs <code>ufw</code>.</p>
+      <p>Aquesta versió és per a màquines <strong>Ubuntu 26.04</strong>. Si les teves màquines són <strong>Debian</strong>, fes l'<a href="aea2_a0a.html">A0a</a>. El resultat final és el mateix; el que canvia és com es configura la IP fixa (<strong>Netplan</strong>), com s'activa el servei SSH i el tallafocs <code>ufw</code>.</p>
     </div>
   </header>
 
@@ -143,7 +143,7 @@
 
     <h3>Prerequisits</h3>
     <ul>
-      <li>Tres màquines <strong>Ubuntu</strong> (22.04 o 24.04) a <strong>IsardVDI</strong>, cadascuna amb <strong>dues targetes de xarxa</strong>: una <em>default</em> (amb sortida a Internet) i una <em>interna</em> (la xarxa privada que connecta les tres màquines).</li>
+      <li>Tres màquines <strong>Ubuntu 26.04</strong> a <strong>IsardVDI</strong>, cadascuna amb <strong>dues targetes de xarxa</strong>: una <em>default</em> (amb sortida a Internet) i una <em>interna</em> (la xarxa privada que connecta les tres màquines).</li>
       <li>Saber obrir un terminal i fer servir <code>sudo</code> (AEA0).</li>
     </ul>
   </section>
@@ -482,7 +482,7 @@ network:
       <p>➜ Mostra l'estat del <em>socket</em> d'SSH. Ha d'aparèixer <code>active (listening)</code>. Prem <code>q</code> per sortir.</p>
       <div class="callout tip">
         <span class="ico">💡</span>
-        <p><strong>Diferència amb Debian:</strong> a les versions recents d'Ubuntu (22.10 i posteriors), el servei <code>ssh</code> no està sempre engegat: el <code>ssh.socket</code> escolta al port 22 i l'engega quan arriba la primera connexió. Per això, si fas <code>systemctl status ssh</code> abans de connectar-te, pot sortir <code>inactive (dead)</code> amb una línia <code>TriggeredBy: ssh.socket</code>. <strong>És normal</strong>: quan l'administrador s'hi connecti, passarà a <code>active (running)</code>. A Ubuntu 22.04 encara funciona com a Debian i <code>systemctl status ssh</code> ja mostra <code>active (running)</code>.</p>
+        <p><strong>Diferència amb Debian:</strong> a Ubuntu 26.04 el servei <code>ssh</code> no està sempre engegat: el <code>ssh.socket</code> escolta al port 22 i l'engega quan arriba la primera connexió. Per això, si fas <code>systemctl status ssh</code> abans de connectar-te, pot sortir <code>inactive (dead)</code> amb una línia <code>TriggeredBy: ssh.socket</code>. <strong>És normal</strong>: quan l'administrador s'hi connecti, passarà a <code>active (running)</code>.</p>
       </div>
       <p>Ubuntu porta el tallafocs <code>ufw</code>. Comprova si està actiu:</p>
       <div class="term">
@@ -585,7 +585,7 @@ network:
         <tr><td>Després de canviar la xarxa, la màquina no té Internet</td><td>Has tocat la targeta <em>default</em>.</td><td>Deixa la targeta <em>default</em> com estava (DHCP) i posa la IP fixa només a la interna.</td></tr>
         <tr><td><code>sudo apt install</code> falla al servidor</td><td>No hi ha sortida a Internet per la targeta <em>default</em>, o no has fet <code>sudo apt update</code>.</td><td>Comprova amb <code>ip a</code> que la targeta <em>default</em> té IP i torna a fer <code>sudo apt update</code>.</td></tr>
         <tr><td><code>ssh</code> dona <em>Connection refused</em></td><td>El servei SSH no està instal·lat o no està actiu al servidor.</td><td>Al servidor, fes <code>sudo apt install openssh-server -y</code> i comprova <code>systemctl status ssh.socket</code>.</td></tr>
-        <tr><td><code>systemctl status ssh</code> diu <em>inactive (dead)</em></td><td>A Ubuntu recent el servei l'engega el <code>ssh.socket</code> quan arriba una connexió.</td><td>És normal. Comprova <code>systemctl status ssh.socket</code> (ha de dir <code>active (listening)</code>) i prova de connectar-te.</td></tr>
+        <tr><td><code>systemctl status ssh</code> diu <em>inactive (dead)</em></td><td>A Ubuntu 26.04 el servei l'engega el <code>ssh.socket</code> quan arriba una connexió.</td><td>És normal. Comprova <code>systemctl status ssh.socket</code> (ha de dir <code>active (listening)</code>) i prova de connectar-te.</td></tr>
         <tr><td><code>ssh</code> es queda penjat i acaba amb <em>Connection timed out</em></td><td>El tallafocs <code>ufw</code> del servidor està actiu i bloqueja el port 22.</td><td>Al servidor, fes <code>sudo ufw allow OpenSSH</code> i torna-ho a provar.</td></tr>
         <tr><td><code>ssh</code> dona <em>Permission denied</em></td><td>Nom d'usuari o contrasenya incorrectes, o l'usuari <code>isard_ssh</code> no existeix al servidor.</td><td>Connecta't amb <code>ssh isard_ssh@192.168.1.10</code> i escriu la contrasenya que vas posar al pas 2.4. Si no recordes la contrasenya, canvia-la al servidor amb <code>sudo passwd isard_ssh</code>; si l'usuari no existeix, crea'l (pas 2.4).</td></tr>
         <tr><td>Per SSH, <code>sudo</code> diu <em>isard_ssh is not in the sudoers file</em></td><td>No has afegit <code>isard_ssh</code> al grup <code>sudo</code>.</td><td>Al servidor, fes <code>sudo usermod -aG sudo isard_ssh</code>, surt de la sessió SSH amb <code>exit</code> i torna-hi a entrar.</td></tr>
