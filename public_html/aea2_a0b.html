@@ -356,13 +356,7 @@
     <h3>2.2 · Assignar la IP fixa a la targeta interna</h3>
     <div class="role-box all">
       <span class="role-label all">Totes les màquines · exemple: servidor</span>
-      <p>A Ubuntu <strong>no</strong> es fa servir <code>/etc/network/interfaces</code> com a Debian: la xarxa es configura amb <strong>Netplan</strong>, amb fitxers <code>.yaml</code> a la carpeta <code>/etc/netplan/</code>. Primer mira quins fitxers hi ha:</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>ls /etc/netplan/</code></pre>
-      </div>
-      <p>➜ Llista els fitxers de configuració de Netplan. Hi veuràs un o més fitxers (per exemple <code>01-network-manager-all.yaml</code> o <code>50-cloud-init.yaml</code>): són els de la targeta <em>default</em> i <strong>no els toquem</strong>.</p>
-      <p>Crearem un fitxer <strong>nou</strong>, només per a la targeta interna. Netplan llegeix els fitxers per ordre alfabètic, i el número <code>60</code> fa que s'apliqui després dels que ja hi ha. Entra a la carpeta i crea'l amb <code>nano</code>:</p>
+      <p>A Ubuntu <strong>no</strong> es fa servir <code>/etc/network/interfaces</code> com a Debian: la xarxa es configura amb <strong>Netplan</strong>, amb fitxers <code>.yaml</code> a la carpeta <code>/etc/netplan/</code>. Entra a la carpeta:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>cd /etc/netplan</code></pre>
@@ -370,12 +364,38 @@
       <p>➜ Entra a la carpeta de configuració de Netplan.</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>sudo nano 60-interna.yaml</code></pre>
+        <pre><code>ls</code></pre>
       </div>
-      <p>➜ Crea i obre el fitxer <code>60-interna.yaml</code>. Cal <code>sudo</code> perquè és un fitxer del sistema.</p>
+      <p>➜ Llista els fitxers de configuració. A IsardVDI hi trobaràs <code>99-isardvdi-conf.yaml</code>, el fitxer que crea IsardVDI. Mira'n el contingut:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>sudo cat 99-isardvdi-conf.yaml</code></pre>
+      </div>
+      <p>➜ Mostra el fitxer. Cal <code>sudo</code> perquè només el pot llegir <code>root</code> (sense <code>sudo</code> surt <em>Permission denied</em>). La sortida és aquesta:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida de sudo cat 99-isardvdi-conf.yaml</span></div>
+        <pre><code># This is the network config written by IsardVDI
+network:
+  version: 2
+  ethernets:
+    enp1s0:
+      dhcp4: true      <span class="c"># targeta DEFAULT → DHCP (es queda així)</span>
+    enp2s0:
+      dhcp4: true      <span class="c"># targeta INTERNA → també DHCP: això és el que canviarem</span></code></pre>
+      </div>
+      <p>IsardVDI posa <strong>les dues targetes</strong> amb DHCP. No modificarem aquest fitxer: en crearem un de <strong>nou</strong> només per a la targeta interna.</p>
+      <div class="callout warn">
+        <span class="ico">⚠️</span>
+        <p><strong>El nom del fitxer importa.</strong> Netplan llegeix els fitxers per <strong>ordre alfabètic</strong> i, si dos fitxers configuren la mateixa targeta, <strong>mana el darrer</strong>. El nostre fitxer s'ha de dir <code>99-xarxa-interna.yaml</code>: com que <code>x</code> va després d'<code>i</code>, es llegeix <strong>després</strong> de <code>99-isardvdi-conf.yaml</code> i el seu <code>dhcp4: false</code> substitueix el <code>dhcp4: true</code> d'IsardVDI. Si li posessis un nom que anés abans (per exemple <code>60-interna.yaml</code>), IsardVDI tornaria a posar DHCP a la targeta interna.</p>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>sudo nano 99-xarxa-interna.yaml</code></pre>
+      </div>
+      <p>➜ Crea i obre el fitxer <code>99-xarxa-interna.yaml</code>. Cal <code>sudo</code> perquè és un fitxer del sistema.</p>
       <p>Escriu-hi aquest contingut, <strong>canviant</strong> <code>enp2s0</code> pel nom real de la teva targeta interna i la IP segons la màquina (servidor <code>.10</code>, administrador <code>.20</code>, client <code>.30</code>). Aquest exemple és el del <strong>servidor</strong>:</p>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">/etc/netplan/60-interna.yaml</span></div>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">/etc/netplan/99-xarxa-interna.yaml</span></div>
         <pre><code><span class="c"># --- Targeta interna (xarxa privada) ---</span>
 network:
   version: 2
@@ -399,7 +419,7 @@ network:
       <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>). Netplan exigeix que només l'administrador (<code>root</code>) pugui llegir aquests fitxers; si no, avisa que els permisos són massa oberts:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>sudo chmod 600 60-interna.yaml</code></pre>
+        <pre><code>sudo chmod 600 99-xarxa-interna.yaml</code></pre>
       </div>
       <p>➜ Deixa el fitxer amb permisos de lectura i escriptura <strong>només per a <code>root</code></strong>.</p>
       <p>Aplica la configuració:</p>
@@ -414,9 +434,15 @@ network:
         <pre><code>ip a show enp2s0</code></pre>
       </div>
       <p>➜ Mostra només la targeta <code>enp2s0</code> per comprovar que ja té la IP fixa assignada (<code>inet 192.168.1.10/24</code>).</p>
+      <p>També pots demanar a Netplan la configuració final de la targeta interna, després de combinar tots els fitxers:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>sudo netplan get ethernets.enp2s0</code></pre>
+      </div>
+      <p>➜ Ha de sortir <code>dhcp4: false</code> i l'adreça <code>192.168.1.10/24</code>. Si surt <code>dhcp4: true</code>, el teu fitxer s'està llegint abans que el d'IsardVDI: revisa'n el nom.</p>
       <div class="callout tip">
         <span class="ico">💡</span>
-        <p>No toquis la targeta <em>default</em> ni els fitxers de Netplan que ja hi havia: ha de continuar amb DHCP perquè les màquines segueixin tenint Internet per instal·lar paquets. Repeteix aquest pas a les tres màquines amb la seva IP (<code>.10</code>, <code>.20</code>, <code>.30</code>).</p>
+        <p>No toquis la targeta <em>default</em> ni el fitxer <code>99-isardvdi-conf.yaml</code>: ha de continuar amb DHCP perquè les màquines segueixin tenint Internet per instal·lar paquets. Repeteix aquest pas a les tres màquines amb la seva IP (<code>.10</code>, <code>.20</code>, <code>.30</code>).</p>
       </div>
     </div>
 
@@ -579,9 +605,10 @@ network:
     <table>
       <thead><tr><th>Problema</th><th>Causa</th><th>Solució</th></tr></thead>
       <tbody>
-        <tr><td><code>ping</code> no respon</td><td>La IP fixa no s'ha aplicat o l'has posada a la targeta <em>default</em> en lloc de la interna.</td><td>Revisa <code>/etc/netplan/60-interna.yaml</code> amb el nom correcte de la targeta interna, fes <code>sudo netplan apply</code> i comprova-ho amb <code>ip a</code>.</td></tr>
+        <tr><td><code>ping</code> no respon</td><td>La IP fixa no s'ha aplicat o l'has posada a la targeta <em>default</em> en lloc de la interna.</td><td>Revisa <code>/etc/netplan/99-xarxa-interna.yaml</code> amb el nom correcte de la targeta interna, fes <code>sudo netplan apply</code> i comprova-ho amb <code>ip a</code>.</td></tr>
+        <tr><td><code>sudo netplan get ethernets.enp2s0</code> mostra <code>dhcp4: true</code></td><td>El teu fitxer es llegeix abans que <code>99-isardvdi-conf.yaml</code> i la targeta interna continua amb DHCP.</td><td>Posa-li un nom que vagi després alfabèticament (<code>99-xarxa-interna.yaml</code>), fes <code>sudo netplan apply</code> i comprova <code>sudo netplan get ethernets.enp2s0</code>.</td></tr>
         <tr><td><code>netplan apply</code> dona un error de YAML</td><td>Hi ha un espai de més o de menys, o has fet servir tabuladors.</td><td>Torna a obrir el fitxer i revisa que cada nivell estigui 2 espais més a dins que l'anterior, sense tabuladors. L'error indica la línia on és el problema.</td></tr>
-        <tr><td><code>netplan</code> avisa <em>Permissions ... are too open</em></td><td>El fitxer <code>.yaml</code> el poden llegir altres usuaris.</td><td>Fes <code>sudo chmod 600 /etc/netplan/60-interna.yaml</code> i torna a fer <code>sudo netplan apply</code>.</td></tr>
+        <tr><td><code>netplan</code> avisa <em>Permissions ... are too open</em></td><td>El fitxer <code>.yaml</code> el poden llegir altres usuaris.</td><td>Fes <code>sudo chmod 600 /etc/netplan/99-xarxa-interna.yaml</code> i torna a fer <code>sudo netplan apply</code>.</td></tr>
         <tr><td>Després de canviar la xarxa, la màquina no té Internet</td><td>Has tocat la targeta <em>default</em>.</td><td>Deixa la targeta <em>default</em> com estava (DHCP) i posa la IP fixa només a la interna.</td></tr>
         <tr><td><code>sudo apt install</code> falla al servidor</td><td>No hi ha sortida a Internet per la targeta <em>default</em>, o no has fet <code>sudo apt update</code>.</td><td>Comprova amb <code>ip a</code> que la targeta <em>default</em> té IP i torna a fer <code>sudo apt update</code>.</td></tr>
         <tr><td><code>ssh</code> dona <em>Connection refused</em></td><td>El servei SSH no està instal·lat o no està actiu al servidor.</td><td>Al servidor, fes <code>sudo apt install openssh-server -y</code> i comprova <code>systemctl status ssh.socket</code>.</td></tr>
