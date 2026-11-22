@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AEA3·A1.2 — Integra Apache amb Tomcat com a proxy invers · M0614</title>
+<title>AEA3·A1.2 — Posa Apache davant de Tomcat · M0614</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -106,6 +106,22 @@
   .check .check-title{font-family:var(--display);font-weight:600;color:#1D4E89;display:block;margin-bottom:.35rem}
   .check .url{font-family:var(--mono);font-size:.86rem;background:#fff;border:1px solid #BBD3F0;color:#1D4E89;padding:.2rem .5rem;border-radius:6px;display:inline-block;margin:.15rem 0 .45rem}
   .check p{margin:.3rem 0}
+
+  /* Màquines de l'AEA3: Apache (verd) i Tomcat (lila) */
+  :root{--tomcat-bg:#F1ECFB;--tomcat-border:#D2C4F1;--tomcat-ink:#5B3FA8}
+  .role-box.tomcat{background:var(--tomcat-bg);border-color:var(--tomcat-border)}
+  .role-label.tomcat{color:var(--tomcat-ink)}
+  .machines td:first-child{white-space:nowrap}
+  .steps-done{list-style:none;margin-left:0}
+  .steps-done li::before{content:"☐ ";color:var(--accent);font-weight:600}
+
+  /* Màquines de l'AEA3: Apache (verd) i Tomcat (lila) */
+  :root{--tomcat-bg:#F1ECFB;--tomcat-border:#D2C4F1;--tomcat-ink:#5B3FA8}
+  .role-box.tomcat{background:var(--tomcat-bg);border-color:var(--tomcat-border)}
+  .role-label.tomcat{color:var(--tomcat-ink)}
+  .machines td:first-child{white-space:nowrap}
+  .steps-done{list-style:none;margin-left:0}
+  .steps-done li::before{content:"☐ ";color:var(--accent);font-weight:600}
 </style>
 </head>
 <body>
@@ -115,410 +131,219 @@
 
   <header>
     <span class="badge">AEA3 · A1.2</span>
-    <span class="eyebrow">M0614 · Linux</span>
-    <h1>Integra Apache amb Tomcat <span class="code">com a proxy invers</span></h1>
-    <p class="lede">Posaràs Apache davant de Tomcat. L'usuari escriurà www.app.local, entrarà pel port 80 com en qualsevol web, i Apache passarà la petició a Tomcat, que quedarà darrere sense que el client ho noti.</p>
+    <span class="eyebrow">M0614 · Linux · Ubuntu 26.04</span>
+    <h1>Posa Apache <span class="code">davant de Tomcat</span></h1>
+    <p class="lede">Instal·laràs Apache a la màquina apache i el faràs servir de proxy invers: el client entrarà per Apache i Apache passarà les peticions a Tomcat.</p>
     <div class="meta">
       <span class="pill">RA <strong>RA3</strong></span>
-      <!-- REVISAR: confirmar la numeració dels CA del RA3 segons la programació del mòdul -->
-      <span class="pill">CA <strong>3.5 · 3.6</strong></span>
+      <span class="pill">Màquina <strong>apache</strong></span>
     </div>
   </header>
 
   <div class="rule"></div>
 
-  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
   <section>
     <div class="sec-head">
       <span class="sec-num">0</span>
-      <h2>Objectius i prerequisits</h2>
+      <h2>Què faràs</h2>
     </div>
-
-    <p>En aquesta activitat aprendràs a:</p>
     <ul>
-      <li>Explicar què és un <strong>proxy invers</strong> i per què es posa Apache davant d'un servidor d'aplicacions.</li>
-      <li>Activar els mòduls <code>proxy</code> i <code>proxy_http</code> d'Apache.</li>
-      <li>Crear un <strong>host virtual</strong> <code>www.app.local</code> que reenviï les peticions a Tomcat.</li>
-      <li>Comprovar, amb les capçaleres i els registres, que l'usuari parla amb Apache i Apache parla amb Tomcat.</li>
+      <li>Instal·lar <strong>Apache</strong> a la màquina apache.</li>
+      <li>Fer que Apache passi les visites a Tomcat (<strong>proxy invers</strong>).</li>
+      <li>Entrar a l'aplicació des del client amb un nom: <code>www.app.local</code>.</li>
+    </ul>
+    <h3>Què necessites</h3>
+    <ul>
+      <li>Haver fet l'<a href="aea3_a1_1.html">A1.1</a>: Tomcat funcionant a la màquina tomcat amb l'aplicació <code>sample</code>.</li>
     </ul>
 
-    <h3>Prerequisit important</h3>
-    <div class="callout warn">
-      <span class="ico">⚠️</span>
-      <p>Necessites la xarxa de l'<a href="aea3_a1_0.html">A1.0</a> i Tomcat funcionant com a servei amb <code>sample.war</code> desplegat (<a href="aea3_a1_1.html">A1.1</a>). Comprova-ho abans: <code>systemctl is-active tomcat</code> ha de dir <code>active</code>.</p>
-    </div>
   </section>
 
-  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
   <section>
     <div class="sec-head">
       <span class="sec-num">1</span>
-      <h2>Context i teoria mínima</h2>
+      <h2>Què és un proxy invers</h2>
     </div>
-
-    <h3>Per què no deixem l'usuari entrar directament al 8080?</h3>
-    <p>A l'A1.1 el client entrava a <code>http://192.168.1.10:8080</code>. Funciona, però en un servei real no es fa així:</p>
-    <ul>
-      <li>L'usuari espera escriure un <strong>nom</strong> (<code>www.app.local</code>), sense port. Sense port, el navegador va al <strong>80</strong> (o al 443 amb HTTPS).</li>
-      <li>Apache és molt bo en la feina "de porta": <strong>HTTPS</strong>, <strong>hosts virtuals</strong>, restriccions per IP, registres, fitxers estàtics. Tomcat es pot dedicar a executar Java.</li>
-      <li>Si Tomcat no està exposat, hi ha <strong>menys superfície d'atac</strong>: només Apache parla amb el món.</li>
-    </ul>
-
-    <h3>Què és un proxy invers?</h3>
-    <p>Un <strong>proxy invers</strong> és un servidor que rep les peticions dels clients en nom d'un altre servidor que hi ha darrere. El client creu que parla amb Apache; Apache fa la mateixa petició a Tomcat, rep la resposta i la torna al client.</p>
-    <p>A Apache això ho fan dos mòduls: <code>mod_proxy</code> (el motor de proxy) i <code>mod_proxy_http</code> (la part que sap parlar HTTP amb el servidor de darrere). Dins del host virtual, dues directives fan la feina:</p>
-    <ul>
-      <li><code>ProxyPass / http://127.0.0.1:8080/</code> → tot el que arribi a <code>/</code>, reenvia-ho a Tomcat.</li>
-      <li><code>ProxyPassReverse / http://127.0.0.1:8080/</code> → si Tomcat respon amb una redirecció cap a <code>127.0.0.1:8080</code>, reescriu-la perquè apunti a <code>www.app.local</code>. Sense això, el navegador del client acabaria intentant anar a una adreça que no és la seva.</li>
-    </ul>
-
+    <p>Fins ara el client entrava <strong>directament</strong> a Tomcat pel port 8080. Ara posarem <strong>Apache al davant</strong>: el client parla només amb Apache (port 80) i Apache demana la pàgina a Tomcat i la hi torna. Això és un <strong>proxy invers</strong>.</p>
+    <p>Avantatges: l'usuari no ha d'escriure <code>:8080</code>, Tomcat queda amagat darrere d'Apache i, a l'A1.3, només caldrà posar HTTPS a Apache.</p>
     <figure class="netfig">
-      <svg viewBox="0 0 820 320" role="img" aria-label="Proxy invers: el client resol www.app.local a 192.168.1.10 amb el seu fitxer /etc/hosts i demana la pàgina al port 80. Apache, amb el host virtual www.app.local, reenvia la petició a Tomcat a 127.0.0.1:8080 dins del mateix servidor. Tomcat respon a Apache i Apache respon al client.">
+      <svg viewBox="0 0 820 290" role="img" aria-label="El client entra a la màquina apache pel port :80 HTTP; apache passa la petició a la màquina tomcat pel port 8080. La màquina admin es connecta per SSH a apache i a tomcat per configurar-les.">
         <defs>
-          <marker id="aO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07B1E"/></marker>
-          <marker id="aB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1D4E89"/></marker>
+          <marker id="fO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07B1E"/></marker>
+          <marker id="fG" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9aa4b2"/></marker>
         </defs>
+        <path d="M722,148 C722,70 330,60 315,146" fill="none" stroke="#9aa4b2" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#fG)"/>
+        <path d="M722,148 C722,100 545,95 535,146" fill="none" stroke="#9aa4b2" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#fG)"/>
+        <rect x="560" y="40" width="150" height="20" rx="6" fill="#EDF1F6"/>
+        <text x="635" y="54" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11.5" fill="#3A4658">SSH :22 · configura</text>
         <g>
-          <rect x="20" y="90" width="170" height="150" rx="12" fill="#FFFFFF" stroke="#D6DEE8"/>
-          <text x="105" y="125" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="16" fill="#1A2230">Client</text>
-          <text x="105" y="147" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#1A2230">192.168.1.30</text>
-          <rect x="35" y="170" width="140" height="52" rx="8" fill="#EDF1F6" stroke="#D6DEE8"/>
-          <text x="105" y="191" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#3A4658">/etc/hosts</text>
-          <text x="105" y="209" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#3A4658">www.app.local → .10</text>
+          <rect x="15" y="150" width="160" height="96" rx="12" fill="#FFFFFF" stroke="#1D4E89" stroke-width="2"/>
+          <text x="95" y="182" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#1A2230">client</text>
+          <text x="95" y="204" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#5A6677">Navegador</text>
+          <text x="95" y="228" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#1A2230">192.168.1.30</text>
         </g>
-        <rect x="260" y="30" width="540" height="270" rx="14" fill="#1A2230"/>
-        <text x="280" y="58" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">Servidor</text>
-        <text x="780" y="58" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="13" fill="#E07B1E">192.168.1.10</text>
-        <rect x="280" y="95" width="210" height="130" rx="10" fill="#263042" stroke="#E07B1E" stroke-width="1.6"/>
-        <text x="385" y="130" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">Apache · :80</text>
-        <text x="385" y="155" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">VirtualHost www.app.local</text>
-        <text x="385" y="178" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E07B1E">mod_proxy · proxy_http</text>
-        <text x="385" y="201" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">ProxyPass / → :8080</text>
-        <rect x="570" y="95" width="210" height="130" rx="10" fill="#263042" stroke="#3A4658"/>
-        <text x="675" y="140" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">Tomcat · :8080</text>
-        <text x="675" y="165" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">ROOT · /sample</text>
-        <text x="675" y="188" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">Java 21</text>
-        <line x1="194" y1="140" x2="274" y2="140" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#aO)"/>
-        <text x="232" y="128" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9c5813">1 · :80</text>
-        <line x1="494" y1="140" x2="564" y2="140" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#aO)"/>
-        <text x="529" y="128" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">2 · 127.0.0.1</text>
-        <line x1="564" y1="190" x2="494" y2="190" stroke="#1D4E89" stroke-width="2" marker-end="url(#aB)"/>
-        <text x="529" y="208" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#1D4E89">3 · resposta</text>
-        <line x1="274" y1="190" x2="194" y2="190" stroke="#1D4E89" stroke-width="2" marker-end="url(#aB)"/>
-        <text x="232" y="240" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#1D4E89">4 · resposta</text>
-        <text x="530" y="270" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#AEB9C9">Apache i Tomcat parlen dins del mateix servidor, per 127.0.0.1</text>
+        <g>
+          <rect x="235" y="150" width="160" height="96" rx="12" fill="#0F6E56" stroke="#0F6E56" stroke-width="2"/>
+          <text x="315" y="182" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">apache</text>
+          <text x="315" y="204" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#E6ECF5">Apache · servidor web</text>
+          <text x="315" y="228" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#FFFFFF">192.168.1.10</text>
+        </g>
+        <g>
+          <rect x="455" y="150" width="160" height="96" rx="12" fill="#FFFFFF" stroke="#5B3FA8" stroke-width="2"/>
+          <text x="535" y="182" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#1A2230">tomcat</text>
+          <text x="535" y="204" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#5A6677">Tomcat · aplicacions Java</text>
+          <text x="535" y="228" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#1A2230">192.168.1.11</text>
+        </g>
+        <g>
+          <rect x="650" y="150" width="145" height="96" rx="12" fill="#FFFFFF" stroke="#A85610" stroke-width="2"/>
+          <text x="722" y="182" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#1A2230">admin</text>
+          <text x="722" y="204" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#5A6677">Administrador · SSH</text>
+          <text x="722" y="228" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#1A2230">192.168.1.20</text>
+        </g>
+        <line x1="178" y1="198" x2="230" y2="198" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#fO)"/>
+        <text x="204" y="190" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">:80</text>
+        <line x1="398" y1="198" x2="450" y2="198" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#fO)"/>
+        <text x="424" y="190" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">:8080</text>
+        <text x="410" y="275" text-anchor="middle" font-family="Inter, sans-serif" font-size="12.5" fill="#5A6677">Avui: la màquina apache. El client entra per apache i apache passa la petició a tomcat.</text>
       </svg>
-      <figcaption>El client només veu Apache al port 80. La connexió entre Apache i Tomcat no surt del servidor.</figcaption>
+      <figcaption>El client només parla amb apache; apache demana la pàgina a tomcat. L'admin configura les dues màquines per SSH.</figcaption>
     </figure>
 
-    <h3>Conceptes clau</h3>
-    <table>
-      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
-      <tbody>
-        <tr><td><strong>Proxy invers</strong></td><td>Servidor que rep les peticions en nom d'un altre i les hi reenvia. Aquí, Apache davant de Tomcat.</td></tr>
-        <tr><td><strong>Backend</strong></td><td>El servidor que hi ha darrere del proxy i fa la feina de debò (Tomcat).</td></tr>
-        <tr><td><strong><code>mod_proxy</code> / <code>mod_proxy_http</code></strong></td><td>Mòduls d'Apache: el primer és el motor de proxy; el segon li permet parlar HTTP amb el backend.</td></tr>
-        <tr><td><strong><code>ProxyPass</code></strong></td><td>Diu quines rutes es reenvien i a on. <code>ProxyPass /ruta !</code> vol dir "aquesta ruta <strong>no</strong> la reenviïs".</td></tr>
-        <tr><td><strong><code>ProxyPassReverse</code></strong></td><td>Reescriu les redireccions que torna el backend perquè apuntin al nom públic.</td></tr>
-        <tr><td><strong><code>ProxyPreserveHost On</code></strong></td><td>Passa a Tomcat el nom original (<code>www.app.local</code>) en lloc de <code>127.0.0.1</code>.</td></tr>
-        <tr><td><strong>503 Service Unavailable</strong></td><td>Error que dona Apache quan el backend no respon (per exemple, Tomcat aturat).</td></tr>
-      </tbody>
-    </table>
-
-    <p>Així quedarà la configuració:</p>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">estructura</span></div>
-      <pre><code>Servidor
-/etc/apache2/sites-available/app.conf     <span class="c"># host virtual www.app.local (proxy cap a Tomcat)</span>
-/etc/apache2/mods-enabled/proxy*.load     <span class="c"># mòduls proxy i proxy_http activats</span>
-/var/log/apache2/app_access.log           <span class="c"># peticions que arriben a Apache</span>
-/opt/tomcat/                              <span class="c"># Tomcat de l'A1.1, sense cap canvi</span>
-
-Client
-/etc/hosts                                <span class="c"># 192.168.1.10  www.app.local app.local</span></code></pre>
-    </div>
   </section>
 
-  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
   <section>
     <div class="sec-head">
       <span class="sec-num">2</span>
-      <h2>Pas a pas guiat</h2>
+      <h2>Pas a pas</h2>
     </div>
-
     <div class="callout tip">
       <span class="ico">💡</span>
-      <p>Cada pas ve dins d'una <strong>capsa de color</strong> que indica qui l'ha de fer: <span class="legend"><span><span class="sw" style="background:var(--admin-bg);border-color:var(--admin-border)"></span>Administrador</span><span><span class="sw" style="background:var(--server-bg);border-color:var(--server-border)"></span>Servidor</span><span><span class="sw" style="background:var(--client-bg);border-color:var(--client-border)"></span>Client</span></span>. Els fitxers de configuració no porten capsa.</p>
+      <p>Cada pas ve dins d'una <strong>capsa de color</strong> que diu a quina màquina l'has de fer: <span class="legend"><span><span class="sw" style="background:var(--client-bg);border-color:var(--client-border)"></span>Client</span><span><span class="sw" style="background:var(--admin-bg);border-color:var(--admin-border)"></span>Administrador</span><span><span class="sw" style="background:var(--server-bg);border-color:var(--server-border)"></span>Apache</span><span><span class="sw" style="background:var(--tomcat-bg);border-color:var(--tomcat-border)"></span>Tomcat</span><span><span class="sw" style="background:var(--slate-soft);border-color:var(--hairline)"></span>Diverses màquines</span></span>.</p>
     </div>
 
-    <h2 style="margin-top:2rem">Part 1 · Apache com a proxy</h2>
-
-    <h3>2.1 · Connecta't al servidor per SSH</h3>
+    <h3>2.1 · Entra a la màquina apache</h3>
     <div class="role-box admin">
       <span class="role-label admin">Administrador</span>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
-        <pre><code>ssh isard_ssh@192.168.1.10</code></pre>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin</span></div>
+        <pre><code>ssh isard@192.168.1.10</code></pre>
       </div>
-      <p>➜ Obre una sessió de terminal xifrada al servidor per SSH.</p>
-    </div>
-    <div class="callout switch">
-      <span class="ico">💻→</span>
-      <p>A partir d'aquí, tot el que escrius s'executa <strong>al servidor</strong>, no a l'administrador. Per tornar a l'administrador quan acabis, escriu <code>exit</code>.</p>
+      <p>➜ Entra a la màquina <strong>apache</strong> per SSH amb l'usuari <code>isard</code> i la seva contrasenya. Quan el <em>prompt</em> digui <code>isard@apache</code>, ja hi ets.</p>
     </div>
 
     <h3>2.2 · Instal·la Apache</h3>
     <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <span class="role-label server">Administrador → Apache · per SSH</span>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo apt update</code></pre>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <pre><code>sudo apt update
+sudo apt install -y apache2</code></pre>
       </div>
-      <p>➜ Actualitza la llista de paquets disponibles.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo apt install -y apache2</code></pre>
-      </div>
-      <p>➜ Instal·la Apache. A Ubuntu, en acabar ja queda engegat i habilitat, escoltant el port 80.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo ss -tlnp | grep -E <span class="c">':(80|8080) '</span></code></pre>
-      </div>
-      <p>➜ Comprova que ara hi ha dos servidors al mateix equip, cadascun al seu port.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
-        <pre><code>LISTEN 0 511  *:80    *:*  users:(("apache2",pid=...))   <span class="c"># Apache: servidor web</span>
-LISTEN 0 100  *:8080  *:*  users:(("java",pid=...))      <span class="c"># Tomcat: servidor d'aplicacions</span></code></pre>
-      </div>
+      <p>➜ Instal·la el servidor web Apache.</p>
     </div>
-
-    <h3>2.3 · Activa els mòduls de proxy</h3>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo a2enmod proxy proxy_http</code></pre>
-      </div>
-      <p>➜ Activa <code>mod_proxy</code> i <code>mod_proxy_http</code>. Igual que a l'AEA2 amb <code>ssl</code>, <code>a2enmod</code> crea els enllaços a <code>mods-enabled</code>.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo systemctl restart apache2</code></pre>
-      </div>
-      <p>➜ Reinicia Apache. Per carregar mòduls nous cal <code>restart</code>, no n'hi ha prou amb <code>reload</code>.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>apache2ctl -M | grep proxy</code></pre>
-      </div>
-      <p>➜ Llista els mòduls carregats i filtra els de proxy. Han de sortir <code>proxy_module (shared)</code> i <code>proxy_http_module (shared)</code>.</p>
-    </div>
-
-    <h3>2.4 · Crea el host virtual www.app.local</h3>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo nano /etc/apache2/sites-available/app.conf</code></pre>
-      </div>
-      <p>➜ Crea el fitxer del host virtual nou.</p>
-      <p>Escriu-hi aquest contingut:</p>
-    </div>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">app.conf</span></div>
-      <pre><code>&lt;VirtualHost *:80&gt;
-    ServerName  www.app.local
-    ServerAlias app.local
-
-    <span class="c"># --- Proxy invers cap a Tomcat ---</span>
-    ProxyRequests     Off                 <span class="c"># NO fem de proxy obert per a navegar per Internet</span>
-    ProxyPreserveHost On                  <span class="c"># Tomcat rep el nom www.app.local</span>
-
-    ProxyPass /manager      !             <span class="c"># les eines d'administració no es publiquen (A1.3)</span>
-    ProxyPass /host-manager !
-
-    ProxyPass        / http://127.0.0.1:8080/
-    ProxyPassReverse / http://127.0.0.1:8080/
-
-    ErrorLog  ${APACHE_LOG_DIR}/app_error.log
-    CustomLog ${APACHE_LOG_DIR}/app_access.log combined
-&lt;/VirtualHost&gt;</code></pre>
-    </div>
-    <div class="callout warn">
-      <span class="ico">⚠️</span>
-      <p>L'ordre importa: Apache aplica el primer <code>ProxyPass</code> que coincideix. Les exclusions (<code>!</code>) han d'anar <strong>abans</strong> del <code>ProxyPass /</code> general. I vigila la barra final: <code>/</code> i <code>http://127.0.0.1:8080/</code> han d'acabar totes dues amb <code>/</code> o cap de les dues.</p>
-    </div>
-    <div class="callout tip">
-      <span class="ico">💡</span>
-      <p>Per què excloem <code>/manager</code>? Tomcat només deixa entrar al Manager des de <code>127.0.0.1</code>. Però, a través del proxy, totes les peticions arriben a Tomcat <strong>des de 127.0.0.1</strong>, siguin de qui siguin. Si no l'excloguéssim, el Manager quedaria publicat a tota la xarxa. A l'A1.3 l'obrirem de manera controlada.</p>
-    </div>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
-      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>).</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo a2ensite app</code></pre>
-      </div>
-      <p>➜ Activa el host virtual <code>app</code>.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo apache2ctl configtest</code></pre>
-      </div>
-      <p>➜ Revisa la sintaxi de tota la configuració sense aplicar-la. Ha de respondre <code>Syntax OK</code>.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo systemctl reload apache2</code></pre>
-      </div>
-      <p>➜ Recarrega Apache perquè apliqui el host virtual nou sense aturar el servei.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo apache2ctl -S</code></pre>
-      </div>
-      <p>➜ Mostra els hosts virtuals actius al port 80. Hi ha d'haver <code>000-default.conf</code> (el per defecte) i <code>www.app.local</code> amb l'àlies <code>app.local</code>.</p>
-    </div>
-
-    <h2 style="margin-top:2rem">Part 2 · Accés des del client</h2>
-
-    <h3>2.5 · Fes que el client conegui www.app.local</h3>
     <div class="role-box client">
       <span class="role-label client">Client</span>
-      <p>No tenim servidor DNS, així que el nom s'afegeix a mà al fitxer <code>/etc/hosts</code> del <strong>client</strong>, com a l'AEA2:</p>
+      <div class="check">
+        <span class="check-title">🔎 Comprova-ho al navegador del client</span>
+        <span class="url">http://192.168.1.10</span>
+        <p>Ha de sortir la pàgina de benvinguda d'Apache (<em>Apache2 Default Page</em>).</p>
+      </div>
+    </div>
+
+    <h3>2.3 · Activa el proxy</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Apache · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <pre><code>sudo a2enmod proxy proxy_http</code></pre>
+      </div>
+      <p>➜ Activa els dos mòduls que permeten a Apache passar peticions a un altre servidor.</p>
+    </div>
+
+    <h3>2.4 · Crea el lloc www.app.local</h3>
+    <div class="role-box server">
+      <span class="role-label server">Administrador → Apache · per SSH</span>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <pre><code>cd /etc/apache2/sites-available</code></pre>
+      </div>
+      <p>➜ Entra a la carpeta on hi ha els llocs web d'Apache.</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <pre><code>sudo nano app.conf</code></pre>
+      </div>
+      <p>➜ Crea el fitxer del lloc nou. Escriu-hi:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">app.conf</span></div>
+        <pre><code>&lt;VirtualHost *:80&gt;
+    ServerName www.app.local
+    ProxyPass        / http://192.168.1.11:8080/
+    ProxyPassReverse / http://192.168.1.11:8080/
+&lt;/VirtualHost&gt;</code></pre>
+      </div>
+      <ul>
+      <li><code>ServerName www.app.local</code> → el nom del lloc.</li>
+      <li><code>ProxyPass / http://192.168.1.11:8080/</code> → tot el que demanin a aquest lloc, Apache ho demana a Tomcat.</li>
+      <li><code>ProxyPassReverse</code> → corregeix les respostes de Tomcat perquè el client continuï veient <code>www.app.local</code>.</li>
+      </ul>
+      <p>Desa i surt. Activa el lloc i reinicia Apache:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <pre><code>sudo a2ensite app
+sudo systemctl restart apache2</code></pre>
+      </div>
+      <p>➜ Activa el lloc <code>app</code> i reinicia Apache perquè carregui els mòduls i el lloc nou.</p>
+    </div>
+
+    <h3>2.5 · Entra des del client pel nom</h3>
+    <div class="role-box client">
+      <span class="role-label client">Client</span>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — client</span></div>
         <pre><code>sudo nano /etc/hosts</code></pre>
       </div>
-      <p>➜ Obre el fitxer on el sistema busca els noms abans de preguntar al DNS.</p>
-      <p>Afegeix aquesta línia al final:</p>
+      <p>➜ Obre la llista de noms del client. Afegeix al final aquesta línia (la IP és la d'<strong>apache</strong>):</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">/etc/hosts — client</span></div>
-        <pre><code>192.168.1.10   www.app.local   app.local</code></pre>
+        <pre><code>192.168.1.10   www.app.local</code></pre>
       </div>
-      <p>Desa i surt. Comprova-ho:</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — client</span></div>
-        <pre><code>getent hosts www.app.local</code></pre>
-      </div>
-      <p>➜ Pregunta al sistema quina IP té el nom. Ha de respondre <code>192.168.1.10   www.app.local app.local</code>.</p>
-    </div>
-
-    <h3>2.6 · Entra a l'aplicació pel port 80</h3>
-    <div class="role-box client">
-      <span class="role-label client">Client</span>
+      <p>Desa i surt.</p>
       <div class="check">
-        <span class="check-title">🔎 Comprova-ho al navegador</span>
-        <span class="url">http://www.app.local</span>
-        <p>Sense port. Ha de sortir la <strong>mateixa pàgina de Tomcat</strong> de l'A1.1, amb el gat i <em>Apache Tomcat/10.1.NN</em>. L'has demanada a Apache pel port 80, però l'ha generat Tomcat.</p>
-      </div>
-      <div class="check">
-        <span class="check-title">🔎 Comprova-ho al navegador</span>
+        <span class="check-title">🔎 Comprova-ho al navegador del client</span>
         <span class="url">http://www.app.local/sample/</span>
-        <p>Ha de sortir l'aplicació d'exemple. Prova també els enllaços del JSP i del servlet: tot passa per Apache.</p>
-      </div>
-      <div class="check">
-        <span class="check-title">🔎 Comprova-ho al navegador</span>
-        <span class="url">http://192.168.1.10</span>
-        <p>Ara entra per la <strong>IP</strong>, sense nom. Ha de sortir la pàgina per defecte d'Apache, <strong>Apache2 Ubuntu Default Page</strong>. La petició no porta el nom <code>www.app.local</code>, així que l'atén el primer host virtual, <code>000-default</code>, que no fa de proxy.</p>
+        <p>Ha de sortir la mateixa aplicació de l'A1.1, però ara <strong>sense <code>:8080</code></strong>: has entrat per Apache i Apache l'ha demanada a Tomcat.</p>
       </div>
     </div>
 
-    <h3>2.7 · Comprova què passa si Tomcat cau</h3>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo systemctl stop tomcat</code></pre>
-      </div>
-      <p>➜ Atura Tomcat. Apache continua funcionant, però ja no té ningú a qui passar les peticions.</p>
-    </div>
-    <div class="role-box client">
-      <span class="role-label client">Client</span>
-      <div class="check">
-        <span class="check-title">🔎 Comprova-ho al navegador</span>
-        <span class="url">http://www.app.local/sample/</span>
-        <p>Recarrega la pàgina. Ara surt <strong>503 Service Unavailable</strong>: la resposta és d'Apache, que diu que el servidor de darrere no respon.</p>
-      </div>
-    </div>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo tail -n 3 /var/log/apache2/app_error.log</code></pre>
-      </div>
-      <p>➜ Mostra les últimes línies del registre d'errors del host virtual. Hi veuràs <em>Connection refused</em> cap a <code>127.0.0.1:8080</code>.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo systemctl start tomcat</code></pre>
-      </div>
-      <p>➜ Torna a engegar Tomcat. Espera uns segons i recarrega la pàgina al client: torna a funcionar.</p>
-    </div>
   </section>
 
-  <!-- ============ 3 · VERIFICACIÓ ============ -->
   <section>
     <div class="sec-head">
       <span class="sec-num">3</span>
-      <h2>Verificació</h2>
+      <h2>Comprova que ho tens tot</h2>
     </div>
-
-    <div class="role-box client">
-      <span class="role-label client">Client</span>
-      <p>Compara les capçaleres de la mateixa aplicació demanada per Apache i directament a Tomcat:</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — client</span></div>
-        <pre><code>curl -I http://www.app.local/sample/
-curl -I http://192.168.1.10:8080/sample/</code></pre>
-      </div>
-      <p>➜ <code>-I</code> mostra només la capçalera de la resposta. La primera passa per Apache; la segona va directament a Tomcat.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
-        <pre><code>HTTP/1.1 200 OK                        <span class="c"># per Apache</span>
-Date: ...
-Server: Apache/2.4.NN (Ubuntu)         <span class="c"># ⚠ EL MÉS IMPORTANT: qui respon és Apache</span>
-...
-HTTP/1.1 200                           <span class="c"># directament a Tomcat (sense "OK" i sense "Server")</span>
-...</code></pre>
-      </div>
-      <p>Comprova que el Manager no es publica pel proxy:</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — client</span></div>
-        <pre><code>curl -s -o /dev/null -w '%{http_code}\n' http://www.app.local/manager/html</code></pre>
-      </div>
-      <p>➜ <code>-o /dev/null</code> descarta la pàgina i <code>-w</code> imprimeix només el codi de resposta. Ha de sortir <code>404</code>: Apache no la reenvia a Tomcat.</p>
-    </div>
-
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
-      <p>Compara els dos registres d'accés. Cada servidor veu un client diferent:</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo tail -n 2 /var/log/apache2/app_access.log
-sudo sh -c 'tail -n 2 /opt/tomcat/logs/localhost_access_log.*.txt'</code></pre>
-      </div>
-      <p>➜ La primera mostra el que ha rebut Apache; la segona, el que ha rebut Tomcat.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
-        <pre><code>192.168.1.30 - - [...] "HEAD /sample/ HTTP/1.1" 200 ...   <span class="c"># Apache veu el client real</span>
-127.0.0.1 - - [...] "HEAD /sample/ HTTP/1.1" 200 ...      <span class="c"># ⚠ Tomcat veu Apache: la petició li arriba des del mateix servidor</span></code></pre>
-      </div>
-      <div class="callout tip">
-        <span class="ico">💡</span>
-        <p>Això demostra que el proxy funciona: per a Tomcat, el client és Apache (<code>127.0.0.1</code>). Si l'aplicació necessités saber la IP real del client, Apache l'envia a la capçalera <code>X-Forwarded-For</code>.</p>
-      </div>
-    </div>
-
-    <div class="callout warn">
-      <span class="ico">⚠️</span>
-      <p>De moment, el port <code>8080</code> encara està obert a la xarxa: el segon <code>curl</code> ho demostra. Qualsevol pot saltar-se Apache. A l'<a href="aea3_a1_3.html">A1.3</a> el tancaràs a l'exterior i hi afegiràs HTTPS.</p>
-    </div>
-
-    <h3>Llista de comprovació</h3>
-    <ul>
-      <li><code>apache2ctl -M</code> mostra <code>proxy_module</code> i <code>proxy_http_module</code>.</li>
-      <li><code>apache2ctl -S</code> mostra el host virtual <code>www.app.local</code>.</li>
-      <li><code>http://www.app.local</code> i <code>http://www.app.local/sample/</code> funcionen des del client, sense port.</li>
-      <li>La capçalera <code>Server</code> diu <code>Apache</code> quan entres pel nom.</li>
-      <li><code>http://www.app.local/manager/html</code> dona <code>404</code>.</li>
-      <li>Amb Tomcat aturat, Apache respon <code>503</code>; en tornar-lo a engegar, tot torna a funcionar.</li>
-      <li>El registre de Tomcat mostra <code>127.0.0.1</code> com a client i el d'Apache, <code>192.168.1.30</code>.</li>
+    <ul class="steps-done">
+      <li>Des del client, <code>http://www.app.local/sample/</code> mostra l'aplicació.</li>
+      <li>Des del client, <code>http://www.app.local</code> mostra la pàgina <em>It works!</em> de Tomcat (no la d'Apache).</li>
+      <li>Si atures Tomcat (<code>sudo systemctl stop tomcat10</code> a la màquina tomcat), <code>www.app.local</code> dona l'error <em>503 Service Unavailable</em>. Torna'l a engegar amb <code>sudo systemctl start tomcat10</code>.</li>
     </ul>
+
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">4</span>
+      <h2>Si alguna cosa falla</h2>
+    </div>
+    <table>
+      <thead><tr><th>Problema</th><th>Solució</th></tr></thead>
+      <tbody>
+        <tr><td>Surt la pàgina d'Apache en lloc de l'aplicació</td><td>Revisa que al client has escrit <code>www.app.local</code> a <code>/etc/hosts</code> i a la barra del navegador, i que has fet <code>sudo a2ensite app</code>.</td></tr>
+        <tr><td><em>503 Service Unavailable</em></td><td>Apache no arriba a Tomcat: comprova que Tomcat funciona i que a <code>app.conf</code> hi ha la IP de tomcat (<code>192.168.1.11</code>).</td></tr>
+        <tr><td>Apache no arrenca</td><td>Fes <code>sudo apache2ctl configtest</code>: et diu la línia d'<code>app.conf</code> que té l'error.</td></tr>
+      </tbody>
+    </table>
+
   </section>
 
   <footer>
