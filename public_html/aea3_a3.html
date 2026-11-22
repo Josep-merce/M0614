@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AEA3·A3.2 — Elastic Beanstalk amb la plataforma Tomcat · M0614</title>
+<title>AEA3·A3 — Elastic Beanstalk amb la plataforma Tomcat · M0614</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -114,7 +114,7 @@
   <a class="back" href="aea3.html"><span class="arrow">←</span> Tornar a l'AEA3</a>
 
   <header>
-    <span class="badge">AEA3 · A3.2</span>
+    <span class="badge">AEA3 · A3</span>
     <span class="eyebrow">M0614 · AWS</span>
     <h1>Elastic Beanstalk <span class="code">amb la plataforma Tomcat</span></h1>
     <p class="lede">Desplegaràs la mateixa aplicació sense instal·lar ni administrar cap servidor: només pujaràs el fitxer .war a Elastic Beanstalk, i AWS crearà la instància, hi posarà Java, Tomcat i un proxy al davant, i et donarà un domini per accedir-hi.</p>
@@ -136,7 +136,7 @@
 
     <p>En aquesta activitat aprendràs a:</p>
     <ul>
-      <li>Explicar què és una <strong>PaaS</strong> i comparar-la amb l'EC2 de l'A3.1.</li>
+      <li>Explicar què és una <strong>PaaS</strong> i comparar-la amb els servidors que vas muntar tu a l'A1.</li>
       <li>Crear un entorn d'Elastic Beanstalk amb la <strong>plataforma Tomcat</strong> i la configuració que exigeix el Learner Lab.</li>
       <li>Desplegar un <code>.war</code> i, després, una <strong>versió nova</strong> amb dues aplicacions.</li>
       <li>Tornar a una versió anterior i, en acabar, <strong>terminar l'entorn</strong>.</li>
@@ -146,7 +146,7 @@
     <ul>
       <li>Accés a <strong>AWS Academy · Learner Lab</strong>.</li>
       <li>Un terminal a la teva màquina amb <code>wget</code> (o <code>curl</code>) i <code>zip</code>.</li>
-      <li>Haver fet l'<a href="aea3_a3_1.html">A3.1</a>: allà vas fer a mà tot el que aquí farà Beanstalk.</li>
+      <li>Haver fet l'A1 (<a href="aea3_a1_1.html">A1.1</a> i <a href="aea3_a1_2.html">A1.2</a>): allà vas fer a mà tot el que aquí farà Beanstalk.</li>
     </ul>
 
     <div class="callout warn">
@@ -163,16 +163,16 @@
     </div>
 
     <h3>Del servidor que administres a la plataforma</h3>
-    <p>A l'A3.1 vas llançar l'EC2, instal·lar-hi Java i Tomcat, crear el servei de systemd i configurar Apache al davant. <strong>Elastic Beanstalk</strong> és una <strong>PaaS</strong> (<em>Platform as a Service</em>): li dones el <code>.war</code> i ella crea i configura tota la resta.</p>
+    <p>A l'A1 vas preparar les màquines, instal·lar-hi Tomcat i configurar Apache al davant. <strong>Elastic Beanstalk</strong> és una <strong>PaaS</strong> (<em>Platform as a Service</em>): li dones el <code>.war</code> i ella crea i configura tota la resta.</p>
 
     <table>
-      <thead><tr><th></th><th>A3.1 · EC2 a mà</th><th>A3.2 · Beanstalk</th></tr></thead>
+      <thead><tr><th></th><th>A1 · Linux, a mà</th><th>A3 · Beanstalk</th></tr></thead>
       <tbody>
-        <tr><td><strong>Llançar la instància</strong></td><td>Tu</td><td>Beanstalk</td></tr>
-        <tr><td><strong>Java i Tomcat</strong></td><td>Tu, amb <code>apt</code> i <code>tar</code></td><td>Ja venen a la plataforma</td></tr>
+        <tr><td><strong>Preparar la màquina</strong></td><td>Tu (A1.0)</td><td>Beanstalk crea una EC2</td></tr>
+        <tr><td><strong>Java i Tomcat</strong></td><td>Tu, amb <code>apt</code></td><td>Ja venen a la plataforma</td></tr>
         <tr><td><strong>Proxy al davant</strong></td><td>Apache, configurat per tu</td><td>Nginx, configurat per Beanstalk</td></tr>
-        <tr><td><strong>Grup de seguretat</strong></td><td>Tu</td><td>Beanstalk (obre el 80)</td></tr>
-        <tr><td><strong>Adreça d'accés</strong></td><td>IP pública (canvia)</td><td>Un domini fix <code>…elasticbeanstalk.com</code></td></tr>
+        <tr><td><strong>Obrir ports</strong></td><td>Tu, amb <code>ufw</code></td><td>Beanstalk (obre el 80)</td></tr>
+        <tr><td><strong>Adreça d'accés</strong></td><td><code>www.app.local</code> a <code>/etc/hosts</code></td><td>Un domini fix <code>…elasticbeanstalk.com</code></td></tr>
         <tr><td><strong>El que hi poses tu</strong></td><td>Tot</td><td>Només el <code>.war</code></td></tr>
       </tbody>
     </table>
@@ -421,7 +421,7 @@ Server: nginx                     <span class="c"># el proxy que posa Beanstalk 
       <li><code>http://DOMINI/</code> mostra l'aplicació d'exemple com a <code>ROOT</code>.</li>
       <li>La <code>v2</code> va publicar <code>/demo/</code> i el retorn a la <code>v1</code> el va retirar.</li>
       <li>La capçalera <code>Server</code> mostra el proxy de Beanstalk.</li>
-      <li>Saps explicar què has fet tu i què ha fet Beanstalk, comparat amb l'A3.1.</li>
+      <li>Saps explicar què has fet tu i què ha fet Beanstalk, comparat amb l'A1.</li>
     </ul>
 
     <h3>En acabar: termina l'entorn</h3>
@@ -432,7 +432,7 @@ Server: nginx                     <span class="c"># el proxy que posa Beanstalk 
   </section>
 
   <footer>
-    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA3 · A3.2
+    Institut La Mercè · Cicle DAW · M0614 Desplegament d'Aplicacions Web · AEA3 · A3
   </footer>
 
 </div>
