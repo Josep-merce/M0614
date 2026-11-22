@@ -161,7 +161,7 @@
     <p>Un <strong>contenidor</strong> és un programa que s'executa amb tot el que necessita a dins (sistema, Java, configuració...). Es crea a partir d'una <strong>imatge</strong>: nosaltres farem servir les imatges oficials <code>httpd</code> (Apache) i <code>tomcat</code>.</p>
     <p>Amb <strong>Docker Compose</strong> escrius en un fitxer, <code>compose.yaml</code>, quins contenidors vols i com es connecten, i els aixeques tots amb una sola ordre. A l'A1 necessitaves dues màquines per a Apache i Tomcat; aquí n'hi ha prou amb una.</p>
     <figure class="netfig">
-      <svg viewBox="0 0 820 290" role="img" aria-label="Una sola màquina Ubuntu amb Docker. El navegador de la mateixa màquina obre localhost pel port 80, que va al contenidor apache. Apache passa la petició al contenidor tomcat pel port 8080, per la xarxa interna de Docker. Tomcat no té cap port publicat.">
+      <svg viewBox="0 0 820 290" role="img" aria-label="Una sola màquina Ubuntu amb Docker. El navegador de la mateixa màquina obre localhost pel port 8080, que va al port 80 del contenidor apache. Apache passa la petició al contenidor tomcat pel port 8080, per la xarxa interna de Docker. Tomcat no té cap port publicat.">
         <defs>
           <marker id="dO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07B1E"/></marker>
         </defs>
@@ -170,7 +170,7 @@
         <g>
           <rect x="40" y="110" width="170" height="96" rx="12" fill="#FFFFFF" stroke="#1D4E89" stroke-width="2"/>
           <text x="125" y="144" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#1A2230">Navegador</text>
-          <text x="125" y="168" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#1D4E89">localhost</text>
+          <text x="125" y="168" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#1D4E89">localhost:8080</text>
           <text x="125" y="188" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#5A6677">o curl</text>
         </g>
         <rect x="265" y="70" width="515" height="180" rx="12" fill="#FFFFFF" stroke="#9aa4b2" stroke-dasharray="6 5"/>
@@ -179,7 +179,7 @@
           <rect x="295" y="112" width="190" height="96" rx="10" fill="#0F6E56"/>
           <text x="390" y="146" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">contenidor apache</text>
           <text x="390" y="168" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E6ECF5">imatge httpd:2.4</text>
-          <text x="390" y="190" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E6ECF5">port 80 publicat</text>
+          <text x="390" y="190" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E6ECF5">port 8080 → 80</text>
         </g>
         <g>
           <rect x="560" y="112" width="190" height="96" rx="10" fill="#5B3FA8"/>
@@ -188,7 +188,7 @@
           <text x="655" y="190" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E6ECF5">sense port publicat</text>
         </g>
         <line x1="213" y1="160" x2="290" y2="160" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#dO)"/>
-        <text x="250" y="152" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">:80</text>
+        <text x="250" y="152" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">:8080</text>
         <line x1="488" y1="160" x2="555" y2="160" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#dO)"/>
         <text x="521" y="152" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">:8080</text>
         <text x="522" y="234" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#5A6677">Apache troba Tomcat pel nom del servei: tomcat</text>
@@ -285,7 +285,7 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
   apache:
     image: httpd:2.4
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       - ./app.conf:/usr/local/apache2/conf/extra/app.conf
     command: httpd-foreground -c "Include conf/extra/app.conf"</code></pre>
@@ -294,7 +294,7 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
       <li><code>tomcat</code> i <code>apache</code> → els dos contenidors (serveis). Docker els connecta per una xarxa interna i cadascú troba l'altre pel nom.</li>
       <li><code>image</code> → la imatge oficial de la qual surt cada contenidor.</li>
       <li><code>volumes</code> → posa una carpeta o fitxer de la màquina dins del contenidor: la nostra carpeta <code>webapps</code> passa a ser el <code>webapps</code> de Tomcat, i el nostre <code>app.conf</code> entra a la configuració d'Apache.</li>
-      <li><code>ports: "80:80"</code> → el port 80 de la màquina va al port 80 del contenidor d'Apache. Tomcat <strong>no</strong> té <code>ports</code>: només s'hi arriba a través d'Apache.</li>
+      <li><code>ports: "8080:80"</code> → el port <strong>8080</strong> de la màquina va al port <strong>80</strong> del contenidor d'Apache. El primer número és el de la màquina; el segon, el de dins del contenidor. No xoca amb el 8080 de Tomcat: aquell és dins del seu contenidor i no es publica. Tomcat <strong>no</strong> té <code>ports</code>: només s'hi arriba a través d'Apache.</li>
       <li><code>command</code> → engega Apache i li diu que llegeixi també el nostre <code>app.conf</code>.</li>
       </ul>
       <div class="callout warn">
@@ -316,7 +316,7 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>sudo docker compose ps</code></pre>
       </div>
-      <p>➜ Llista els contenidors. Tots dos han d'estar <code>Up</code>. L'apache mostra <code>0.0.0.0:80-&gt;80/tcp</code> i el tomcat només <code>8080/tcp</code> (intern).</p>
+      <p>➜ Llista els contenidors. Tots dos han d'estar <code>Up</code>. L'apache mostra <code>0.0.0.0:8080-&gt;80/tcp</code> i el tomcat només <code>8080/tcp</code> (intern).</p>
     </div>
 
     <h3>2.6 · Prova-ho</h3>
@@ -324,13 +324,13 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
       <span class="role-label all">La teva màquina</span>
       <div class="check">
         <span class="check-title">🔎 Comprova-ho al navegador de la mateixa màquina</span>
-        <span class="url">http://localhost/sample/</span>
+        <span class="url">http://localhost:8080/sample/</span>
         <p>Obre-ho al navegador d'aquesta mateixa màquina. Ha de sortir l'aplicació d'exemple de l'A1.1: has entrat pel contenidor d'Apache i Apache l'ha demanada al de Tomcat.</p>
       </div>
       <p>Si la màquina no té escriptori, prova-ho des del terminal:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>curl http://localhost/sample/</code></pre>
+        <pre><code>curl http://localhost:8080/sample/</code></pre>
       </div>
       <p>➜ Ha de sortir el codi HTML de la pàgina, amb el títol <code>Sample "Hello, World" Application</code>.</p>
     </div>
@@ -354,7 +354,7 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
     </div>
     <ul class="steps-done">
       <li><code>sudo docker compose ps</code> mostra els dos contenidors <code>Up</code>.</li>
-      <li><code>http://localhost/sample/</code> mostra l'aplicació.</li>
+      <li><code>http://localhost:8080/sample/</code> mostra l'aplicació.</li>
       <li>Saps explicar per què a <code>app.conf</code> hi ha <code>tomcat</code> en lloc d'una IP.</li>
     </ul>
 
@@ -368,7 +368,7 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
     <table>
       <thead><tr><th>Problema</th><th>Solució</th></tr></thead>
       <tbody>
-        <tr><td><code>up</code> diu <em>port is already allocated</em> o <em>address already in use</em></td><td>Ja hi ha un Apache instal·lat a la màquina que ocupa el port 80. Atura'l amb <code>sudo systemctl stop apache2</code> i torna a fer <code>sudo docker compose up -d</code>.</td></tr>
+        <tr><td><code>up</code> diu <em>port is already allocated</em> o <em>address already in use</em></td><td>Ja hi ha un altre programa al port 8080 de la màquina, per exemple el Tomcat de l'A1.1. Atura'l (<code>sudo systemctl stop tomcat10</code>) i torna a fer <code>sudo docker compose up -d</code>.</td></tr>
         <tr><td><code>up</code> dona un error de YAML</td><td>Revisa el sagnat de <code>compose.yaml</code>: espais, no tabuladors, exactament com a l'exemple.</td></tr>
         <tr><td>El contenidor apache no està <code>Up</code></td><td>Mira l'error amb <code>sudo docker compose logs apache</code>. Normalment és una falta d'escriptura a <code>app.conf</code>.</td></tr>
         <tr><td><em>503 Service Unavailable</em></td><td>Tomcat encara arrenca o ha fallat: espera uns segons i mira <code>sudo docker compose logs tomcat</code>.</td></tr>
