@@ -356,13 +356,7 @@
     <h3>2.2 · Assignar la IP fixa a la targeta interna</h3>
     <div class="role-box all">
       <span class="role-label all">Totes les màquines · exemple: servidor</span>
-      <p>A Ubuntu <strong>no</strong> es fa servir <code>/etc/network/interfaces</code> com a Debian: la xarxa es configura amb <strong>Netplan</strong>, amb fitxers <code>.yaml</code> a la carpeta <code>/etc/netplan/</code>. Primer mira quins fitxers hi ha:</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>ls /etc/netplan/</code></pre>
-      </div>
-      <p>➜ Llista els fitxers de configuració de Netplan. Hi veuràs un o més fitxers (per exemple <code>01-network-manager-all.yaml</code> o <code>50-cloud-init.yaml</code>): són els de la targeta <em>default</em> i <strong>no els toquem</strong>.</p>
-      <p>Crearem un fitxer <strong>nou</strong>, només per a la targeta interna. Netplan llegeix els fitxers per ordre alfabètic, i el número <code>60</code> fa que s'apliqui després dels que ja hi ha. Entra a la carpeta i crea'l amb <code>nano</code>:</p>
+      <p>A Ubuntu <strong>no</strong> es fa servir <code>/etc/network/interfaces</code> com a Debian: la xarxa es configura amb <strong>Netplan</strong>, amb fitxers <code>.yaml</code> a la carpeta <code>/etc/netplan/</code>. Entra a la carpeta:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>cd /etc/netplan</code></pre>
@@ -370,38 +364,57 @@
       <p>➜ Entra a la carpeta de configuració de Netplan.</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>sudo nano 60-interna.yaml</code></pre>
+        <pre><code>ls</code></pre>
       </div>
-      <p>➜ Crea i obre el fitxer <code>60-interna.yaml</code>. Cal <code>sudo</code> perquè és un fitxer del sistema.</p>
-      <p>Escriu-hi aquest contingut, <strong>canviant</strong> <code>enp2s0</code> pel nom real de la teva targeta interna i la IP segons la màquina (servidor <code>.10</code>, administrador <code>.20</code>, client <code>.30</code>). Aquest exemple és el del <strong>servidor</strong>:</p>
+      <p>➜ Llista els fitxers de configuració. A IsardVDI hi trobaràs <code>99-isardvdi-conf.yaml</code>, el fitxer que crea IsardVDI. Mira'n el contingut:</p>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">/etc/netplan/60-interna.yaml</span></div>
-        <pre><code><span class="c"># --- Targeta interna (xarxa privada) ---</span>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>sudo cat 99-isardvdi-conf.yaml</code></pre>
+      </div>
+      <p>➜ Mostra el fitxer. Cal <code>sudo</code> perquè només el pot llegir <code>root</code> (sense <code>sudo</code> surt <em>Permission denied</em>). La sortida és aquesta:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida de sudo cat 99-isardvdi-conf.yaml</span></div>
+        <pre><code># This is the network config written by IsardVDI
 network:
   version: 2
   ethernets:
+    enp1s0:
+      dhcp4: true      <span class="c"># targeta DEFAULT → DHCP (es queda així)</span>
     enp2s0:
-      dhcp4: false
-      addresses:
-        - 192.168.1.10/24</code></pre>
+      dhcp4: true      <span class="c"># targeta INTERNA → també DHCP: això és el que canviarem</span></code></pre>
       </div>
-      <p>➜ Explicació de cada línia:</p>
+      <p>IsardVDI posa <strong>les dues targetes</strong> amb DHCP. Editarem aquest mateix fitxer per canviar <strong>només</strong> el bloc de la targeta interna (<code>enp2s0</code>):</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>sudo nano 99-isardvdi-conf.yaml</code></pre>
+      </div>
+      <p>➜ Obre el fitxer amb <code>nano</code>. Cal <code>sudo</code> perquè és un fitxer del sistema.</p>
+      <p>Deixa el bloc d'<code>enp1s0</code> tal com està i <strong>canvia el d'<code>enp2s0</code></strong>: substitueix <code>dhcp4: true</code> per <code>dhcp4: false</code> i afegeix-hi l'adreça. Fes servir el nom real de la teva targeta interna i la IP segons la màquina (servidor <code>.10</code>, administrador <code>.20</code>, client <code>.30</code>). Aquest exemple és el del <strong>servidor</strong>; el fitxer ha de quedar així:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">/etc/netplan/99-isardvdi-conf.yaml</span></div>
+        <pre><code># This is the network config written by IsardVDI
+network:
+  version: 2
+  ethernets:
+    enp1s0:
+      dhcp4: true            <span class="c"># default: NO la toquis</span>
+    enp2s0:
+      dhcp4: false           <span class="c"># abans era true</span>
+      addresses:             <span class="c"># línia nova</span>
+        - 192.168.1.10/24    <span class="c"># línia nova</span></code></pre>
+      </div>
+      <p>➜ Explicació de les línies que canvien (els comentaris en gris no cal que els escriguis):</p>
       <ul>
-        <li><code>ethernets:</code> → comença la llista de targetes de xarxa amb cable que configurem.</li>
         <li><code>enp2s0:</code> → la targeta interna (posa-hi el nom de la teva).</li>
-        <li><code>dhcp4: false</code> → aquesta targeta <strong>no</strong> demana IP per DHCP: la posem nosaltres.</li>
+        <li><code>dhcp4: false</code> → aquesta targeta <strong>ja no</strong> demana IP per DHCP: la posem nosaltres.</li>
+        <li><code>addresses:</code> → comença la llista d'adreces IP fixes de la targeta.</li>
         <li><code>- 192.168.1.10/24</code> → la IP fixa. El <code>/24</code> equival a la màscara <code>255.255.255.0</code>.</li>
       </ul>
       <div class="callout warn">
         <span class="ico">⚠️</span>
-        <p>En YAML els <strong>espais compten</strong>: cada nivell va <strong>2 espais</strong> més a dins que l'anterior i <strong>no es poden fer servir tabuladors</strong>. Un espai de més o de menys fa que Netplan doni error.</p>
+        <p>En YAML els <strong>espais compten</strong>: cada nivell va <strong>2 espais</strong> més a dins que l'anterior i <strong>no es poden fer servir tabuladors</strong>. <code>addresses:</code> ha d'estar a la mateixa altura que <code>dhcp4:</code>, i el guió <code>-</code> dues posicions més a dins. Un espai de més o de menys fa que Netplan doni error.</p>
       </div>
-      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>). Netplan exigeix que només l'administrador (<code>root</code>) pugui llegir aquests fitxers; si no, avisa que els permisos són massa oberts:</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
-        <pre><code>sudo chmod 600 60-interna.yaml</code></pre>
-      </div>
-      <p>➜ Deixa el fitxer amb permisos de lectura i escriptura <strong>només per a <code>root</code></strong>.</p>
+      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>).</p>
       <p>Aplica la configuració:</p>
       <div class="term">
         <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
@@ -416,7 +429,7 @@ network:
       <p>➜ Mostra només la targeta <code>enp2s0</code> per comprovar que ja té la IP fixa assignada (<code>inet 192.168.1.10/24</code>).</p>
       <div class="callout tip">
         <span class="ico">💡</span>
-        <p>No toquis la targeta <em>default</em> ni els fitxers de Netplan que ja hi havia: ha de continuar amb DHCP perquè les màquines segueixin tenint Internet per instal·lar paquets. Repeteix aquest pas a les tres màquines amb la seva IP (<code>.10</code>, <code>.20</code>, <code>.30</code>).</p>
+        <p>No toquis el bloc de la targeta <em>default</em> (<code>enp1s0</code>): ha de continuar amb DHCP perquè les màquines segueixin tenint Internet per instal·lar paquets. Repeteix aquest pas a les tres màquines amb la seva IP (<code>.10</code>, <code>.20</code>, <code>.30</code>).</p>
       </div>
     </div>
 
@@ -579,10 +592,10 @@ network:
     <table>
       <thead><tr><th>Problema</th><th>Causa</th><th>Solució</th></tr></thead>
       <tbody>
-        <tr><td><code>ping</code> no respon</td><td>La IP fixa no s'ha aplicat o l'has posada a la targeta <em>default</em> en lloc de la interna.</td><td>Revisa <code>/etc/netplan/60-interna.yaml</code> amb el nom correcte de la targeta interna, fes <code>sudo netplan apply</code> i comprova-ho amb <code>ip a</code>.</td></tr>
+        <tr><td><code>ping</code> no respon</td><td>La IP fixa no s'ha aplicat o l'has posada a la targeta <em>default</em> en lloc de la interna.</td><td>Revisa el bloc d'<code>enp2s0</code> a <code>/etc/netplan/99-isardvdi-conf.yaml</code> amb el nom correcte de la targeta interna, fes <code>sudo netplan apply</code> i comprova-ho amb <code>ip a</code>.</td></tr>
         <tr><td><code>netplan apply</code> dona un error de YAML</td><td>Hi ha un espai de més o de menys, o has fet servir tabuladors.</td><td>Torna a obrir el fitxer i revisa que cada nivell estigui 2 espais més a dins que l'anterior, sense tabuladors. L'error indica la línia on és el problema.</td></tr>
-        <tr><td><code>netplan</code> avisa <em>Permissions ... are too open</em></td><td>El fitxer <code>.yaml</code> el poden llegir altres usuaris.</td><td>Fes <code>sudo chmod 600 /etc/netplan/60-interna.yaml</code> i torna a fer <code>sudo netplan apply</code>.</td></tr>
-        <tr><td>Després de canviar la xarxa, la màquina no té Internet</td><td>Has tocat la targeta <em>default</em>.</td><td>Deixa la targeta <em>default</em> com estava (DHCP) i posa la IP fixa només a la interna.</td></tr>
+        <tr><td><code>netplan</code> avisa <em>Permissions ... are too open</em></td><td>El fitxer <code>.yaml</code> el poden llegir altres usuaris.</td><td>Fes <code>sudo chmod 600 /etc/netplan/99-isardvdi-conf.yaml</code> i torna a fer <code>sudo netplan apply</code>.</td></tr>
+        <tr><td>Després de canviar la xarxa, la màquina no té Internet</td><td>Has tocat el bloc de la targeta <em>default</em> (<code>enp1s0</code>).</td><td>Deixa la targeta <em>default</em> com estava (DHCP) i posa la IP fixa només a la interna.</td></tr>
         <tr><td><code>sudo apt install</code> falla al servidor</td><td>No hi ha sortida a Internet per la targeta <em>default</em>, o no has fet <code>sudo apt update</code>.</td><td>Comprova amb <code>ip a</code> que la targeta <em>default</em> té IP i torna a fer <code>sudo apt update</code>.</td></tr>
         <tr><td><code>ssh</code> dona <em>Connection refused</em></td><td>El servei SSH no està instal·lat o no està actiu al servidor.</td><td>Al servidor, fes <code>sudo apt install openssh-server -y</code> i comprova <code>systemctl status ssh.socket</code>.</td></tr>
         <tr><td><code>systemctl status ssh</code> diu <em>inactive (dead)</em></td><td>A Ubuntu 26.04 el servei l'engega el <code>ssh.socket</code> quan arriba una connexió.</td><td>És normal. Comprova <code>systemctl status ssh.socket</code> (ha de dir <code>active (listening)</code>) i prova de connectar-te.</td></tr>
