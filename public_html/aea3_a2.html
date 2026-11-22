@@ -123,12 +123,12 @@
 
   <header>
     <span class="badge">AEA3 · A2</span>
-    <span class="eyebrow">M0614 · Linux · Ubuntu 26.04</span>
+    <span class="eyebrow">M0614 · Docker · Ubuntu 26.04</span>
     <h1>Apache i Tomcat <span class="code">amb Docker</span></h1>
-    <p class="lede">Faràs el mateix que a l'A1.2, Apache davant de Tomcat, però amb dos contenidors aixecats amb Docker Compose a la màquina apache.</p>
+    <p class="lede">Faràs el mateix que a l'A1.2, Apache davant de Tomcat, però amb dos contenidors en una sola màquina, aixecats amb Docker Compose.</p>
     <div class="meta">
       <span class="pill">RA <strong>RA3</strong></span>
-      <span class="pill">Màquina <strong>apache</strong></span>
+      <span class="pill"><strong>Una sola màquina</strong></span>
       <span class="pill">Docker</span>
     </div>
   </header>
@@ -141,13 +141,14 @@
       <h2>Què faràs</h2>
     </div>
     <ul>
-      <li>Instal·lar <strong>Docker</strong> a la màquina apache.</li>
+      <li>Instal·lar <strong>Docker</strong> en una màquina Ubuntu.</li>
       <li>Aixecar <strong>Apache i Tomcat en dos contenidors</strong> amb un sol fitxer: <code>compose.yaml</code>.</li>
-      <li>Entrar a l'aplicació des del client, com a l'A1.2.</li>
+      <li>Obrir l'aplicació al navegador de la mateixa màquina.</li>
     </ul>
     <h3>Què necessites</h3>
     <ul>
-      <li>Haver fet l'<a href="aea3_a1_2.html">A1.2</a>: el client té <code>www.app.local</code> a <code>/etc/hosts</code> apuntant a la màquina apache (<code>192.168.1.10</code>).</li>
+      <li><strong>Una sola màquina Ubuntu 26.04</strong> amb Internet. Pot ser una màquina nova d'IsardVDI: no cal la xarxa de quatre màquines de l'A1.</li>
+      <li>Entendre què fa el proxy invers de l'<a href="aea3_a1_2.html">A1.2</a>: aquí fem el mateix, però amb contenidors.</li>
     </ul>
 
   </section>
@@ -158,42 +159,41 @@
       <h2>Què és Docker</h2>
     </div>
     <p>Un <strong>contenidor</strong> és un programa que s'executa amb tot el que necessita a dins (sistema, Java, configuració...). Es crea a partir d'una <strong>imatge</strong>: nosaltres farem servir les imatges oficials <code>httpd</code> (Apache) i <code>tomcat</code>.</p>
-    <p>Amb <strong>Docker Compose</strong> escrius en un fitxer, <code>compose.yaml</code>, quins contenidors vols i com es connecten, i els aixeques tots amb una sola ordre.</p>
+    <p>Amb <strong>Docker Compose</strong> escrius en un fitxer, <code>compose.yaml</code>, quins contenidors vols i com es connecten, i els aixeques tots amb una sola ordre. A l'A1 necessitaves dues màquines per a Apache i Tomcat; aquí n'hi ha prou amb una.</p>
     <figure class="netfig">
-      <svg viewBox="0 0 820 300" role="img" aria-label="El client entra pel port 80 a la màquina apache, 192.168.1.10. Dins hi ha Docker amb dos contenidors: apache, que té el port 80 publicat, i tomcat, sense cap port publicat. Apache passa la petició a tomcat:8080 per la xarxa interna de Docker.">
+      <svg viewBox="0 0 820 290" role="img" aria-label="Una sola màquina Ubuntu amb Docker. El navegador de la mateixa màquina obre localhost pel port 80, que va al contenidor apache. Apache passa la petició al contenidor tomcat pel port 8080, per la xarxa interna de Docker. Tomcat no té cap port publicat.">
         <defs>
           <marker id="dO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07B1E"/></marker>
         </defs>
+        <rect x="15" y="20" width="790" height="250" rx="14" fill="#EDF1F6" stroke="#3A4658" stroke-width="2"/>
+        <text x="35" y="48" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#1A2230">La teva màquina · Ubuntu 26.04</text>
         <g>
-          <rect x="15" y="110" width="160" height="96" rx="12" fill="#FFFFFF" stroke="#1D4E89" stroke-width="2"/>
-          <text x="95" y="142" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#1A2230">client</text>
-          <text x="95" y="164" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#5A6677">Navegador</text>
-          <text x="95" y="188" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#1A2230">192.168.1.30</text>
+          <rect x="40" y="110" width="170" height="96" rx="12" fill="#FFFFFF" stroke="#1D4E89" stroke-width="2"/>
+          <text x="125" y="144" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#1A2230">Navegador</text>
+          <text x="125" y="168" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#1D4E89">localhost</text>
+          <text x="125" y="188" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#5A6677">o curl</text>
         </g>
-        <rect x="235" y="30" width="570" height="250" rx="14" fill="#E1F5EE" stroke="#0F6E56" stroke-width="2"/>
-        <text x="255" y="58" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#0F6E56">màquina apache</text>
-        <text x="785" y="58" text-anchor="end" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#0F6E56">192.168.1.10</text>
-        <rect x="265" y="80" width="510" height="175" rx="12" fill="#FFFFFF" stroke="#9FE1CB" stroke-dasharray="6 5"/>
-        <text x="285" y="104" font-family="JetBrains Mono, monospace" font-size="11.5" fill="#5A6677">Docker · xarxa interna dels contenidors</text>
+        <rect x="265" y="70" width="515" height="180" rx="12" fill="#FFFFFF" stroke="#9aa4b2" stroke-dasharray="6 5"/>
+        <text x="285" y="94" font-family="JetBrains Mono, monospace" font-size="11.5" fill="#5A6677">Docker · xarxa interna dels contenidors</text>
         <g>
-          <rect x="295" y="120" width="190" height="96" rx="10" fill="#0F6E56"/>
-          <text x="390" y="154" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">contenidor apache</text>
-          <text x="390" y="176" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E6ECF5">imatge httpd:2.4</text>
-          <text x="390" y="198" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E6ECF5">port 80 publicat</text>
+          <rect x="295" y="112" width="190" height="96" rx="10" fill="#0F6E56"/>
+          <text x="390" y="146" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">contenidor apache</text>
+          <text x="390" y="168" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E6ECF5">imatge httpd:2.4</text>
+          <text x="390" y="190" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E6ECF5">port 80 publicat</text>
         </g>
         <g>
-          <rect x="560" y="120" width="190" height="96" rx="10" fill="#5B3FA8"/>
-          <text x="655" y="154" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">contenidor tomcat</text>
-          <text x="655" y="176" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E6ECF5">imatge tomcat:10.1</text>
-          <text x="655" y="198" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E6ECF5">sense port publicat</text>
+          <rect x="560" y="112" width="190" height="96" rx="10" fill="#5B3FA8"/>
+          <text x="655" y="146" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">contenidor tomcat</text>
+          <text x="655" y="168" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E6ECF5">imatge tomcat:10.1</text>
+          <text x="655" y="190" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E6ECF5">sense port publicat</text>
         </g>
-        <line x1="178" y1="168" x2="290" y2="168" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#dO)"/>
-        <text x="215" y="160" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">:80</text>
-        <line x1="488" y1="168" x2="555" y2="168" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#dO)"/>
-        <text x="521" y="160" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">:8080</text>
-        <text x="520" y="240" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#5A6677">Apache troba Tomcat pel nom del servei: tomcat</text>
+        <line x1="213" y1="160" x2="290" y2="160" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#dO)"/>
+        <text x="250" y="152" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">:80</text>
+        <line x1="488" y1="160" x2="555" y2="160" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#dO)"/>
+        <text x="521" y="152" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">:8080</text>
+        <text x="522" y="234" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#5A6677">Apache troba Tomcat pel nom del servei: tomcat</text>
       </svg>
-      <figcaption>La mateixa idea de l'A1.2, però els dos servidors són contenidors dins d'una sola màquina.</figcaption>
+      <figcaption>Tot passa dins d'una sola màquina: el navegador parla amb el contenidor d'Apache i Apache demana la pàgina al de Tomcat.</figcaption>
     </figure>
 
   </section>
@@ -205,66 +205,46 @@
     </div>
     <div class="callout tip">
       <span class="ico">💡</span>
-      <p>Cada pas ve dins d'una <strong>capsa de color</strong> que diu a quina màquina l'has de fer: <span class="legend"><span><span class="sw" style="background:var(--client-bg);border-color:var(--client-border)"></span>Client</span><span><span class="sw" style="background:var(--admin-bg);border-color:var(--admin-border)"></span>Administrador</span><span><span class="sw" style="background:var(--server-bg);border-color:var(--server-border)"></span>Apache</span><span><span class="sw" style="background:var(--tomcat-bg);border-color:var(--tomcat-border)"></span>Tomcat</span><span><span class="sw" style="background:var(--slate-soft);border-color:var(--hairline)"></span>Diverses màquines</span></span>.</p>
+      <p>Tota l'activitat es fa en <strong>una sola màquina</strong>: obre-hi un terminal i ves fent els passos en ordre.</p>
     </div>
 
-    <h3>2.1 · Entra a la màquina apache</h3>
-    <div class="role-box admin">
-      <span class="role-label admin">Administrador</span>
+    <h3>2.1 · Instal·la Docker</h3>
+    <div class="role-box all">
+      <span class="role-label all">La teva màquina</span>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin</span></div>
-        <pre><code>ssh isard@192.168.1.10</code></pre>
-      </div>
-      <p>➜ Entra a la màquina <strong>apache</strong> per SSH amb l'usuari <code>isard</code> i la seva contrasenya. Quan el <em>prompt</em> digui <code>isard@apache</code>, ja hi ets.</p>
-    </div>
-
-    <h3>2.2 · Atura l'Apache de l'A1</h3>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Apache · per SSH</span>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
-        <pre><code>sudo systemctl stop apache2</code></pre>
-      </div>
-      <p>➜ Atura l'Apache que vas instal·lar a l'A1.2. El port 80 ha de quedar lliure per al contenidor d'Apache.</p>
-    </div>
-
-    <h3>2.3 · Instal·la Docker</h3>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Apache · per SSH</span>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>sudo apt update
 sudo apt install -y docker.io docker-compose-v2</code></pre>
       </div>
       <p>➜ Instal·la Docker i Docker Compose.</p>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>sudo docker run --rm hello-world</code></pre>
       </div>
       <p>➜ Prova Docker amb un contenidor de prova. Ha de sortir <strong>Hello from Docker!</strong></p>
     </div>
 
-    <h3>2.4 · Prepara la carpeta i l'aplicació</h3>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Apache · per SSH</span>
+    <h3>2.2 · Prepara la carpeta i l'aplicació</h3>
+    <div class="role-box all">
+      <span class="role-label all">La teva màquina</span>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>mkdir -p ~/app/webapps
 cd ~/app</code></pre>
       </div>
       <p>➜ Crea la carpeta del projecte, <code>app</code>, amb una subcarpeta <code>webapps</code> per a les aplicacions, i hi entra.</p>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>wget -P webapps https://tomcat.apache.org/tomcat-10.1-doc/appdev/sample/sample.war</code></pre>
       </div>
       <p>➜ Baixa l'aplicació d'exemple de l'A1.1 dins de <code>webapps</code>.</p>
     </div>
 
-    <h3>2.5 · Escriu la configuració d'Apache</h3>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Apache · per SSH</span>
+    <h3>2.3 · Escriu la configuració d'Apache</h3>
+    <div class="role-box all">
+      <span class="role-label all">La teva màquina</span>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>nano app.conf</code></pre>
       </div>
       <p>➜ Crea el fitxer de configuració per al contenidor d'Apache. Escriu-hi:</p>
@@ -274,23 +254,22 @@ cd ~/app</code></pre>
 LoadModule proxy_http_module modules/mod_proxy_http.so
 
 &lt;VirtualHost *:80&gt;
-    ServerName www.app.local
     ProxyPass        / http://tomcat:8080/
     ProxyPassReverse / http://tomcat:8080/
 &lt;/VirtualHost&gt;</code></pre>
       </div>
       <ul>
       <li>Les dues línies <code>LoadModule</code> activen el proxy (a l'A1.2 ho feies amb <code>a2enmod</code>).</li>
-      <li>El <code>&lt;VirtualHost&gt;</code> és el mateix de l'A1.2, però en lloc de la IP de tomcat hi ha <code>tomcat</code>: el <strong>nom del contenidor</strong>. Docker sap a quina IP és.</li>
+      <li><code>ProxyPass</code> és el mateix de l'A1.2, però en lloc d'una IP hi ha <code>tomcat</code>: el <strong>nom del contenidor</strong>. Docker sap a quina IP és.</li>
       </ul>
-      <p>Desa i surt.</p>
+      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>).</p>
     </div>
 
-    <h3>2.6 · Escriu el compose.yaml</h3>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Apache · per SSH</span>
+    <h3>2.4 · Escriu el compose.yaml</h3>
+    <div class="role-box all">
+      <span class="role-label all">La teva màquina</span>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>nano compose.yaml</code></pre>
       </div>
       <p>➜ Crea el fitxer que diu quins contenidors volem. Escriu-hi:</p>
@@ -315,54 +294,55 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
       <li><code>tomcat</code> i <code>apache</code> → els dos contenidors (serveis). Docker els connecta per una xarxa interna i cadascú troba l'altre pel nom.</li>
       <li><code>image</code> → la imatge oficial de la qual surt cada contenidor.</li>
       <li><code>volumes</code> → posa una carpeta o fitxer de la màquina dins del contenidor: la nostra carpeta <code>webapps</code> passa a ser el <code>webapps</code> de Tomcat, i el nostre <code>app.conf</code> entra a la configuració d'Apache.</li>
-      <li><code>ports: "80:80"</code> → el port 80 de la màquina va al port 80 del contenidor d'Apache. Tomcat <strong>no</strong> té <code>ports</code>: des de fora no s'hi pot entrar.</li>
+      <li><code>ports: "80:80"</code> → el port 80 de la màquina va al port 80 del contenidor d'Apache. Tomcat <strong>no</strong> té <code>ports</code>: només s'hi arriba a través d'Apache.</li>
       <li><code>command</code> → engega Apache i li diu que llegeixi també el nostre <code>app.conf</code>.</li>
       </ul>
       <div class="callout warn">
         <span class="ico">⚠️</span>
-        <p>Com a Netplan, en YAML els <strong>espais compten</strong>: copia el sagnat exactament, sense tabuladors.</p>
+        <p>En YAML els <strong>espais compten</strong>: copia el sagnat exactament, sense tabuladors.</p>
       </div>
       <p>Desa i surt.</p>
     </div>
 
-    <h3>2.7 · Aixeca els contenidors</h3>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Apache · per SSH</span>
+    <h3>2.5 · Aixeca els contenidors</h3>
+    <div class="role-box all">
+      <span class="role-label all">La teva màquina</span>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>sudo docker compose up -d</code></pre>
       </div>
       <p>➜ Baixa les dues imatges (el primer cop triga una mica) i engega els dos contenidors en segon pla (<code>-d</code>).</p>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>sudo docker compose ps</code></pre>
       </div>
       <p>➜ Llista els contenidors. Tots dos han d'estar <code>Up</code>. L'apache mostra <code>0.0.0.0:80-&gt;80/tcp</code> i el tomcat només <code>8080/tcp</code> (intern).</p>
     </div>
 
-    <h3>2.8 · Prova-ho des del client</h3>
-    <div class="role-box client">
-      <span class="role-label client">Client</span>
+    <h3>2.6 · Prova-ho</h3>
+    <div class="role-box all">
+      <span class="role-label all">La teva màquina</span>
       <div class="check">
-        <span class="check-title">🔎 Comprova-ho al navegador del client</span>
-        <span class="url">http://www.app.local/sample/</span>
-        <p>Ha de sortir l'aplicació d'exemple, igual que a l'A1.2. La diferència és que ara Apache i Tomcat són <strong>contenidors</strong> a la màquina apache. Escriu <code>http://</code>: aquest Apache no té HTTPS.</p>
+        <span class="check-title">🔎 Comprova-ho al navegador de la mateixa màquina</span>
+        <span class="url">http://localhost/sample/</span>
+        <p>Obre-ho al navegador d'aquesta mateixa màquina. Ha de sortir l'aplicació d'exemple de l'A1.1: has entrat pel contenidor d'Apache i Apache l'ha demanada al de Tomcat.</p>
       </div>
+      <p>Si la màquina no té escriptori, prova-ho des del terminal:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
+        <pre><code>curl http://localhost/sample/</code></pre>
+      </div>
+      <p>➜ Ha de sortir el codi HTML de la pàgina, amb el títol <code>Sample "Hello, World" Application</code>.</p>
     </div>
 
-    <h3>2.9 · En acabar, torna a l'A1</h3>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Apache · per SSH</span>
+    <h3>2.7 · En acabar</h3>
+    <div class="role-box all">
+      <span class="role-label all">La teva màquina</span>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash</span></div>
         <pre><code>sudo docker compose down</code></pre>
       </div>
       <p>➜ Atura i esborra els dos contenidors. Els fitxers de <code>~/app</code> es queden: amb <code>sudo docker compose up -d</code> els tornes a aixecar.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
-        <pre><code>sudo systemctl start apache2</code></pre>
-      </div>
-      <p>➜ Torna a engegar l'Apache de l'A1.</p>
     </div>
 
   </section>
@@ -374,7 +354,7 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
     </div>
     <ul class="steps-done">
       <li><code>sudo docker compose ps</code> mostra els dos contenidors <code>Up</code>.</li>
-      <li>Des del client, <code>http://www.app.local/sample/</code> mostra l'aplicació.</li>
+      <li><code>http://localhost/sample/</code> mostra l'aplicació.</li>
       <li>Saps explicar per què a <code>app.conf</code> hi ha <code>tomcat</code> en lloc d'una IP.</li>
     </ul>
 
@@ -388,12 +368,11 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
     <table>
       <thead><tr><th>Problema</th><th>Solució</th></tr></thead>
       <tbody>
-        <tr><td><code>up</code> diu <em>port is already allocated</em> o <em>address already in use</em></td><td>L'Apache de l'A1 encara funciona. Fes <code>sudo systemctl stop apache2</code> i torna a fer <code>sudo docker compose up -d</code>.</td></tr>
+        <tr><td><code>up</code> diu <em>port is already allocated</em> o <em>address already in use</em></td><td>Ja hi ha un Apache instal·lat a la màquina que ocupa el port 80. Atura'l amb <code>sudo systemctl stop apache2</code> i torna a fer <code>sudo docker compose up -d</code>.</td></tr>
         <tr><td><code>up</code> dona un error de YAML</td><td>Revisa el sagnat de <code>compose.yaml</code>: espais, no tabuladors, exactament com a l'exemple.</td></tr>
         <tr><td>El contenidor apache no està <code>Up</code></td><td>Mira l'error amb <code>sudo docker compose logs apache</code>. Normalment és una falta d'escriptura a <code>app.conf</code>.</td></tr>
         <tr><td><em>503 Service Unavailable</em></td><td>Tomcat encara arrenca o ha fallat: espera uns segons i mira <code>sudo docker compose logs tomcat</code>.</td></tr>
         <tr><td><code>/sample/</code> dona error 404</td><td>Comprova que <code>sample.war</code> és a <code>~/app/webapps</code> (<code>ls webapps</code>) i espera uns segons que Tomcat el desplegui.</td></tr>
-        <tr><td>El navegador va a <code>https://</code> i no carrega</td><td>És la redirecció de l'A1.3 que el navegador recorda. Escriu <code>http://www.app.local/sample/</code> en una finestra privada.</td></tr>
       </tbody>
     </table>
 
