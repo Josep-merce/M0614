@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AEA3·A1.3 — Desplegament segur: Manager, HTTPS i port 8080 tancat · M0614</title>
+<title>AEA3·A1.3 — Fes-ho segur: HTTPS i Tomcat tancat · M0614</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -106,6 +106,22 @@
   .check .check-title{font-family:var(--display);font-weight:600;color:#1D4E89;display:block;margin-bottom:.35rem}
   .check .url{font-family:var(--mono);font-size:.86rem;background:#fff;border:1px solid #BBD3F0;color:#1D4E89;padding:.2rem .5rem;border-radius:6px;display:inline-block;margin:.15rem 0 .45rem}
   .check p{margin:.3rem 0}
+
+  /* Màquines de l'AEA3: Apache (verd) i Tomcat (lila) */
+  :root{--tomcat-bg:#F1ECFB;--tomcat-border:#D2C4F1;--tomcat-ink:#5B3FA8}
+  .role-box.tomcat{background:var(--tomcat-bg);border-color:var(--tomcat-border)}
+  .role-label.tomcat{color:var(--tomcat-ink)}
+  .machines td:first-child{white-space:nowrap}
+  .steps-done{list-style:none;margin-left:0}
+  .steps-done li::before{content:"☐ ";color:var(--accent);font-weight:600}
+
+  /* Màquines de l'AEA3: Apache (verd) i Tomcat (lila) */
+  :root{--tomcat-bg:#F1ECFB;--tomcat-border:#D2C4F1;--tomcat-ink:#5B3FA8}
+  .role-box.tomcat{background:var(--tomcat-bg);border-color:var(--tomcat-border)}
+  .role-label.tomcat{color:var(--tomcat-ink)}
+  .machines td:first-child{white-space:nowrap}
+  .steps-done{list-style:none;margin-left:0}
+  .steps-done li::before{content:"☐ ";color:var(--accent);font-weight:600}
 </style>
 </head>
 <body>
@@ -115,488 +131,259 @@
 
   <header>
     <span class="badge">AEA3 · A1.3</span>
-    <span class="eyebrow">M0614 · Linux</span>
-    <h1>Desplegament segur: <span class="code">Manager, HTTPS i port 8080 tancat</span></h1>
-    <p class="lede">Deixaràs el servidor d'aplicacions a punt per a producció: el Tomcat Manager amb usuaris i rols, accessible només des de l'administrador; HTTPS a l'Apache que hi ha davant, amb redirecció automàtica des d'HTTP; i el port 8080 tancat a la xarxa perquè ningú es pugui saltar Apache.</p>
+    <span class="eyebrow">M0614 · Linux · Ubuntu 26.04</span>
+    <h1>Fes-ho segur: <span class="code">HTTPS i Tomcat tancat</span></h1>
+    <p class="lede">Publicaràs l'aplicació amb HTTPS a Apache i faràs que Tomcat només accepti connexions de la màquina apache.</p>
     <div class="meta">
       <span class="pill">RA <strong>RA3</strong></span>
-      <!-- REVISAR: confirmar la numeració dels CA del RA3 segons la programació del mòdul -->
-      <span class="pill">CA <strong>3.3 · 3.5 · 3.6 · 3.7</strong></span>
+      <span class="pill">Màquines <strong>apache</strong> i <strong>tomcat</strong></span>
     </div>
   </header>
 
   <div class="rule"></div>
 
-  <!-- ============ 0 · OBJECTIUS I PREREQUISITS ============ -->
   <section>
     <div class="sec-head">
       <span class="sec-num">0</span>
-      <h2>Objectius i prerequisits</h2>
+      <h2>Què faràs</h2>
     </div>
-
-    <p>En aquesta activitat aprendràs a:</p>
     <ul>
-      <li>Crear <strong>usuaris i rols</strong> de Tomcat a <code>tomcat-users.xml</code>.</li>
-      <li>Fer servir el <strong>Tomcat Manager</strong> per desplegar i retirar aplicacions a distància.</li>
-      <li>Restringir l'accés al Manager <strong>per IP</strong> a l'Apache.</li>
-      <li>Activar <strong>HTTPS</strong> a l'Apache que fa de proxy i redirigir tot l'HTTP cap a l'HTTPS.</li>
-      <li>Fer que Tomcat només escolti a <code>127.0.0.1</code>, de manera que el port <strong>8080</strong> quedi tancat a l'exterior.</li>
+      <li>Publicar l'aplicació amb <strong>HTTPS</strong> a Apache.</li>
+      <li>Fer que Tomcat <strong>només accepti</strong> connexions d'Apache, amb el tallafocs <code>ufw</code>.</li>
+    </ul>
+    <h3>Què necessites</h3>
+    <ul>
+      <li>Haver fet l'<a href="aea3_a1_2.html">A1.2</a>: <code>http://www.app.local/sample/</code> funciona des del client.</li>
     </ul>
 
-    <h3>Prerequisit important</h3>
-    <div class="callout warn">
-      <span class="ico">⚠️</span>
-      <p>Necessites l'Apache fent de proxy invers cap a Tomcat amb el host virtual <code>www.app.local</code> (<a href="aea3_a1_2.html">A1.2</a>). Comprova-ho abans: des del client, <code>http://www.app.local/sample/</code> ha de funcionar.</p>
-    </div>
   </section>
 
-  <!-- ============ 1 · CONTEXT I TEORIA MÍNIMA ============ -->
   <section>
     <div class="sec-head">
       <span class="sec-num">1</span>
-      <h2>Context i teoria mínima</h2>
+      <h2>Què canviarem</h2>
     </div>
-
-    <h3>El Tomcat Manager</h3>
-    <p>El <strong>Manager</strong> és una aplicació que porta Tomcat (<code>webapps/manager</code>) per administrar les altres aplicacions sense entrar al servidor: llistar-les, desplegar-ne de noves, aturar-les, tornar-les a carregar o retirar-les. És molt pràctic i, per això mateix, <strong>molt perillós</strong>: qui hi entra pot posar el codi Java que vulgui al servidor.</p>
-    <p>Per això Tomcat el protegeix de dues maneres, i nosaltres n'hi afegirem una tercera:</p>
-    <ol>
-      <li><strong>Usuari i contrasenya amb rol.</strong> Per defecte no hi ha cap usuari: ningú no hi pot entrar. Els crearem a <code>tomcat-users.xml</code>.</li>
-      <li><strong>Origen local.</strong> El fitxer <code>webapps/manager/META-INF/context.xml</code> només deixa entrar peticions de <code>127.0.0.1</code>. Però, com que totes les peticions que passen per Apache arriben a Tomcat des de <code>127.0.0.1</code>, aquesta protecció no distingeix els clients. Ho vas veure a l'A1.2.</li>
-      <li><strong>Restricció per IP a Apache.</strong> Com que Apache sí que veu la IP real, li direm que només deixi passar cap a <code>/manager</code> les peticions de l'administrador (<code>192.168.1.20</code>).</li>
-    </ol>
-
-    <h3>Rols del Manager</h3>
-    <table>
-      <thead><tr><th>Rol</th><th>Què permet</th><th>Ruta</th></tr></thead>
-      <tbody>
-        <tr><td><code>manager-gui</code></td><td>Fer servir la interfície web, amb botons, des d'un navegador.</td><td><code>/manager/html</code></td></tr>
-        <tr><td><code>manager-script</code></td><td>Fer servir la interfície de text, pensada per a scripts i <code>curl</code>.</td><td><code>/manager/text/…</code></td></tr>
-        <tr><td><code>manager-status</code></td><td>Només veure l'estat del servidor.</td><td><code>/manager/status</code></td></tr>
-      </tbody>
-    </table>
-    <div class="callout tip">
-      <span class="ico">💡</span>
-      <p>La documentació de Tomcat recomana <strong>no</strong> donar <code>manager-gui</code> i <code>manager-script</code> al mateix usuari: si un usuari amb rol <code>manager-script</code> obrís una web maliciosa mentre té la sessió iniciada, aquesta web podria fer accions al Manager en nom seu. Per això crearem dos usuaris, un per a cada interfície.</p>
-    </div>
-
-    <h3>HTTPS a la porta, HTTP a dins</h3>
-    <p>El xifratge el farà Apache, que és qui parla amb el client. Entre Apache i Tomcat la connexió continuarà en HTTP, però no surt del servidor (<code>127.0.0.1</code>), així que ningú de la xarxa la pot llegir. Aquest esquema es diu <strong>terminació TLS</strong> al proxy.</p>
-
+    <p>Ara mateix hi ha dos problemes de seguretat:</p>
+    <ul>
+      <li>Les dades viatgen <strong>sense xifrar</strong> (HTTP). Ho arreglarem amb <strong>HTTPS</strong> a Apache, amb un certificat fet per nosaltres (<em>autofirmat</em>).</li>
+      <li>El client encara pot entrar <strong>directament a Tomcat</strong> pel 8080, saltant-se Apache. Ho arreglarem amb el tallafocs de la màquina tomcat: només deixarà entrar al 8080 la màquina apache.</li>
+    </ul>
     <figure class="netfig">
-      <svg viewBox="0 0 820 340" role="img" aria-label="Esquema final: el client fa HTTP al port 80 i Apache el redirigeix a HTTPS al port 443. Apache, amb certificat, reenvia les peticions a Tomcat a 127.0.0.1:8080. El camí /manager només el deixa passar si ve de l'administrador, 192.168.1.20. El port 8080 ja no és accessible des de la xarxa.">
+      <svg viewBox="0 0 820 290" role="img" aria-label="El client entra a la màquina apache pel port :443 HTTPS; apache passa la petició a la màquina tomcat pel port 8080. La màquina admin es connecta per SSH a apache i a tomcat per configurar-les.">
         <defs>
-          <marker id="aO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07B1E"/></marker>
-          <marker id="aG" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9aa4b2"/></marker>
-          <marker id="aR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C0392B"/></marker>
+          <marker id="fO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07B1E"/></marker>
+          <marker id="fG" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9aa4b2"/></marker>
         </defs>
+        <path d="M722,148 C722,70 330,60 315,146" fill="none" stroke="#9aa4b2" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#fG)"/>
+        <path d="M722,148 C722,100 545,95 535,146" fill="none" stroke="#9aa4b2" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#fG)"/>
+        <rect x="560" y="40" width="150" height="20" rx="6" fill="#EDF1F6"/>
+        <text x="635" y="54" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11.5" fill="#3A4658">SSH :22 · configura</text>
         <g>
-          <rect x="20" y="40" width="160" height="90" rx="12" fill="#FFFFFF" stroke="#D6DEE8"/>
-          <text x="100" y="78" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="16" fill="#1A2230">Client</text>
-          <text x="100" y="102" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#1A2230">192.168.1.30</text>
+          <rect x="15" y="150" width="160" height="96" rx="12" fill="#FFFFFF" stroke="#1D4E89" stroke-width="2"/>
+          <text x="95" y="182" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#1A2230">client</text>
+          <text x="95" y="204" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#5A6677">Navegador</text>
+          <text x="95" y="228" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#1A2230">192.168.1.30</text>
         </g>
         <g>
-          <rect x="20" y="210" width="160" height="90" rx="12" fill="#FFFFFF" stroke="#D6DEE8"/>
-          <text x="100" y="248" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="16" fill="#1A2230">Administrador</text>
-          <text x="100" y="272" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#1A2230">192.168.1.20</text>
+          <rect x="235" y="150" width="160" height="96" rx="12" fill="#0F6E56" stroke="#0F6E56" stroke-width="2"/>
+          <text x="315" y="182" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">apache</text>
+          <text x="315" y="204" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#E6ECF5">Apache · servidor web</text>
+          <text x="315" y="228" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#FFFFFF">192.168.1.10</text>
         </g>
-        <rect x="260" y="20" width="540" height="300" rx="14" fill="#1A2230"/>
-        <text x="280" y="48" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">Servidor</text>
-        <text x="780" y="48" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="13" fill="#E07B1E">192.168.1.10</text>
-        <rect x="280" y="70" width="230" height="230" rx="10" fill="#263042" stroke="#E07B1E" stroke-width="1.6"/>
-        <text x="395" y="98" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">Apache</text>
-        <rect x="295" y="112" width="200" height="36" rx="8" fill="#1A2230" stroke="#3A4658"/>
-        <text x="395" y="135" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">:80 → 301 a https</text>
-        <rect x="295" y="158" width="200" height="36" rx="8" fill="#1A2230" stroke="#E07B1E"/>
-        <text x="395" y="181" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E07B1E">:443 · TLS · certificat</text>
-        <rect x="295" y="204" width="200" height="80" rx="8" fill="#1A2230" stroke="#3A4658"/>
-        <text x="395" y="226" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E6ECF5">/          → tothom</text>
-        <text x="395" y="248" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E6ECF5">/manager   → només .20</text>
-        <text x="395" y="270" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">Require ip</text>
-        <rect x="590" y="110" width="190" height="130" rx="10" fill="#263042" stroke="#3A4658"/>
-        <text x="685" y="148" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">Tomcat</text>
-        <text x="685" y="172" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#E07B1E">127.0.0.1:8080</text>
-        <text x="685" y="194" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">tomcat-users.xml</text>
-        <text x="685" y="214" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#9aa4b2">ROOT · sample · manager</text>
-        <line x1="184" y1="85" x2="290" y2="135" stroke="#9aa4b2" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#aG)"/>
-        <text x="215" y="90" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9aa4b2">http</text>
-        <line x1="184" y1="105" x2="290" y2="176" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#aO)"/>
-        <text x="205" y="150" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">https</text>
-        <line x1="184" y1="255" x2="290" y2="245" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#aO)"/>
-        <text x="200" y="238" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">https /manager</text>
-        <line x1="514" y1="175" x2="584" y2="175" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#aO)"/>
-        <text x="549" y="165" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9c5813">http</text>
-        <path d="M180,120 C240,330 620,345 680,244" fill="none" stroke="#C0392B" stroke-width="1.8" stroke-dasharray="4 5" marker-end="url(#aR)"/>
-        <text x="450" y="336" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#C0392B">:8080 des de fora → tancat ✗</text>
+        <g>
+          <rect x="455" y="150" width="160" height="96" rx="12" fill="#5B3FA8" stroke="#5B3FA8" stroke-width="2"/>
+          <text x="535" y="182" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#FFFFFF">tomcat</text>
+          <text x="535" y="204" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#E6ECF5">Tomcat · aplicacions Java</text>
+          <text x="535" y="228" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#FFFFFF">192.168.1.11</text>
+        </g>
+        <g>
+          <rect x="650" y="150" width="145" height="96" rx="12" fill="#FFFFFF" stroke="#A85610" stroke-width="2"/>
+          <text x="722" y="182" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15" fill="#1A2230">admin</text>
+          <text x="722" y="204" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#5A6677">Administrador · SSH</text>
+          <text x="722" y="228" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="13" fill="#1A2230">192.168.1.20</text>
+        </g>
+        <line x1="178" y1="198" x2="230" y2="198" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#fO)"/>
+        <text x="204" y="190" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">:443</text>
+        <line x1="398" y1="198" x2="450" y2="198" stroke="#E07B1E" stroke-width="2.4" marker-end="url(#fO)"/>
+        <text x="424" y="190" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9c5813">:8080</text>
+        <text x="410" y="275" text-anchor="middle" font-family="Inter, sans-serif" font-size="12.5" fill="#5A6677">Al final: el client entra per HTTPS a apache, i tomcat només accepta peticions d'apache.</text>
       </svg>
-      <figcaption>Apache és l'única porta: xifra, redirigeix i filtra per IP. Tomcat només escolta dins del servidor.</figcaption>
+      <figcaption>El client només parla amb apache; apache demana la pàgina a tomcat. L'admin configura les dues màquines per SSH.</figcaption>
     </figure>
 
-    <h3>Conceptes clau</h3>
-    <table>
-      <thead><tr><th>Concepte</th><th>Què és</th></tr></thead>
-      <tbody>
-        <tr><td><strong><code>tomcat-users.xml</code></strong></td><td>Fitxer de <code>conf/</code> amb els usuaris, les contrasenyes i els rols de Tomcat. Es llegeix en arrencar.</td></tr>
-        <tr><td><strong>Rol</strong></td><td>Nom d'un permís. Un usuari pot tenir-ne diversos; les aplicacions demanen rols, no usuaris.</td></tr>
-        <tr><td><strong><code>Require ip</code></strong></td><td>Directiva d'Apache que només deixa passar les peticions de les IP indicades. La resta reben <em>403 Forbidden</em>.</td></tr>
-        <tr><td><strong><code>&lt;Location&gt;</code></strong></td><td>Bloc d'Apache que aplica directives a una ruta de la URL (per exemple, <code>/manager</code>).</td></tr>
-        <tr><td><strong>Terminació TLS</strong></td><td>El proxy desxifra l'HTTPS i parla amb el backend en HTTP per una connexió interna.</td></tr>
-        <tr><td><strong><code>address="127.0.0.1"</code></strong></td><td>Atribut del connector de Tomcat que el fa escoltar només dins del servidor.</td></tr>
-      </tbody>
-    </table>
   </section>
 
-  <!-- ============ 2 · PAS A PAS GUIAT ============ -->
   <section>
     <div class="sec-head">
       <span class="sec-num">2</span>
-      <h2>Pas a pas guiat</h2>
+      <h2>Pas a pas</h2>
     </div>
-
     <div class="callout tip">
       <span class="ico">💡</span>
-      <p>Cada pas ve dins d'una <strong>capsa de color</strong> que indica qui l'ha de fer: <span class="legend"><span><span class="sw" style="background:var(--admin-bg);border-color:var(--admin-border)"></span>Administrador</span><span><span class="sw" style="background:var(--server-bg);border-color:var(--server-border)"></span>Servidor</span><span><span class="sw" style="background:var(--client-bg);border-color:var(--client-border)"></span>Client</span></span>. Els fitxers de configuració no porten capsa.</p>
+      <p>Cada pas ve dins d'una <strong>capsa de color</strong> que diu a quina màquina l'has de fer: <span class="legend"><span><span class="sw" style="background:var(--client-bg);border-color:var(--client-border)"></span>Client</span><span><span class="sw" style="background:var(--admin-bg);border-color:var(--admin-border)"></span>Administrador</span><span><span class="sw" style="background:var(--server-bg);border-color:var(--server-border)"></span>Apache</span><span><span class="sw" style="background:var(--tomcat-bg);border-color:var(--tomcat-border)"></span>Tomcat</span><span><span class="sw" style="background:var(--slate-soft);border-color:var(--hairline)"></span>Diverses màquines</span></span>.</p>
     </div>
 
-    <h2 style="margin-top:2rem">Part 1 · Usuaris i rols del Manager</h2>
+    <h2 style="margin-top:2rem">Part 1 · HTTPS a Apache</h2>
 
-    <h3>2.1 · Connecta't al servidor per SSH</h3>
+    <h3>2.1 · Entra a la màquina apache</h3>
     <div class="role-box admin">
       <span class="role-label admin">Administrador</span>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
-        <pre><code>ssh isard_ssh@192.168.1.10</code></pre>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin</span></div>
+        <pre><code>ssh isard@192.168.1.10</code></pre>
       </div>
-      <p>➜ Obre una sessió de terminal xifrada al servidor per SSH.</p>
-    </div>
-    <div class="callout switch">
-      <span class="ico">💻→</span>
-      <p>A partir d'aquí, tot el que escrius s'executa <strong>al servidor</strong>, no a l'administrador. Per tornar a l'administrador quan acabis, escriu <code>exit</code>.</p>
+      <p>➜ Entra a la màquina <strong>apache</strong> per SSH amb l'usuari <code>isard</code> i la seva contrasenya. Quan el <em>prompt</em> digui <code>isard@apache</code>, ja hi ets.</p>
     </div>
 
-    <h3>2.2 · Mira com es protegeix el Manager per defecte</h3>
+    <h3>2.2 · Crea el certificat</h3>
     <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <span class="role-label server">Administrador → Apache · per SSH</span>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo grep -A2 '&lt;Valve' /opt/tomcat/webapps/manager/META-INF/context.xml</code></pre>
-      </div>
-      <p>➜ Mostra la <em>Valve</em> que filtra les peticions al Manager i les dues línies següents (<code>-A2</code>).</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada (aproximada)</span></div>
-        <pre><code>  &lt;Valve className="org.apache.catalina.valves.RemoteCIDRValve"
-         allow="127.0.0.0/8,::1/128" /&gt;     <span class="c"># només des del mateix servidor</span></code></pre>
-      </div>
-      <!-- REVISAR: segons la versió 10.1.x, la Valve pot ser RemoteAddrValve amb una expressió regular en lloc de RemoteCIDRValve -->
-      <p>No la toquis. Segons la versió, pot sortir <code>RemoteAddrValve</code> amb una expressió regular; l'efecte és el mateix: només <code>127.0.0.1</code>. Com que Apache es connecta des de <code>127.0.0.1</code>, el filtre de debò el posarem a Apache.</p>
-    </div>
-
-    <h3>2.3 · Crea els usuaris del Manager</h3>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo nano /opt/tomcat/conf/tomcat-users.xml</code></pre>
-      </div>
-      <p>➜ Obre el fitxer d'usuaris de Tomcat. Està ple d'exemples comentats (<code>&lt;!-- ... --&gt;</code>): no els toquis.</p>
-      <p>Baixa fins al final i, <strong>just abans</strong> de l'última línia <code>&lt;/tomcat-users&gt;</code>, afegeix aquest bloc. Canvia les dues contrasenyes per unes de teves:</p>
-    </div>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">tomcat-users.xml</span></div>
-      <pre><code>  <span class="c">&lt;!-- AEA3 · A1.3 --&gt;</span>
-  &lt;role rolename="manager-gui"/&gt;
-  &lt;role rolename="manager-script"/&gt;
-  &lt;user username="gestor"      password="CONTRASENYA_GESTOR"      roles="manager-gui"/&gt;      <span class="c">&lt;!-- interfície web --&gt;</span>
-  &lt;user username="desplegador" password="CONTRASENYA_DESPLEGADOR" roles="manager-script"/&gt;   <span class="c">&lt;!-- curl / scripts --&gt;</span>
-&lt;/tomcat-users&gt;</code></pre>
-    </div>
-    <div class="callout warn">
-      <span class="ico">⚠️</span>
-      <p>Les contrasenyes queden <strong>en clar</strong> dins del fitxer. Per això <code>conf/</code> només la pot llegir l'usuari <code>tomcat</code>. Si una línia queda mal tancada (per exemple, sense <code>/&gt;</code>), Tomcat no podrà llegir el fitxer i no deixarà entrar ningú.</p>
-    </div>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
-      <p>Desa (<code>Ctrl+O</code>, <code>Enter</code>) i surt (<code>Ctrl+X</code>).</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo systemctl restart tomcat</code></pre>
-      </div>
-      <p>➜ Reinicia Tomcat perquè llegeixi els usuaris nous. Aquest fitxer només es carrega en arrencar.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>curl -s -u desplegador:CONTRASENYA_DESPLEGADOR http://127.0.0.1:8080/manager/text/list</code></pre>
-      </div>
-      <p>➜ Prova l'usuari des del mateix servidor, directament a Tomcat. <code>-u</code> envia l'usuari i la contrasenya. Ha de començar per <code>OK - Listed applications for virtual host [localhost]</code>. Si respon amb un error 401, l'usuari o la contrasenya no coincideixen.</p>
-    </div>
-
-    <h2 style="margin-top:2rem">Part 2 · HTTPS i restricció per IP a Apache</h2>
-
-    <h3>2.4 · Activa SSL i genera el certificat</h3>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
         <pre><code>sudo a2enmod ssl</code></pre>
       </div>
-      <p>➜ Activa el mòdul <code>ssl</code>, que permet a Apache servir per HTTPS al port 443.</p>
+      <p>➜ Activa el mòdul d'HTTPS d'Apache.</p>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
         <pre><code>sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout /etc/ssl/private/app.key \
-  -out /etc/ssl/certs/app.crt \
-  -subj "/C=ES/ST=Barcelona/L=Barcelona/O=Institut La Merce/OU=DAW/CN=www.app.local" \
-  -addext "subjectAltName=DNS:www.app.local,DNS:app.local"</code></pre>
+  -keyout /etc/ssl/private/app.key -out /etc/ssl/certs/app.crt \
+  -subj "/CN=www.app.local"</code></pre>
       </div>
-      <p>➜ Genera el certificat autofirmat i la clau, com a l'AEA2, però en <strong>una sola ordre</strong> sense preguntes: <code>-subj</code> respon les dades del certificat (el <strong>CN</strong> és el nom del lloc) i <code>-addext</code> hi afegeix els noms alternatius, que és el que comproven els navegadors actuals.</p>
+      <p>➜ Crea un certificat <strong>autofirmat</strong> per a <code>www.app.local</code>, vàlid 365 dies: la clau privada (<code>app.key</code>) i el certificat (<code>app.crt</code>). És una sola ordre en tres línies.</p>
     </div>
 
-    <h3>2.5 · Reescriu el host virtual</h3>
+    <h3>2.3 · Canvia el lloc a HTTPS</h3>
     <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
+      <span class="role-label server">Administrador → Apache · per SSH</span>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo nano /etc/apache2/sites-available/app.conf</code></pre>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
+        <pre><code>cd /etc/apache2/sites-available
+sudo nano app.conf</code></pre>
       </div>
-      <p>➜ Obre el host virtual de l'A1.2.</p>
-      <p>Esborra'n tot el contingut i deixa'l així. Ara té dos blocs: el del <strong>80</strong> només redirigeix, i el del <strong>443</strong> fa tota la feina:</p>
-    </div>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">app.conf</span></div>
-      <pre><code><span class="c"># --- Port 80: només redirigeix a HTTPS ---</span>
+      <p>➜ Torna a obrir el lloc de l'A1.2. Esborra el que hi ha i escriu-hi:</p>
+      <div class="term">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">app.conf</span></div>
+        <pre><code><span class="c"># Port 80: envia el client a HTTPS</span>
 &lt;VirtualHost *:80&gt;
-    ServerName  www.app.local
-    ServerAlias app.local
-    Redirect permanent / https://www.app.local/
+    ServerName www.app.local
+    Redirect / https://www.app.local/
 &lt;/VirtualHost&gt;
 
-<span class="c"># --- Port 443: HTTPS + proxy cap a Tomcat ---</span>
+<span class="c"># Port 443: HTTPS i proxy cap a Tomcat</span>
 &lt;VirtualHost *:443&gt;
-    ServerName  www.app.local
-    ServerAlias app.local
-
+    ServerName www.app.local
     SSLEngine on
     SSLCertificateFile    /etc/ssl/certs/app.crt
     SSLCertificateKeyFile /etc/ssl/private/app.key
-
-    ProxyRequests     Off
-    ProxyPreserveHost On
-
-    <span class="c"># El Manager només per a l'administrador</span>
-    &lt;Location /manager&gt;
-        Require ip 192.168.1.20
-    &lt;/Location&gt;
-    ProxyPass /host-manager !               <span class="c"># aquest no el fem servir: continua sense publicar</span>
-
-    ProxyPass        / http://127.0.0.1:8080/
-    ProxyPassReverse / http://127.0.0.1:8080/
-
-    ErrorLog  ${APACHE_LOG_DIR}/app_error.log
-    CustomLog ${APACHE_LOG_DIR}/app_access.log combined
+    ProxyPass        / http://192.168.1.11:8080/
+    ProxyPassReverse / http://192.168.1.11:8080/
 &lt;/VirtualHost&gt;</code></pre>
-    </div>
-    <div class="callout tip">
-      <span class="ico">💡</span>
-      <p>Fixa't que ja no hi ha <code>ProxyPass /manager !</code>: ara el Manager <strong>sí</strong> que passa a Tomcat, però el bloc <code>&lt;Location /manager&gt;</code> fa que Apache l'aturi amb un <em>403</em> abans de reenviar-lo si la petició no ve de <code>192.168.1.20</code>.</p>
-    </div>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
-      <p>Desa i surt.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo apache2ctl configtest</code></pre>
       </div>
-      <p>➜ Revisa la sintaxi. Ha de respondre <code>Syntax OK</code>.</p>
+      <ul>
+      <li>El primer bloc (port 80) només fa una cosa: <strong>redirigir</strong> el client a la versió HTTPS.</li>
+      <li>El segon bloc (port 443) és el d'abans, amb HTTPS activat (<code>SSLEngine on</code>) i el certificat que has creat.</li>
+      </ul>
+      <p>Desa i surt. Reinicia Apache:</p>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → apache (SSH)</span></div>
         <pre><code>sudo systemctl restart apache2</code></pre>
       </div>
-      <p>➜ Reinicia Apache: cal <code>restart</code> perquè has activat un mòdul nou (<code>ssl</code>) i s'ha d'obrir el port 443.</p>
+      <p>➜ Reinicia Apache amb el mòdul SSL i el lloc nou. Si dona error, fes <code>sudo apache2ctl configtest</code> per veure la línia que falla.</p>
     </div>
 
-    <h2 style="margin-top:2rem">Part 3 · Tancar el 8080 a l'exterior</h2>
-
-    <h3>2.6 · Fes que Tomcat només escolti a 127.0.0.1</h3>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo nano /opt/tomcat/conf/server.xml</code></pre>
-      </div>
-      <p>➜ Obre la configuració principal de Tomcat. Busca el connector amb <code>Ctrl+W</code> i escriu <code>Connector port="8080"</code>.</p>
-      <p>Afegeix-hi l'atribut <code>address="127.0.0.1"</code>. Deixa la resta d'atributs tal com estiguin:</p>
-    </div>
-    <div class="term">
-      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">server.xml</span></div>
-      <pre><code>    &lt;Connector port="8080" address="127.0.0.1" protocol="HTTP/1.1"     <span class="c">&lt;!-- afegeix address --&gt;</span>
-               connectionTimeout="20000"
-               redirectPort="8443"
-               ... /&gt;                                                   <span class="c">&lt;!-- la resta, igual --&gt;</span></code></pre>
-    </div>
-    <div class="role-box server">
-      <span class="role-label server">Administrador → Servidor · per SSH</span>
-      <p>Desa i surt.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo systemctl restart tomcat</code></pre>
-      </div>
-      <p>➜ Reinicia Tomcat perquè torni a obrir el connector, ara només a l'adreça interna.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador → servidor (SSH)</span></div>
-        <pre><code>sudo ss -tlnp | grep -E <span class="c">':(80|443|8080) '</span></code></pre>
-      </div>
-      <p>➜ Comprova on escolta cada servei. Espera uns segons si el 8080 encara no surt.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
-        <pre><code>LISTEN 0 511  *:80                 *:*  users:(("apache2",...))   <span class="c"># Apache HTTP (redirecció)</span>
-LISTEN 0 511  *:443                *:*  users:(("apache2",...))   <span class="c"># Apache HTTPS</span>
-LISTEN 0 100  [::ffff:127.0.0.1]:8080  *:*  users:(("java",...))  <span class="c"># ⚠ EL MÉS IMPORTANT: Tomcat només dins del servidor</span></code></pre>
-      </div>
-      <div class="callout tip">
-        <span class="ico">💡</span>
-        <p>A l'A1.0 i l'A1.1 el 8080 sortia com <code>*:8080</code> (totes les adreces). Ara només surt a <code>127.0.0.1</code>: des de la xarxa ningú s'hi pot connectar, però Apache sí, perquè és al mateix servidor. En un servidor real, a més, s'hi afegiria un tallafoc (per exemple <code>ufw</code>) que només deixés entrar el 22, el 80 i el 443.</p>
-      </div>
-    </div>
-
-    <h2 style="margin-top:2rem">Part 4 · Proves</h2>
-
-    <h3>2.7 · Prova l'HTTPS des del client</h3>
+    <h3>2.4 · Prova l'HTTPS des del client</h3>
     <div class="role-box client">
       <span class="role-label client">Client</span>
       <div class="check">
-        <span class="check-title">🔎 Comprova-ho al navegador</span>
+        <span class="check-title">🔎 Comprova-ho al navegador del client</span>
         <span class="url">http://www.app.local/sample/</span>
-        <p>Escriu-la <strong>amb http</strong>. El navegador ha de saltar sol a <code>https://www.app.local/sample/</code> i mostrar l'<strong>avís de seguretat</strong> del certificat autofirmat. Accepta'l (a Firefox: <em>Avançat → Accepta el risc</em>). Ha de sortir l'aplicació d'exemple. Clica el cadenat: el certificat és per a <code>www.app.local</code> i l'ha emès <em>Institut La Merce</em>.</p>
-      </div>
-      <div class="check">
-        <span class="check-title">🔎 Comprova-ho al navegador</span>
-        <span class="url">https://www.app.local/manager/html</span>
-        <p>Des del <strong>client</strong>, ha de sortir <strong>Forbidden</strong> (<em>You don't have permission to access this resource</em>). Ni tan sols et demana usuari: Apache t'atura per la IP abans d'arribar a Tomcat.</p>
-      </div>
-      <div class="check">
-        <span class="check-title">🔎 Comprova-ho al navegador</span>
-        <span class="url">http://192.168.1.10:8080</span>
-        <p>A l'A1.2 funcionava. Ara ha de fallar amb <em>No es pot connectar</em>: el 8080 ja no és accessible des de la xarxa.</p>
+        <p>El navegador canvia sol a <code>https://</code> i avisa que el certificat no és de confiança: és normal, l'has fet tu. Fes clic a <strong>Avançat</strong> → <strong>Accepta el risc i continua</strong>. Ha de sortir l'aplicació amb el cadenat a la barra d'adreces.</p>
       </div>
     </div>
 
-    <h3>2.8 · Fes servir el Manager des de l'administrador</h3>
+    <h2 style="margin-top:2rem">Part 2 · Tomcat només per a Apache</h2>
+
+    <h3>2.5 · Entra a la màquina tomcat</h3>
     <div class="role-box admin">
       <span class="role-label admin">Administrador</span>
-      <p>Surt de l'SSH (<code>exit</code>). L'administrador també ha de conèixer el nom <code>www.app.local</code>:</p>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
-        <pre><code>echo '192.168.1.10   www.app.local   app.local' | sudo tee -a /etc/hosts</code></pre>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin</span></div>
+        <pre><code>ssh isard@192.168.1.11</code></pre>
       </div>
-      <p>➜ Afegeix la línia al final de <code>/etc/hosts</code> de l'administrador. <code>tee -a</code> l'afegeix amb permisos de <code>sudo</code> sense esborrar res.</p>
+      <p>➜ Entra a la màquina <strong>tomcat</strong> per SSH amb l'usuari <code>isard</code> i la seva contrasenya. Quan el <em>prompt</em> digui <code>isard@tomcat</code>, ja hi ets.</p>
+    </div>
+
+    <h3>2.6 · Activa el tallafocs</h3>
+    <div class="role-box tomcat">
+      <span class="role-label tomcat">Administrador → Tomcat · per SSH</span>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
-        <pre><code>curl -k -u desplegador:CONTRASENYA_DESPLEGADOR https://www.app.local/manager/text/list</code></pre>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → tomcat (SSH)</span></div>
+        <pre><code>sudo ufw allow OpenSSH</code></pre>
       </div>
-      <p>➜ Llista les aplicacions desplegades a través del Manager, per HTTPS i des de la IP permesa. <code>-k</code> accepta el certificat autofirmat.</p>
+      <p>➜ <strong>Primer de tot</strong>, deixa entrar l'SSH. Si actives el tallafocs sense aquesta regla, et quedes fora.</p>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada (l'ordre pot variar)</span></div>
-        <pre><code>OK - Listed applications for virtual host [localhost]   <span class="c"># ⚠ EL MÉS IMPORTANT</span>
-/:running:0:ROOT
-/sample:running:0:sample
-/manager:running:0:manager
-/docs:running:0:docs
-/examples:running:0:examples
-/host-manager:running:0:host-manager</code></pre>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → tomcat (SSH)</span></div>
+        <pre><code>sudo ufw allow from 192.168.1.10 to any port 8080</code></pre>
       </div>
-      <p>Ara desplega una aplicació nova <strong>sense entrar al servidor</strong>. Primer, descarrega el <code>.war</code> d'exemple a l'administrador:</p>
+      <p>➜ Deixa entrar al port 8080 <strong>només</strong> la màquina apache (<code>192.168.1.10</code>).</p>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
-        <pre><code>wget https://tomcat.apache.org/tomcat-10.1-doc/appdev/sample/sample.war</code></pre>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → tomcat (SSH)</span></div>
+        <pre><code>sudo ufw enable</code></pre>
       </div>
-      <p>➜ Descarrega l'aplicació d'exemple oficial a la carpeta on ets.</p>
+      <p>➜ Activa el tallafocs. Et preguntarà si vols continuar: escriu <code>y</code>. A partir d'ara, tot el que no hagis permès queda bloquejat.</p>
       <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
-        <pre><code>curl -k -u desplegador:CONTRASENYA_DESPLEGADOR -T sample.war "https://www.app.local/manager/text/deploy?path=/demo"</code></pre>
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — admin → tomcat (SSH)</span></div>
+        <pre><code>sudo ufw status</code></pre>
       </div>
-      <p>➜ <code>-T</code> puja el fitxer al Manager, que el desplega amb la ruta <code>/demo</code>. Ha de respondre <code>OK - Deployed application at context path [/demo]</code>. Les cometes calen perquè la URL porta un <code>?</code>.</p>
+      <p>➜ Mostra les regles. Han de sortir <code>OpenSSH</code> i <code>8080</code> permès des de <code>192.168.1.10</code>.</p>
+    </div>
+
+    <h3>2.7 · Comprova que el 8080 ja no s'obre des del client</h3>
+    <div class="role-box client">
+      <span class="role-label client">Client</span>
       <div class="check">
-        <span class="check-title">🔎 Comprova-ho al navegador</span>
-        <span class="url">https://www.app.local/demo/</span>
-        <p>Des del <strong>client</strong>: ha de sortir la mateixa aplicació d'exemple, ara a la ruta <code>/demo</code>. L'has desplegada a distància, sense tocar <code>webapps</code>.</p>
+        <span class="check-title">🔎 Comprova-ho al navegador del client</span>
+        <span class="url">http://192.168.1.11:8080</span>
+        <p>Ara <strong>no ha de carregar</strong>: el navegador es queda esperant i acaba donant error de temps d'espera. El tallafocs de tomcat no deixa entrar el client.</p>
       </div>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
-        <pre><code>curl -k -u desplegador:CONTRASENYA_DESPLEGADOR "https://www.app.local/manager/text/undeploy?path=/demo"</code></pre>
-      </div>
-      <p>➜ Retira l'aplicació <code>/demo</code>. Ha de respondre <code>OK - Undeployed application at context path [/demo]</code>.</p>
-      <div class="callout tip">
-        <span class="ico">💡</span>
-        <p>Si l'administrador té navegador, obre <code>https://www.app.local/manager/html</code> amb l'usuari <code>gestor</code>: veuràs la llista d'aplicacions amb els botons <em>Start</em>, <em>Stop</em>, <em>Reload</em> i <em>Undeploy</em>, i un formulari per pujar un <code>.war</code>.</p>
+      <div class="check">
+        <span class="check-title">🔎 Comprova-ho al navegador del client</span>
+        <span class="url">https://www.app.local/sample/</span>
+        <p>En canvi, per Apache continua funcionant: Apache sí que pot parlar amb Tomcat.</p>
       </div>
     </div>
+
   </section>
 
-  <!-- ============ 3 · VERIFICACIÓ ============ -->
   <section>
     <div class="sec-head">
       <span class="sec-num">3</span>
-      <h2>Verificació</h2>
+      <h2>Comprova que ho tens tot</h2>
     </div>
-
-    <div class="role-box client">
-      <span class="role-label client">Client</span>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — client</span></div>
-        <pre><code>curl -I http://www.app.local/sample/</code></pre>
-      </div>
-      <p>➜ Demana la pàgina per HTTP i mostra només la capçalera.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
-        <pre><code>HTTP/1.1 301 Moved Permanently                <span class="c"># ⚠ redirecció</span>
-Server: Apache/2.4.NN (Ubuntu)
-Location: https://www.app.local/sample/       <span class="c"># cap a l'HTTPS</span></code></pre>
-      </div>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — client</span></div>
-        <pre><code>for u in /sample/ /manager/html /host-manager/html; do
-  printf '%-20s %s\n' "$u" "$(curl -k -s -o /dev/null -w '%{http_code}' https://www.app.local$u)"
-done
-curl -m 5 -s -o /dev/null http://192.168.1.10:8080/ &amp;&amp; echo "8080: obert" || echo "8080: tancat"</code></pre>
-      </div>
-      <p>➜ El bucle demana tres rutes per HTTPS i escriu només el codi de cada resposta. L'última línia intenta connectar al 8080 amb un límit de 5 segons (<code>-m 5</code>) i escriu <code>obert</code> o <code>tancat</code> segons si ho aconsegueix.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
-        <pre><code>/sample/             200      <span class="c"># l'aplicació funciona per HTTPS</span>
-/manager/html        403      <span class="c"># ⚠ el client no pot entrar al Manager</span>
-/host-manager/html   404      <span class="c"># no es publica</span>
-8080: tancat                  <span class="c"># ⚠ no es pot connectar al 8080</span></code></pre>
-      </div>
-    </div>
-
-    <div class="role-box admin">
-      <span class="role-label admin">Administrador</span>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bash — administrador</span></div>
-        <pre><code>curl -k -s -o /dev/null -w 'sense usuari: %{http_code}\n' https://www.app.local/manager/html
-curl -k -s -o /dev/null -w 'amb gestor:   %{http_code}\n' -u gestor:CONTRASENYA_GESTOR https://www.app.local/manager/html</code></pre>
-      </div>
-      <p>➜ La mateixa pàgina del Manager, primer sense credencials i després amb l'usuari <code>gestor</code>.</p>
-      <div class="term">
-        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sortida esperada</span></div>
-        <pre><code>sense usuari: 401             <span class="c"># Apache el deixa passar (IP correcta), però Tomcat demana usuari</span>
-amb gestor:   200             <span class="c"># ⚠ EL MÉS IMPORTANT: IP permesa + usuari amb rol manager-gui</span></code></pre>
-      </div>
-    </div>
-
-    <h3>Llista de comprovació</h3>
-    <ul>
-      <li><code>tomcat-users.xml</code> té els usuaris <code>gestor</code> (<code>manager-gui</code>) i <code>desplegador</code> (<code>manager-script</code>).</li>
-      <li><code>http://www.app.local</code> redirigeix amb un <code>301</code> a <code>https://www.app.local</code>.</li>
-      <li>L'aplicació funciona per HTTPS amb el certificat de <code>www.app.local</code>.</li>
-      <li>Des del client, <code>/manager/html</code> dona <code>403</code>; des de l'administrador, <code>401</code> sense usuari i <code>200</code> amb <code>gestor</code>.</li>
-      <li>L'administrador ha desplegat i retirat <code>/demo</code> amb <code>curl</code> i l'usuari <code>desplegador</code>.</li>
-      <li><code>ss</code> mostra Tomcat només a <code>127.0.0.1:8080</code> i el client no s'hi pot connectar.</li>
+    <ul class="steps-done">
+      <li><code>http://www.app.local/sample/</code> et porta sol a <code>https://</code> i mostra l'aplicació.</li>
+      <li>El navegador mostra el cadenat (amb l'avís de certificat autofirmat).</li>
+      <li><code>http://192.168.1.11:8080</code> ja <strong>no</strong> s'obre des del client.</li>
+      <li>L'admin encara pot entrar per SSH a tomcat.</li>
     </ul>
 
-    <div class="callout warn">
-      <span class="ico">⚠️</span>
-      <p>Si l'administrador rep <code>403</code> al Manager, Apache no veu la seva IP com a <code>192.168.1.20</code>: comprova-la amb <code>ip a</code> i revisa el <code>Require ip</code>. Si rep <code>502 Proxy Error</code> o <code>503</code>, Tomcat no respon a <code>127.0.0.1:8080</code>: revisa l'<code>address</code> de <code>server.xml</code> i mira <code>sudo journalctl -u tomcat -n 30</code>.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">4</span>
+      <h2>Si alguna cosa falla</h2>
     </div>
+    <table>
+      <thead><tr><th>Problema</th><th>Solució</th></tr></thead>
+      <tbody>
+        <tr><td>Apache no arrenca després del pas 2.3</td><td>Fes <code>sudo apache2ctl configtest</code>. Si diu <em>Invalid command 'SSLEngine'</em>, et falta <code>sudo a2enmod ssl</code>.</td></tr>
+        <tr><td><code>https://www.app.local</code> no carrega</td><td>Comprova que has reiniciat Apache i que l'ordre <code>openssl</code> ha creat els dos fitxers (<code>ls /etc/ssl/certs/app.crt /etc/ssl/private/app.key</code> amb <code>sudo</code>).</td></tr>
+        <tr><td><em>503 Service Unavailable</em> després d'activar <code>ufw</code></td><td>La regla del 8080 no té la IP d'apache. Fes <code>sudo ufw status</code> i, si cal, torna a fer <code>sudo ufw allow from 192.168.1.10 to any port 8080</code>.</td></tr>
+        <tr><td>L'admin ja no pot entrar per SSH a tomcat</td><td>Has activat <code>ufw</code> sense <code>sudo ufw allow OpenSSH</code>. Ves a la màquina tomcat directament (al seu escriptori d'IsardVDI) i fes-ho allà.</td></tr>
+      </tbody>
+    </table>
+
   </section>
 
   <footer>
